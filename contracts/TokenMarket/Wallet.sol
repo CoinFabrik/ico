@@ -16,7 +16,7 @@ pragma solidity ^0.4.8;
 // use modifiers onlyowner (just own owned) or onlymanyowners(hash), whereby the same hash must be provided by
 // some number (specified in constructor) of the set of owners (specified in the constructor, modifiable) before the
 // interior is executed.
-contract multiowned {
+/* contract multiowned {
 
 	// TYPES
 
@@ -264,7 +264,7 @@ contract daylimit is multiowned {
 
     // checks to see if there is at least `_value` left from the daily limit today. if there is, subtracts it and
     // returns true. otherwise just returns false.
-    function underLimit(uint _value) internal onlyowner returns (bool) {
+    function underLimit(uint _value) internal onlyowner returns (bool) { */
         // reset the spend limit if we're on a different day to last time.
         /*if (today() > m_lastDay) {
             m_spentToday = 0;
@@ -277,7 +277,7 @@ contract daylimit is multiowned {
             return true;
         }
         return false;*/
-        return false;
+        /* return false;
     }
     // determines today's index.
     function today() private constant returns (uint) { return now / 1 days; }
@@ -393,3 +393,4 @@ contract Wallet is multisig, multiowned, daylimit {
     // pending transactions we have at present.
     mapping (bytes32 => Transaction) m_txs;
 }
+ */
