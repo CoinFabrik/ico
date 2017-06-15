@@ -1,8 +1,7 @@
 pragma solidity ^0.4.8;
 
-import "../zeppelinTokenMarket/ownership/Ownable.sol";
-import "../zeppelinTokenMarket/token/ERC20.sol";
-
+import "./ERC20.sol";
+import "./Ownable.sol";
 
 /**
  * Define interface for releasing the token transfer after a successful crowdsale.
@@ -87,3 +86,5 @@ contract ReleasableToken is ERC20, Ownable {
   }
 
 }
+
+

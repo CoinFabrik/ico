@@ -1,10 +1,8 @@
 pragma solidity ^0.4.8;
 
-import './StandardToken.sol';
-import "./UpgradeableToken.sol";
 import "./ReleasableToken.sol";
 import "./MintableToken.sol";
-
+import "./UpgradeableToken.sol";
 
 /**
  * A crowdsaled token.
@@ -19,8 +17,6 @@ import "./MintableToken.sol";
  */
 contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken {
 
-  event UpdatedTokenInformation(string newName, string newSymbol);
-
   string public name;
 
   string public symbol;
@@ -31,14 +27,8 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken {
    * Construct the token.
    *
    * This token must be created through a team multisig wallet, so that it is owned by that wallet.
-   *
-   * @param _name Token name
-   * @param _symbol Token symbol - should be all caps
-   * @param _initialSupply How many tokens we start with
-   * @param _decimals Number of decimal places
-   * @param _mintable Are new tokens created over the crowdsale or do we distribute only the initial supply? Note that when the token becomes transferable the minting always ends.
    */
-  function CrowdsaleToken(string _name, string _symbol, uint _initialSupply, uint _decimals, bool _mintable)
+  function CrowdsaleToken(string _name, string _symbol, uint _initialSupply, uint _decimals)
     UpgradeableToken(msg.sender) {
 
     // Create any address, can be transferred
@@ -55,18 +45,6 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken {
 
     // Create initially all balance on the team multisig
     balances[owner] = totalSupply;
-
-    if(totalSupply > 0) {
-      Minted(owner, totalSupply);
-    }
-
-    // No more new supply allowed after the token creation
-    if(!_mintable) {
-      mintingFinished = true;
-      if(totalSupply == 0) {
-        throw; // Cannot create a token without supply and no minting
-      }
-    }
   }
 
   /**
@@ -81,17 +59,7 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken {
    * Allow upgrade agent functionality kick in only if the crowdsale was success.
    */
   function canUpgrade() public constant returns(bool) {
-    return released && super.canUpgrade();
-  }
-
-  /**
-   * Owner can update token information here
-   */
-  function setTokenInformation(string _name, string _symbol) onlyOwner {
-    name = _name;
-    symbol = _symbol;
-
-    UpdatedTokenInformation(name, symbol);
+    return released;
   }
 
 }

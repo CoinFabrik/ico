@@ -1,14 +1,13 @@
-var SafeMathLib = artifacts.require("./TokenMarket/SafeMathLib.sol");
-var CrowdsaleToken = artifacts.require("./TokenMarket/CrowdsaleToken.sol");
-var EthTranchePricing = artifacts.require("./TokenMarket/EthTranchePricing.sol");
+var SafeMathLib = artifacts.require("./Monaco/SafeMathLib.sol");
+var CrowdsaleToken = artifacts.require("./Monaco/CrowdsaleToken.sol");
+var EthTranchePricing = artifacts.require("./Monaco/EthTranchePricing.sol");
 var MultiSigWallet = artifacts.require("./Monaco/MultiSigWallet.sol");
-var MintedEthCappedCrowdsale = artifacts.require("./TokenMarket/MintedEthCappedCrowdsale.sol");
+var MintedEthCappedCrowdsale = artifacts.require("./Monaco/MintedEthCappedCrowdsale.sol");
 
 module.exports = function(deployer) {
     deployer.deploy(SafeMathLib);
     deployer.link(SafeMathLib, CrowdsaleToken);
     deployer.link(SafeMathLib, EthTranchePricing);
-    deployer.link(SafeMathLib, MultiSigWallet);
     deployer.link(SafeMathLib, MintedEthCappedCrowdsale);
 
     deployer.deploy(CrowdsaleToken, "TokenI", "TI", 1000, 2, true) // string _name, string _symbol, uint _initialSupply, uint _decimals, bool _mintable

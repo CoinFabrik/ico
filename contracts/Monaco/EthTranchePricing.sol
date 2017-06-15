@@ -1,9 +1,8 @@
-pragma solidity ^0.4.6;
+pragma solidity ^0.4.8;
 
 import "./PricingStrategy.sol";
-import "./Crowdsale.sol";
+import "./Ownable.sol";
 import "./SafeMathLib.sol";
-import "../zeppelinTokenMarket/ownership/Ownable.sol";
 
 /// @dev Tranche based pricing with special support for pre-ico deals.
 ///      Implementing "first price" tranches, meaning, that if byers order is
@@ -135,7 +134,7 @@ contract EthTranchePricing is PricingStrategy, Ownable {
   }
 
   /// @dev Calculate the current price for buy in amount.
-  function calculatePrice(uint value, uint weiRaised, uint tokensSold, address msgSender, uint decimals) public constant returns (uint) {
+  function calculatePrice(uint value, uint tokensSold, uint weiRaised, address msgSender, uint decimals) public constant returns (uint) {
 
     uint multiplier = 10 ** decimals;
 
