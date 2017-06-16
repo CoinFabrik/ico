@@ -1,8 +1,8 @@
 pragma solidity ^0.4.8;
 
-import "./ReleasableToken.sol";
-import "./MintableToken.sol";
-import "./UpgradeableToken.sol";
+import "./MonacoReleasableToken.sol";
+import "./MonacoMintableToken.sol";
+import "./MonacoUpgradeableToken.sol";
 
 /**
  * A crowdsaled token.

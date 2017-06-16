@@ -1,8 +1,8 @@
 pragma solidity ^0.4.8;
 
+import "./Zeppelin/Ownable.sol";
+import "./Zeppelin/SafeMath.sol";
 import "./PricingStrategy.sol";
-import "./Ownable.sol";
-import "./SafeMathLib.sol";
 
 /// @dev Tranche based pricing with special support for pre-ico deals.
 ///      Implementing "first price" tranches, meaning, that if byers order is
@@ -10,7 +10,7 @@ import "./SafeMathLib.sol";
 ///      to the whole order.
 contract EthTranchePricing is PricingStrategy, Ownable {
 
-  using SafeMathLib for uint;
+  using SafeMath for uint;
 
   uint public constant MAX_TRANCHES = 10;
 
@@ -140,11 +140,11 @@ contract EthTranchePricing is PricingStrategy, Ownable {
 
     // This investor is coming through pre-ico
     if(preicoAddresses[msgSender] > 0) {
-      return value.times(multiplier) / preicoAddresses[msgSender];
+      return value.mul(multiplier) / preicoAddresses[msgSender];
     }
 
     uint price = getCurrentPrice(weiRaised);
-    return value.times(multiplier) / price;
+    return value.mul(multiplier) / price;
   }
 
   function() payable {

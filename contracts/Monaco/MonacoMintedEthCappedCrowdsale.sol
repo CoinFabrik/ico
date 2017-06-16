@@ -1,8 +1,8 @@
 pragma solidity ^0.4.8;
 
-import "./Crowdsale.sol";
-import "./PricingStrategy.sol";
-import "./MintableToken.sol";
+import "./MonacoCrowdsale.sol";
+import "./MonacoPricingStrategy.sol";
+import "./MonacoMintableToken.sol";
 
 /**
  * ICO crowdsale contract that is capped by amout of ETH.

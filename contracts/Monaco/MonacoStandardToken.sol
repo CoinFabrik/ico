@@ -1,7 +1,7 @@
 pragma solidity ^0.4.8;
 
-import "./ERC20.sol";
-import "./SafeMath.sol";
+import "./MonacoERC20.sol";
+import "./MonacoSafeMath.sol";
 
 /**
  * Standard ERC20 token with Short Hand Attack and approve() race condition mitigation.
