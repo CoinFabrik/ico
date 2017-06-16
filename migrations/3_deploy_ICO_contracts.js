@@ -35,7 +35,7 @@ module.exports = function(deployer) {
         deployer.deploy(FlatPricing, PRICE)
         .then(function() {
             // TODO: change to use client's MultiSigWallet
-            deployer.deploy(MultiSigWallet, [0x92ac5d12df3e3b89f8cedcc0a1d599c2aea0f977, 0x5feef421e63ae269d31ddabea8fcc729ab516a76], 2)
+            deployer.deploy(MultiSigWallet, [0x4cdabc27b48893058aa1675683af3485e4409eff], 1)
             .then(function() {
                 deployer.deploy(MintedEthCappedCrowdsale,
                     CrowdsaleToken.address, 
@@ -52,11 +52,15 @@ module.exports = function(deployer) {
                         BONUS_BASE_POINTS,
                         MultiSigWallet.address)
                     .then(function() {
-                        MintedEthCappedCrowdsale.deployed().then(function(instance) {
-                            instance.setFinalizeAgent(BonusFinalizeAgent.address);
+                        MintedEthCappedCrowdsale.deployed().then(function(crowdsale) {
+                            crowdsale.setFinalizeAgent(BonusFinalizeAgent.address);
+                            crowdsale.transferOwnership(MultiSigWallet.address);
                         });
-                        CrowdsaleToken.deployed().then(function(instance) {
-                            instance.setMintAgent(BonusFinalizeAgent.address, true);
+                        CrowdsaleToken.deployed().then(function(token) {
+                            token.setMintAgent(MintedEthCappedCrowdsale.address, true);
+                            token.setMintAgent(BonusFinalizeAgent.address, true);
+                            token.setReleaseAgent(BonusFinalizeAgent.address);
+                            token.transferOwnership(MultiSigWallet.address);
                         });
                     });
                 });
