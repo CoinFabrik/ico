@@ -1,10 +1,10 @@
 pragma solidity ^0.4.8;
 
-import "./Zeppelin/Pausable.sol";
-import "./Zeppelin/SafeMath.sol";
+import "./Haltable.sol";
 import "./FractionalERC20.sol";
 import "./PricingStrategy.sol";
 import "./FinalizeAgent.sol";
+import "./SafeMathLib.sol";
 
 /**
  * Abstract base contract for token sales.
@@ -18,9 +18,9 @@ import "./FinalizeAgent.sol";
  * - different investment policies (require server side customer id, allow only whitelisted addresses)
  *
  */
-contract Crowdsale is Pausable {
+contract Crowdsale is Haltable {
 
-  using SafeMath for uint;
+  using SafeMathLib for uint;
 
   /* The token we are selling */
   FractionalERC20 public token;
@@ -163,7 +163,7 @@ contract Crowdsale is Pausable {
    * @param customerId (optional) UUID v4 to track the successful payments on the server side
    *
    */
-  function investInternal(address receiver, uint128 customerId) whenNotPaused private {
+  function investInternal(address receiver, uint128 customerId) stopInEmergency private {
 
     // Determine if it's a good time to accept investment from this participant
     if(getState() == State.PreFunding) {
@@ -193,12 +193,12 @@ contract Crowdsale is Pausable {
     }
 
     // Update investor
-    investedAmountOf[receiver] = investedAmountOf[receiver].add(weiAmount);
-    tokenAmountOf[receiver] = tokenAmountOf[receiver].add(tokenAmount);
+    investedAmountOf[receiver] = investedAmountOf[receiver].plus(weiAmount);
+    tokenAmountOf[receiver] = tokenAmountOf[receiver].plus(tokenAmount);
 
     // Update totals
-    weiRaised = weiRaised.add(weiAmount);
-    tokensSold = tokensSold.add(tokenAmount);
+    weiRaised = weiRaised.plus(weiAmount);
+    tokensSold = tokensSold.plus(tokenAmount);
 
     // Check that we did not bust the cap
     if(isBreakingCap(tokenAmount, weiAmount, weiRaised, tokensSold)) {
@@ -234,11 +234,11 @@ contract Crowdsale is Pausable {
     uint tokenAmount = fullTokens * 10**token.decimals();
     uint weiAmount = weiPrice * tokenAmount; // This can be also 0, we give out tokens for free
 
-    weiRaised = weiRaised.add(weiAmount);
-    tokensSold = tokensSold.add(tokenAmount);
+    weiRaised = weiRaised.plus(weiAmount);
+    tokensSold = tokensSold.plus(tokenAmount);
 
-    investedAmountOf[receiver] = investedAmountOf[receiver].add(weiAmount);
-    tokenAmountOf[receiver] = tokenAmountOf[receiver].add(tokenAmount);
+    investedAmountOf[receiver] = investedAmountOf[receiver].plus(weiAmount);
+    tokenAmountOf[receiver] = tokenAmountOf[receiver].plus(tokenAmount);
 
     assignTokens(receiver, tokenAmount);
 
@@ -304,7 +304,7 @@ contract Crowdsale is Pausable {
    *
    * The owner can triggre a call the contract that provides post-crowdsale actions, like releasing the tokens.
    */
-  function finalize() public inState(State.Success) onlyOwner whenNotPaused {
+  function finalize() public inState(State.Success) onlyOwner stopInEmergency {
 
     // Already finalized
     if(finalized) {
@@ -405,7 +405,7 @@ contract Crowdsale is Pausable {
    */
   function loadRefund() public payable inState(State.Failure) {
     if(msg.value == 0) throw;
-    loadedRefund = loadedRefund.add(msg.value);
+    loadedRefund = loadedRefund.plus(msg.value);
   }
 
   /**
@@ -415,7 +415,7 @@ contract Crowdsale is Pausable {
     uint256 weiValue = investedAmountOf[msg.sender];
     if (weiValue == 0) throw;
     investedAmountOf[msg.sender] = 0;
-    weiRefunded = weiRefunded.add(weiValue);
+    weiRefunded = weiRefunded.plus(weiValue);
     Refund(msg.sender, weiValue);
     if (!msg.sender.send(weiValue)) throw;
   }

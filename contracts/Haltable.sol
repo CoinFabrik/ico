@@ -1,6 +1,6 @@
 pragma solidity ^0.4.8;
 
-import "./MonacoOwnable.sol";
+import "./Ownable.sol";
 
 /*
  * Haltable

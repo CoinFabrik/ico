@@ -1,9 +1,9 @@
 pragma solidity ^0.4.8;
 
-import "./MonacoStandardToken.sol";
-import "./MonacoUpgradeAgent.sol";
-import "./MonacoSafeMathLib.sol";
-import "./MonacoSafeMath.sol";
+import "./StandardToken.sol";
+import "./UpgradeAgent.sol";
+import "./SafeMathLib.sol";
+import "./SafeMath.sol";
 
 /**
  * A token upgrade mechanism where users can opt-in amount of tokens to the next smart contract revision.

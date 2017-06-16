@@ -1,6 +1,6 @@
 pragma solidity ^0.4.8;
 
-import "./MonacoERC20.sol";
+import "./ERC20.sol";
 
 /**
  * A token that defines fractional units as decimals.

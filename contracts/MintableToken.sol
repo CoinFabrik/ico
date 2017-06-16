@@ -1,8 +1,8 @@
 pragma solidity ^0.4.8;
 
-import "./MonacoStandardToken.sol";
-import "./MonacoOwnable.sol";
-import "./MonacoSafeMathLib.sol";
+import "./StandardToken.sol";
+import "./Ownable.sol";
+import "./SafeMathLib.sol";
 
 /**
  * A token that can increase its supply by another contract.

@@ -1,7 +1,7 @@
 pragma solidity ^0.4.8;
 
-import "./MonacoERC20.sol";
-import "./MonacoOwnable.sol";
+import "./ERC20.sol";
+import "./Ownable.sol";
 
 /**
  * Define interface for releasing the token transfer after a successful crowdsale.
