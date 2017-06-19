@@ -52,19 +52,65 @@ module.exports = function(deployer) {
                         BONUS_BASE_POINTS,
                         MultiSigWallet.address)
                     .then(function() {
-                        MintedEthCappedCrowdsale.deployed().then(function(crowdsale) {
-                            crowdsale.setFinalizeAgent(BonusFinalizeAgent.address);
-                            crowdsale.transferOwnership(MultiSigWallet.address);
+                        MintedEthCappedCrowdsale.deployed()
+                        .then(function(crowdsale) {
+                            crowdsale.setFinalizeAgent(BonusFinalizeAgent.address)
+                            .then(function() {
+                                crowdsale.transferOwnership(MultiSigWallet.address)
+                                .catch(function(error1) {
+                                    console.log('Failed to transfer crowdsale contract\'s ownership', error1);
+                                });
+                            })
+                            .catch(function(error2) {
+                                console.log('Failed to set a finalize agent for crowdsale contract', error2);
+                            });
                         });
-                        CrowdsaleToken.deployed().then(function(token) {
-                            token.setMintAgent(MintedEthCappedCrowdsale.address, true);
-                            token.setMintAgent(BonusFinalizeAgent.address, true);
-                            token.setReleaseAgent(BonusFinalizeAgent.address);
-                            token.transferOwnership(MultiSigWallet.address);
+                        CrowdsaleToken.deployed()
+                        .then(function(token) {
+                            token.setMintAgent(MintedEthCappedCrowdsale.address, true)
+                            .then(function() {
+                                token.setMintAgent(BonusFinalizeAgent.address, true)
+                                .then(function() {
+                                    token.setReleaseAgent(BonusFinalizeAgent.address)
+                                    .then(function() {
+                                        token.transferOwnership(MultiSigWallet.address)
+                                        .catch(function(error3) {
+                                            console.log('Failed to transfer token contract\'s ownership', error3);
+                                        });
+                                    })
+                                    .catch(function(error4) {
+                                        console.log('Failed to set a release agent for token contract', error4);
+                                    });
+                                })
+                                .catch(function(error5) {
+                                    console.log('Failed to set a mint agent (BonusFinalizeAgent) for token contract', error5);
+                                });
+                            })
+                            .catch(function(error6) {
+                                console.log('Failed to set a mint agent (MintedEthCappedCrowdsale) for token contract', error6);
+                            });
+                        })
+                        .catch(function(error7) {
+                            console.log('Failed to deploy token contract', error7);
                         });
+                    })
+                    .catch(function(error8) {
+                        console.log('Failed to deploy finalize agent contract', error8);
                     });
+                })
+                .catch(function(error9) {
+                    console.log('Failed to deploy crowdsale contract', error9);
                 });
+            })
+            .catch(function(error10) {
+                console.log('Failed to deploy multisig wallet contract', error10);
             });
+        })
+        .catch(function(error11) {
+            console.log('Failed to deploy pricing strategy contract', error11);
         });
+    })
+    .catch(function(error12) {
+        console.log('Failed to deploy token contract', error12);
     });
 };
