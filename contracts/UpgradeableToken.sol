@@ -2,7 +2,6 @@ pragma solidity ^0.4.8;
 
 import "./StandardToken.sol";
 import "./UpgradeAgent.sol";
-import "./SafeMathLib.sol";
 import "./SafeMath.sol";
 
 /**
@@ -63,11 +62,11 @@ contract UpgradeableToken is StandardToken {
       // Validate input value.
       if (value == 0) throw;
 
-      balances[msg.sender] = safeSub(balances[msg.sender], value);
+      balances[msg.sender] = balances[msg.sender].sub(value);
 
       // Take tokens out from circulation
-      totalSupply = safeSub(totalSupply, value);
-      totalUpgraded = safeAdd(totalUpgraded, value);
+      totalSupply = totalSupply.sub(value);
+      totalUpgraded = totalUpgraded.add(value);
 
       // Upgrade agent reissues the tokens
       upgradeAgent.upgradeFrom(msg.sender, value);

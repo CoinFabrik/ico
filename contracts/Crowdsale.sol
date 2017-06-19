@@ -4,7 +4,7 @@ import "./Haltable.sol";
 import "./FractionalERC20.sol";
 import "./PricingStrategy.sol";
 import "./FinalizeAgent.sol";
-import "./SafeMathLib.sol";
+import "./SafeMath.sol";
 
 /**
  * Abstract base contract for token sales.
@@ -20,7 +20,10 @@ import "./SafeMathLib.sol";
  */
 contract Crowdsale is Haltable {
 
-  using SafeMathLib for uint;
+  /* Max investment count when we are still allowed to change the multisig address */
+  uint public MAX_INVESTMENTS_BEFORE_MULTISIG_CHANGE = 5;
+
+  using SafeMath for uint;
 
   /* The token we are selling */
   FractionalERC20 public token;
@@ -193,12 +196,12 @@ contract Crowdsale is Haltable {
     }
 
     // Update investor
-    investedAmountOf[receiver] = investedAmountOf[receiver].plus(weiAmount);
-    tokenAmountOf[receiver] = tokenAmountOf[receiver].plus(tokenAmount);
+    investedAmountOf[receiver] = investedAmountOf[receiver].add(weiAmount);
+    tokenAmountOf[receiver] = tokenAmountOf[receiver].add(tokenAmount);
 
     // Update totals
-    weiRaised = weiRaised.plus(weiAmount);
-    tokensSold = tokensSold.plus(tokenAmount);
+    weiRaised = weiRaised.add(weiAmount);
+    tokensSold = tokensSold.add(tokenAmount);
 
     // Check that we did not bust the cap
     if(isBreakingCap(tokenAmount, weiAmount, weiRaised, tokensSold)) {
@@ -234,11 +237,11 @@ contract Crowdsale is Haltable {
     uint tokenAmount = fullTokens * 10**token.decimals();
     uint weiAmount = weiPrice * tokenAmount; // This can be also 0, we give out tokens for free
 
-    weiRaised = weiRaised.plus(weiAmount);
-    tokensSold = tokensSold.plus(tokenAmount);
+    weiRaised = weiRaised.add(weiAmount);
+    tokensSold = tokensSold.add(tokenAmount);
 
-    investedAmountOf[receiver] = investedAmountOf[receiver].plus(weiAmount);
-    tokenAmountOf[receiver] = tokenAmountOf[receiver].plus(tokenAmount);
+    investedAmountOf[receiver] = investedAmountOf[receiver].add(weiAmount);
+    tokenAmountOf[receiver] = tokenAmountOf[receiver].add(tokenAmount);
 
     assignTokens(receiver, tokenAmount);
 
@@ -399,13 +402,30 @@ contract Crowdsale is Haltable {
   }
 
   /**
+   * Allow to change the team multisig address in the case of emergency.
+   *
+   * This allows to save a deployed crowdsale wallet in the case the crowdsale has not yet begun
+   * (we have done only few test transactions). After the crowdsale is going
+   * then multisig address stays locked for the safety reasons.
+   */
+  function setMultisig(address addr) public onlyOwner {
+
+    // Change
+    if(investorCount > MAX_INVESTMENTS_BEFORE_MULTISIG_CHANGE) {
+      throw;
+    }
+
+    multisigWallet = addr;
+  }
+
+  /**
    * Allow load refunds back on the contract for the refunding.
    *
    * The team can transfer the funds back on the smart contract in the case the minimum goal was not reached..
    */
   function loadRefund() public payable inState(State.Failure) {
     if(msg.value == 0) throw;
-    loadedRefund = loadedRefund.plus(msg.value);
+    loadedRefund = loadedRefund.add(msg.value);
   }
 
   /**
@@ -415,7 +435,7 @@ contract Crowdsale is Haltable {
     uint256 weiValue = investedAmountOf[msg.sender];
     if (weiValue == 0) throw;
     investedAmountOf[msg.sender] = 0;
-    weiRefunded = weiRefunded.plus(weiValue);
+    weiRefunded = weiRefunded.add(weiValue);
     Refund(msg.sender, weiValue);
     if (!msg.sender.send(weiValue)) throw;
   }
@@ -425,6 +445,20 @@ contract Crowdsale is Haltable {
    */
   function isMinimumGoalReached() public constant returns (bool reached) {
     return weiRaised >= minimumFundingGoal;
+  }
+
+  /**
+   * Check if the contract relationship looks good.
+   */
+  function isFinalizerSane() public constant returns (bool sane) {
+    return finalizeAgent.isSane();
+  }
+
+  /**
+   * Check if the contract relationship looks good.
+   */
+  function isPricingSane() public constant returns (bool sane) {
+    return pricingStrategy.isSane(address(this));
   }
 
   /**
@@ -447,6 +481,11 @@ contract Crowdsale is Haltable {
   /** This is for manual testing of multisig wallet interaction */
   function setOwnerTestValue(uint val) onlyOwner {
     ownerTestValue = val;
+  }
+
+  /** Interface marker. */
+  function isCrowdsale() public constant returns (bool) {
+    return true;
   }
 
   //

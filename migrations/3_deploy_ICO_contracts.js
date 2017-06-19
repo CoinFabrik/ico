@@ -1,9 +1,9 @@
-var SafeMathLib = artifacts.require("./SafeMathLib.sol");
-var CrowdsaleToken = artifacts.require("./CrowdsaleToken.sol");
-var FlatPricing = artifacts.require("./FlatPricing.sol");
+var SafeMath = artifacts.require("./SafeMath.sol");
 var MultiSigWallet = artifacts.require("./MultiSigWallet.sol");
-var MintedEthCappedCrowdsale = artifacts.require("./MintedEthCappedCrowdsale.sol");
+var FlatPricing = artifacts.require("./FlatPricing.sol");
 var BonusFinalizeAgent = artifacts.require("./BonusFinalizeAgent.sol");
+var CrowdsaleToken = artifacts.require("./CrowdsaleToken.sol");
+var MintedEthCappedCrowdsale = artifacts.require("./MintedEthCappedCrowdsale.sol");
 
 // TODO: adapt to client needs
 var TOKEN_NAME = "TokenI";
@@ -14,16 +14,16 @@ var MINTABLE = true;
 var PRICE = 500;
 var START_DATE = 1498867200;
 var END_DATE = 1500000000;
-var MINIMUM_FUNDING_GOAL = 1000;
-var WEI_CAP = 1000000000;
+var MINIMUM_FUNDING_GOAL = 2000;
+var WEI_CAP = 3000;
 var BONUS_BASE_POINTS = 300000; // equivalent to 30%
 
 module.exports = function(deployer) {
-    deployer.deploy(SafeMathLib);
-    deployer.link(SafeMathLib, CrowdsaleToken);
-    deployer.link(SafeMathLib, FlatPricing);
-    deployer.link(SafeMathLib, MintedEthCappedCrowdsale);
-    deployer.link(SafeMathLib, BonusFinalizeAgent);
+    deployer.deploy(SafeMath);
+    deployer.link(SafeMath, FlatPricing);
+    deployer.link(SafeMath, BonusFinalizeAgent);
+    deployer.link(SafeMath, CrowdsaleToken);
+    deployer.link(SafeMath, MintedEthCappedCrowdsale);
 
     deployer.deploy(CrowdsaleToken,
         TOKEN_NAME,

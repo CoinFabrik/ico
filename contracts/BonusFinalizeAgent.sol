@@ -2,7 +2,7 @@ pragma solidity ^0.4.6;
 
 import "./Crowdsale.sol";
 import "./CrowdsaleToken.sol";
-import "./SafeMathLib.sol";
+import "./SafeMath.sol";
 
 /**
  * At the end of the successful crowdsale allocate % bonus of tokens to the team.
@@ -14,7 +14,7 @@ import "./SafeMathLib.sol";
  */
 contract BonusFinalizeAgent is FinalizeAgent {
 
-  using SafeMathLib for uint;
+  using SafeMath for uint;
 
   CrowdsaleToken public token;
   Crowdsale public crowdsale;
@@ -56,7 +56,7 @@ contract BonusFinalizeAgent is FinalizeAgent {
 
     // How many % of tokens the founders and others get
     uint tokensSold = crowdsale.tokensSold();
-    allocatedBonus = tokensSold.times(bonusBasePoints) / 10000;
+    allocatedBonus = tokensSold.mul(bonusBasePoints) / 10000;
 
     // move tokens to the team multisig wallet
     token.mint(teamMultisig, allocatedBonus);

@@ -1,8 +1,8 @@
-pragma solidity ^0.4.8;
+pragma solidity ^0.4.6;
 
-import "./StandardToken.sol";
 import "./Ownable.sol";
-import "./SafeMathLib.sol";
+import './StandardToken.sol';
+import "./SafeMath.sol";
 
 /**
  * A token that can increase its supply by another contract.
@@ -13,12 +13,14 @@ import "./SafeMathLib.sol";
  */
 contract MintableToken is StandardToken, Ownable {
 
-  using SafeMathLib for uint;
+  using SafeMath for uint;
 
   bool public mintingFinished = false;
 
   /** List of agents that are allowed to create new tokens */
   mapping (address => bool) public mintAgents;
+
+  event MintingAgentChanged(address addr, bool state  );
 
   /**
    * Create new tokens and allocate them to an address..
@@ -26,8 +28,11 @@ contract MintableToken is StandardToken, Ownable {
    * Only callably by a crowdsale contract (mint agent).
    */
   function mint(address receiver, uint amount) onlyMintAgent canMint public {
-    totalSupply = totalSupply.plus(amount);
-    balances[receiver] = balances[receiver].plus(amount);
+    totalSupply = totalSupply.add(amount);
+    balances[receiver] = balances[receiver].add(amount);
+
+    // This will make the mint transaction apper in EtherScan.io
+    // We can remove this after there is a standardized minting event
     Transfer(0, receiver, amount);
   }
 
@@ -36,6 +41,7 @@ contract MintableToken is StandardToken, Ownable {
    */
   function setMintAgent(address addr, bool state) onlyOwner canMint public {
     mintAgents[addr] = state;
+    MintingAgentChanged(addr, state);
   }
 
   modifier onlyMintAgent() {
