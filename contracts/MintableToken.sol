@@ -20,18 +20,19 @@ contract MintableToken is StandardToken, Ownable {
   /** List of agents that are allowed to create new tokens */
   mapping (address => bool) public mintAgents;
 
-  event MintingAgentChanged(address addr, bool state  );
+  event MintingAgentChanged(address addr, bool state);
 
   /**
-   * Create new tokens and allocate them to an address..
+   * Create new tokens and allocate them to an address.
    *
-   * Only callably by a crowdsale contract (mint agent).
+   * Only callable by a crowdsale contract (mint agent).
    */
   function mint(address receiver, uint amount) onlyMintAgent canMint public {
     totalSupply = totalSupply.add(amount);
     balances[receiver] = balances[receiver].add(amount);
 
-    // This will make the mint transaction apper in EtherScan.io
+    // STD_PENDING
+    // This will make the mint transaction appear in EtherScan.io
     // We can remove this after there is a standardized minting event
     Transfer(0, receiver, amount);
   }
