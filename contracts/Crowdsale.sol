@@ -263,8 +263,8 @@ contract Crowdsale is Haltable {
    * Track who is the customer making the payment so we can send thank you email.
    */
   function investWithCustomerId(address addr, uint128 customerId) public payable {
-    if(requiredSignedAddress) throw; // Crowdsale allows only server-side signed participants
-    if(customerId == 0) throw;  // UUIDv4 sanity check
+    require(!requiredSignedAddress); // Crowdsale allows only server-side signed participants
+    require(customerId != 0);  // UUIDv4 sanity check
     investInternal(addr, customerId);
   }
 
@@ -272,8 +272,8 @@ contract Crowdsale is Haltable {
    * Allow anonymous contributions to this crowdsale.
    */
   function invest(address addr) public payable {
-    if(requireCustomerId) throw; // Crowdsale needs to track partipants for thank you email
-    if(requiredSignedAddress) throw; // Crowdsale allows only server-side signed participants
+    require(!requireCustomerId); // Crowdsale needs to track participants for thank you email
+    require(!requiredSignedAddress); // Crowdsale allows only server-side signed participants
     investInternal(addr, 0);
   }
 
@@ -305,7 +305,7 @@ contract Crowdsale is Haltable {
   /**
    * Finalize a succcesful crowdsale.
    *
-   * The owner can triggre a call the contract that provides post-crowdsale actions, like releasing the tokens.
+   * The owner can trigger a call the contract that provides post-crowdsale actions, like releasing the tokens.
    */
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
 
@@ -328,12 +328,10 @@ contract Crowdsale is Haltable {
    * Design choice: no state restrictions on setting this, so that we can fix fat finger mistakes.
    */
   function setFinalizeAgent(FinalizeAgent addr) onlyOwner {
-    finalizeAgent = addr;
-
     // Don't allow setting bad agent
-    if(!finalizeAgent.isFinalizeAgent()) {
-      throw;
-    }
+    require(addr.isFinalizeAgent());
+
+    finalizeAgent = addr;
   }
 
   /**
@@ -360,9 +358,8 @@ contract Crowdsale is Haltable {
   /**
    * Allow addresses to do early participation.
    *
-   * TODO: Fix spelling error in the name
    */
-  function setEarlyParicipantWhitelist(address addr, bool status) onlyOwner {
+  function setEarlyParticipantWhitelist(address addr, bool status) onlyOwner {
     earlyParticipantWhitelist[addr] = status;
     Whitelisted(addr, status);
   }
@@ -393,12 +390,10 @@ contract Crowdsale is Haltable {
    * Design choice: no state restrictions on the set, so that we can fix fat finger mistakes.
    */
   function setPricingStrategy(PricingStrategy _pricingStrategy) onlyOwner {
-    pricingStrategy = _pricingStrategy;
-
     // Don't allow setting bad agent
-    if(!pricingStrategy.isPricingStrategy()) {
-      throw;
-    }
+    require(_pricingStrategy.isPricingStrategy());
+
+    pricingStrategy = _pricingStrategy;
   }
 
   /**
@@ -421,7 +416,7 @@ contract Crowdsale is Haltable {
   /**
    * Allow load refunds back on the contract for the refunding.
    *
-   * The team can transfer the funds back on the smart contract in the case the minimum goal was not reached..
+   * The team can transfer the funds back on the smart contract in the case the minimum goal was not reached.
    */
   function loadRefund() public payable inState(State.Failure) {
     if(msg.value == 0) throw;
@@ -469,8 +464,8 @@ contract Crowdsale is Haltable {
   function getState() public constant returns (State) {
     if(finalized) return State.Finalized;
     else if (address(finalizeAgent) == 0) return State.Preparing;
-    else if (!finalizeAgent.isSane()) return State.Preparing;
-    else if (!pricingStrategy.isSane(address(this))) return State.Preparing;
+    else if (!isFinalizerSane()) return State.Preparing;
+    else if (!isPricingSane()) return State.Preparing;
     else if (block.timestamp < startsAt) return State.PreFunding;
     else if (block.timestamp <= endsAt && !isCrowdsaleFull()) return State.Funding;
     else if (isMinimumGoalReached()) return State.Success;
