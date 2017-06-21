@@ -54,13 +54,11 @@ contract UpgradeableToken is StandardToken {
   function upgrade(uint256 value) public {
 
       UpgradeState state = getUpgradeState();
-      if(!(state == UpgradeState.ReadyToUpgrade || state == UpgradeState.Upgrading)) {
-        // Called in a bad state
-        throw;
-      }
+      // Ensure it's not called in a bad state
+      require(state == UpgradeState.ReadyToUpgrade || state == UpgradeState.Upgrading);
 
       // Validate input value.
-      if (value == 0) throw;
+      require(value != 0);
 
       balances[msg.sender] = balances[msg.sender].sub(value);
 
@@ -78,23 +76,21 @@ contract UpgradeableToken is StandardToken {
    */
   function setUpgradeAgent(address agent) external {
 
-      if(!canUpgrade()) {
-        // The token is not yet in a state that we could think upgrading
-        throw;
-      }
+      // Check whether the token is in a state that we could think of upgrading
+      require(canUpgrade());
 
-      if (agent == 0x0) throw;
+      require(agent != 0x0);
       // Only a master can designate the next agent
-      if (msg.sender != upgradeMaster) throw;
+      require(msg.sender == upgradeMaster);
       // Upgrade has already begun for an agent
-      if (getUpgradeState() == UpgradeState.Upgrading) throw;
+      require(getUpgradeState() != UpgradeState.Upgrading);
 
       upgradeAgent = UpgradeAgent(agent);
 
       // Bad interface
-      if(!upgradeAgent.isUpgradeAgent()) throw;
+      require(upgradeAgent.isUpgradeAgent());
       // Make sure that token supplies match in source and target
-      if (upgradeAgent.originalSupply() != totalSupply) throw;
+      require(upgradeAgent.originalSupply() == totalSupply);
 
       UpgradeAgentSet(upgradeAgent);
   }
@@ -115,8 +111,8 @@ contract UpgradeableToken is StandardToken {
    * This allows us to set a new owner for the upgrade mechanism.
    */
   function setUpgradeMaster(address master) public {
-      if (master == 0x0) throw;
-      if (msg.sender != upgradeMaster) throw;
+      require(master != 0x0);
+      require(msg.sender == upgradeMaster);
       upgradeMaster = master;
   }
 

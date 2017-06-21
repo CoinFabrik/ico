@@ -38,11 +38,9 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken {
    */
   function CrowdsaleToken(string _name, string _symbol, uint _initialSupply, uint _decimals, bool _mintable)
     UpgradeableToken(msg.sender) {
-
-    // Create any address, can be transferred
-    // to team multisig via changeOwner(),
-    // also remember to call setUpgradeMaster()
-    owner = msg.sender;
+    // The message sender is the owner initially.
+    // It can be transferred to another team multisig via changeOwner().
+    // When doing so, remember to call setUpgradeMaster() too.
 
     name = _name;
     symbol = _symbol;
@@ -59,12 +57,9 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken {
     }
 
     // No more new supply allowed after the token creation
-    if(!_mintable) {
-      mintingFinished = true;
-      if(totalSupply == 0) {
-        throw; // Cannot create a token without supply and no minting
-      }
-    }
+    mintingFinished = !_mintable;
+    // Cannot create a token without supply and no minting
+    require(_mintable || totalSupply != 0);
   }
 
   /**

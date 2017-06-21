@@ -15,12 +15,12 @@ contract Haltable is Ownable {
   bool public halted;
 
   modifier stopInEmergency {
-    if (halted) throw;
+    require(!halted);
     _;
   }
 
   modifier onlyInEmergency {
-    if (!halted) throw;
+    require(halted);
     _;
   }
 

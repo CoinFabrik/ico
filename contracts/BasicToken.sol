@@ -18,9 +18,7 @@ contract BasicToken is ERC20Basic {
    * @dev Fix for the ERC20 short address attack.
    */
   modifier onlyPayloadSize(uint size) {
-     if(msg.data.length < size + 4) {
-       throw;
-     }
+     require(msg.data.length >= size + 4);
      _;
   }
 

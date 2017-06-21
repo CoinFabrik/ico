@@ -17,6 +17,8 @@ contract MintedEthCappedCrowdsale is Crowdsale {
   uint public weiCap;
 
   function MintedEthCappedCrowdsale(address _token, PricingStrategy _pricingStrategy, address _multisigWallet, uint _start, uint _end, uint _minimumFundingGoal, uint _weiCap) Crowdsale(_token, _pricingStrategy, _multisigWallet, _start, _end, _minimumFundingGoal) {
+    // Check for valid minimum and cap
+    require(_weiCap > _minimumFundingGoal);
     weiCap = _weiCap;
   }
 
