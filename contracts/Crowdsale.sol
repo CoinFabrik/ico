@@ -192,7 +192,7 @@ contract Crowdsale is Haltable {
     // Pocket the money
     assert(multisigWallet.send(weiAmount));
 
-    // Tell us invest was success
+    // Tell us that the investment was completed successfully
     Invested(receiver, weiAmount, tokenAmount, customerId);
   }
 
