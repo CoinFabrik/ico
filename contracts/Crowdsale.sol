@@ -412,6 +412,17 @@ contract Crowdsale is Haltable {
   }
 
   /**
+   * Allow to (re)set ceiling strategy.
+   *
+   * Design choice: no state restrictions on the set, so that we can fix fat finger mistakes.
+   */
+  function setCeilingStrategy(CeilingStrategy _ceilingStrategy) onlyOwner {
+    require(_ceilingStrategy.isCeilingStrategy());
+
+    ceilingStrategy = _ceilingStrategy;
+  }
+
+  /**
    * Allow to change the team multisig address in the case of emergency.
    *
    * This allows to save a deployed crowdsale wallet in the case the crowdsale has not yet begun
