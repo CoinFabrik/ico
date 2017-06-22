@@ -1,5 +1,4 @@
 const RandomBytes = require('random-bytes');
-const Web3 = require('web3');
 
 const SafeMath = artifacts.require('./SafeMath.sol');
 const MultiSigWallet = artifacts.require('./MultiSigWallet.sol');
@@ -21,9 +20,9 @@ const END_DATE = 1500000000;
 const MINIMUM_FUNDING_GOAL = 2000;
 const BONUS_BASE_POINTS = 300000; // equivalent to 30%
 const CURVES = [
-    [Web3.toWei(1000), 30, 10**12],
-    [Web3.toWei(21000), 30, 10**12],
-    [Web3.toWei(61000), 30, 10**12],
+    [web3.toWei(1000), 30, 10**12],
+    [web3.toWei(21000), 30, 10**12],
+    [web3.toWei(61000), 30, 10**12],
 ];
 const NHIDDENCURVES = 7;
 
@@ -39,7 +38,7 @@ const setHiddenCurves = async function(dynamicCeiling, curves, nHiddenCurves) {
     }
     for (; i < nHiddenCurves; i += 1) {
         let salt = RandomBytes(32);
-        hashes.push(Web3.sha3(salt));
+        hashes.push(web3.sha3(salt));
     }
     await dynamicCeiling.setHiddenCurves(hashes);
     console.log(i, 'curves set');

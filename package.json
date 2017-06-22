@@ -1,0 +1,7 @@
+{
+  "name": "ICOSample",
+  "version": "0.0.1",
+  "dependencies": {
+    "random-bytes": "^1.0.0"
+  }
+}
