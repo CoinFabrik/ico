@@ -15,6 +15,6 @@ contract UpgradeAgent {
     return true;
   }
 
-  function upgradeFrom(address _from, uint256 _value) public;
+  function upgradeFrom(address _from, uint _value) public;
 
 }

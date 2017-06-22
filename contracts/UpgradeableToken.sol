@@ -18,7 +18,7 @@ contract UpgradeableToken is StandardToken {
   UpgradeAgent public upgradeAgent;
 
   /** How many tokens we have upgraded by now. */
-  uint256 public totalUpgraded;
+  uint public totalUpgraded;
 
   /**
    * Upgrade states.
@@ -34,7 +34,7 @@ contract UpgradeableToken is StandardToken {
   /**
    * Somebody has upgraded some of his tokens.
    */
-  event Upgrade(address indexed _from, address indexed _to, uint256 _value);
+  event Upgrade(address indexed _from, address indexed _to, uint _value);
 
   /**
    * New upgrade agent available.
@@ -51,7 +51,7 @@ contract UpgradeableToken is StandardToken {
   /**
    * Allow the token holder to upgrade some of their tokens to a new contract.
    */
-  function upgrade(uint256 value) public {
+  function upgrade(uint value) public {
 
       UpgradeState state = getUpgradeState();
       if(!(state == UpgradeState.ReadyToUpgrade || state == UpgradeState.Upgrading)) {

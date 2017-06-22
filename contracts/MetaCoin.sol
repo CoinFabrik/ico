@@ -10,7 +10,7 @@ import "./ConvertLib.sol";
 contract MetaCoin {
 	mapping (address => uint) balances;
 
-	event Transfer(address indexed _from, address indexed _to, uint256 _value);
+	event Transfer(address indexed _from, address indexed _to, uint _value);
 
 	function MetaCoin() {
 		balances[tx.origin] = 10000;
