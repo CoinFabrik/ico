@@ -6,6 +6,7 @@ import "./PricingStrategy.sol";
 import "./FinalizeAgent.sol";
 import "./SafeMath.sol";
 import "./CeilingStrategy.sol";
+import "./MintableToken.sol";
 
 /**
  * Abstract base contract for token sales.
@@ -81,10 +82,10 @@ contract Crowdsale is Haltable {
   address public signerAddress;
 
   /** How much ETH each address has invested to this crowdsale */
-  mapping (address => uint256) public investedAmountOf;
+  mapping (address => uint) public investedAmountOf;
 
   /** How much tokens this crowdsale has credited for each investor address */
-  mapping (address => uint256) public tokenAmountOf;
+  mapping (address => uint) public tokenAmountOf;
 
   /** Addresses that are allowed to invest even before ICO offical opens. For testing, for ICO partners, etc. */
   mapping (address => bool) public earlyParticipantWhitelist;
@@ -127,7 +128,7 @@ contract Crowdsale is Haltable {
 
     setPricingStrategy(_pricingStrategy);
 
-    require(isCeilingStrategy(_ceilingStrategy));
+    require(_ceilingStrategy.isCeilingStrategy());
     ceilingStrategy = _ceilingStrategy;
 
     multisigWallet = _multisigWallet;
@@ -189,13 +190,14 @@ contract Crowdsale is Haltable {
       throw;
     }
 
-    uint weiAmount = ceilingStrategy.ethAllowedToSend(msg.value, weiRaised);
+    uint weiAmount = ceilingStrategy.weiAllowedToReceive(msg.value, weiRaised);
+    uint tokenAmount = pricingStrategy.calculatePrice(weiAmount, weiRaised, tokensSold, msg.sender, token.decimals());
+    
+    // Return excess of money
     uint weiToReturn = msg.value.sub(weiAmount);
-    if (weiToReturn) > 0) {
+    if (weiToReturn > 0) {
       assert(msg.sender.send(weiToReturn));
     }
-
-    uint tokenAmount = pricingStrategy.calculatePrice(weiAmount, weiRaised, tokensSold, msg.sender, token.decimals());
 
     if(tokenAmount == 0) {
       // Dust transaction
@@ -214,11 +216,6 @@ contract Crowdsale is Haltable {
     // Update totals
     weiRaised = weiRaised.add(weiAmount);
     tokensSold = tokensSold.add(tokenAmount);
-
-    // Check that we did not bust the cap
-    if(isBreakingCap(tokenAmount, weiAmount, weiRaised, tokensSold)) {
-      throw;
-    }
 
     assignTokens(receiver, tokenAmount);
 
@@ -445,7 +442,7 @@ contract Crowdsale is Haltable {
    * Investors can claim refund.
    */
   function refund() public inState(State.Refunding) {
-    uint256 weiValue = investedAmountOf[msg.sender];
+    uint weiValue = investedAmountOf[msg.sender];
     if (weiValue == 0) throw;
     investedAmountOf[msg.sender] = 0;
     weiRefunded = weiRefunded.add(weiValue);
@@ -492,7 +489,7 @@ contract Crowdsale is Haltable {
     else if (!finalizeAgent.isSane()) return State.Preparing;
     else if (!pricingStrategy.isSane(address(this))) return State.Preparing;
     else if (block.timestamp < startsAt) return State.PreFunding;
-    else if (block.timestamp <= endsAt && !isCrowdsaleFull()) return State.Funding;
+    else if (block.timestamp <= endsAt && !ceilingStrategy.isCrowdsaleFull(weiRaised)) return State.Funding;
     else if (isMinimumGoalReached()) return State.Success;
     else if (!isMinimumGoalReached() && weiRaised > 0 && loadedRefund >= weiRaised) return State.Refunding;
     else return State.Failure;

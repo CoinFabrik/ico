@@ -19,14 +19,15 @@ contract CeilingStrategy {
   }
 
   /**
-   * When somebody tries to buy tokens for X eth, calculate how many eths they are allowed to use.
+   * When somebody tries to buy tokens for X wei, calculate how many weis they are allowed to use.
    *
    *
-   * @param value - What is the value of the transaction send in as wei
-   * @param weiRaised - how much money has been raised this far
-   * @param msgSender - who is the investor of this transaction
-   * @return Amount of eth the investor can send
+   * @param _value - What is the value of the transaction send in as wei.
+   * @param _weiRaised - How much money has been raised so far.
+   * @return Amount of wei the crowdsale can receive.
    */
-  function ethAllowedToSend(uint _value, uint _weiRaised, address _msgSender) public constant returns (uint amount);
+  function weiAllowedToReceive(uint _value, uint _weiRaised) public constant returns (uint amount);
+
+  function isCrowdsaleFull(uint _weiRaised) public constant returns (bool);
 
 }

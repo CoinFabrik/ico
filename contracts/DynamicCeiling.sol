@@ -31,24 +31,24 @@ import "./Ownable.sol";
 import "./CeilingStrategy.sol";
 
 contract DynamicCeiling is CeilingStrategy, Ownable {
-    using SafeMath for uint256;
+    using SafeMath for uint;
 
     struct Curve {
         bytes32 hash;
         // Absolute limit for this curve
-        uint256 limit;
+        uint limit;
         // The funds remaining to be collected are divided by `slopeFactor` smooth ceiling
         // with a long tail where big and small buyers can take part.
-        uint256 slopeFactor;
+        uint slopeFactor;
         // This keeps the curve flat at this number, until funds to be collected is less than this
-        uint256 collectMinimum;
+        uint collectMinimum;
     }
 
     address public contribution;
 
     Curve[] public curves;
-    uint256 public currentIndex;
-    uint256 public revealedCurves;
+    uint public currentIndex;
+    uint public revealedCurves;
     bool public allRevealed;
 
     /// @dev `contribution` is the only address that can call a function with this
@@ -73,7 +73,7 @@ contract DynamicCeiling is CeilingStrategy, Ownable {
         require(curves.length == 0);
 
         curves.length = _curveHashes.length;
-        for (uint256 i = 0; i < _curveHashes.length; i = i.add(1)) {
+        for (uint i = 0; i < _curveHashes.length; i = i.add(1)) {
             curves[i].hash = _curveHashes[i];
         }
     }
@@ -84,7 +84,7 @@ contract DynamicCeiling is CeilingStrategy, Ownable {
     ///  (must be greater or equal to the previous one).
     /// @param _last `true` if it's the last curve.
     /// @param _salt Random number used to commit the curve
-    function revealCurve(uint256 _limit, uint256 _slopeFactor, uint256 _collectMinimum,
+    function revealCurve(uint _limit, uint _slopeFactor, uint _collectMinimum,
                          bool _last, bytes32 _salt) public {
         require(!allRevealed);
 
@@ -105,7 +105,7 @@ contract DynamicCeiling is CeilingStrategy, Ownable {
     }
 
     /// @notice Reveal multiple curves at once
-    function revealMulti(uint256[] _limits, uint256[] _slopeFactors, uint256[] _collectMinimums,
+    function revealMulti(uint[] _limits, uint[] _slopeFactors, uint[] _collectMinimums,
                          bool[] _lasts, bytes32[] _salts) public {
         // Do not allow none and needs to be same length for all parameters
         require(_limits.length != 0 &&
@@ -114,14 +114,14 @@ contract DynamicCeiling is CeilingStrategy, Ownable {
                 _limits.length == _lasts.length &&
                 _limits.length == _salts.length);
 
-        for (uint256 i = 0; i < _limits.length; i = i.add(1)) {
+        for (uint i = 0; i < _limits.length; i = i.add(1)) {
             revealCurve(_limits[i], _slopeFactors[i], _collectMinimums[i],
                         _lasts[i], _salts[i]);
         }
     }
 
     /// @notice Move to curve, used as a failsafe
-    function moveTo(uint256 _index) public onlyOwner {
+    function moveTo(uint _index) public onlyOwner {
         require(_index < revealedCurves &&       // No more curves
                 _index == currentIndex.add(1));  // Only move one index at a time
         currentIndex = _index;
@@ -129,22 +129,22 @@ contract DynamicCeiling is CeilingStrategy, Ownable {
 
     /// @return Return the funds to collect for the current point on the curve
     ///  (or 0 if no curves revealed yet)
-    function toCollect(uint256 collected) public onlyContribution returns (uint256) {
+    function toCollect(uint collected) public onlyContribution returns (uint) {
         if (revealedCurves == 0) return 0;
 
         // Move to the next curve
         if (collected >= curves[currentIndex].limit) {  // Catches `limit == 0`
-            uint256 nextIndex = currentIndex.add(1);
+            uint nextIndex = currentIndex.add(1);
             if (nextIndex >= revealedCurves) return 0;  // No more curves
             currentIndex = nextIndex;
             if (collected >= curves[currentIndex].limit) return 0;  // Catches `limit == 0`
         }
 
         // Everything left to collect from this limit
-        uint256 difference = curves[currentIndex].limit.sub(collected);
+        uint difference = curves[currentIndex].limit.sub(collected);
 
         // Current point on the curve
-        uint256 collect = difference.div(curves[currentIndex].slopeFactor);
+        uint collect = difference.div(curves[currentIndex].slopeFactor);
 
         // Prevents paying too much fees vs to be collected; breaks long tail
         if (collect <= curves[currentIndex].collectMinimum) {
@@ -163,7 +163,7 @@ contract DynamicCeiling is CeilingStrategy, Ownable {
     /// @param _last `true` if it's the last curve.
     /// @param _salt Random number that will be needed to reveal this curve.
     /// @return The calculated hash of this curve to be used in the `setHiddenCurves` method
-    function calculateHash(uint256 _limit, uint256 _slopeFactor, uint256 _collectMinimum,
+    function calculateHash(uint _limit, uint _slopeFactor, uint _collectMinimum,
                            bool _last, bytes32 _salt) public constant returns (bytes32) {
         return keccak256(_limit, _slopeFactor, _collectMinimum, _last, _salt);
     }
@@ -171,22 +171,26 @@ contract DynamicCeiling is CeilingStrategy, Ownable {
     /// @return Return the total number of curves committed
     ///  (can be larger than the number of actual curves on the curve to hide
     ///  the real number of curves)
-    function nCurves() public constant returns (uint256) {
+    function nCurves() public constant returns (uint) {
         return curves.length;
     }
 
-    function ethAllowedToSend(uint _value, uint _weiRaised) public constant returns (uint amount) {
-        uint256 toCollect = toCollect(_weiRaised);
+    function weiAllowedToReceive(uint _value, uint _weiRaised) public constant returns (uint) {
+        uint weiToCollect = toCollect(_weiRaised);
 
         uint amount;
 
-        if (_value <= toCollect) {
+        if (_value <= weiToCollect) {
             amount = _value;
         } else {
-            amount = toCollect;
+            amount = weiToCollect;
         }
 
         return amount;
+    }
+
+    function isCrowdsaleFull(uint _weiRaised) public constant returns (bool) {
+        return toCollect(_weiRaised) == 0 && allRevealed;
     }
 
 }
