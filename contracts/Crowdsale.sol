@@ -33,7 +33,7 @@ contract Crowdsale is Haltable {
   PricingStrategy public pricingStrategy;
 
   /* How are we going to limit our offering */
-  CeilingStrategy ceilingStrategy;
+  CeilingStrategy public ceilingStrategy;
 
   /* Post-success callback */
   FinalizeAgent public finalizeAgent;
@@ -127,10 +127,7 @@ contract Crowdsale is Haltable {
 
     setPricingStrategy(_pricingStrategy);
 
-    if(!isCeilingStrategy(_ceilingStrategy)) {
-      throw;
-    }
-
+    require(isCeilingStrategy(_ceilingStrategy));
     ceilingStrategy = _ceilingStrategy;
 
     multisigWallet = _multisigWallet;
@@ -192,7 +189,12 @@ contract Crowdsale is Haltable {
       throw;
     }
 
-    uint weiAmount = msg.value;
+    uint weiAmount = ceilingStrategy.ethAllowedToSend(msg.value, weiRaised);
+    uint weiToReturn = msg.value.sub(weiAmount);
+    if (weiToReturn) > 0) {
+      // TODO: return remaining ether to msg.sender
+    }
+
     uint tokenAmount = pricingStrategy.calculatePrice(weiAmount, weiRaised, tokensSold, msg.sender, token.decimals());
 
     if(tokenAmount == 0) {
@@ -225,6 +227,7 @@ contract Crowdsale is Haltable {
 
     // Tell us invest was success
     Invested(receiver, weiAmount, tokenAmount, customerId);
+
   }
 
   /**
@@ -469,6 +472,13 @@ contract Crowdsale is Haltable {
    */
   function isPricingSane() public constant returns (bool sane) {
     return pricingStrategy.isSane(address(this));
+  }
+
+  /**
+   * Check if the contract relationship looks good.
+   */
+  function isCeilingSane() public constant returns (bool sane) {
+    return ceilingStrategy.isSane(address(this));
   }
 
   /**

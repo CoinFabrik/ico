@@ -175,18 +175,18 @@ contract DynamicCeiling is CeilingStrategy, Ownable {
         return curves.length;
     }
 
-    function ethAllowedToSend(uint _value, uint _weiRaised, address _msgSender) public constant returns (uint amount) {
+    function ethAllowedToSend(uint _value, uint _weiRaised) public constant returns (uint amount) {
         uint256 toCollect = toCollect(_weiRaised);
 
-        uint ammount;
+        uint amount;
 
         if (_value <= toCollect) {
-            ammount = _value;
+            amount = _value;
         } else {
-            ammount = toCollect;
+            amount = toCollect;
         }
 
-        return ammount;
+        return amount;
     }
 
 }
