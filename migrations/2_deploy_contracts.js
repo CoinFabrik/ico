@@ -53,43 +53,49 @@ module.exports = async function(deployer) {
     deployer.link(SafeMath, DynamicCeiling);
     deployer.link(SafeMath, Crowdsale);
 
-    await deployer.deploy(CrowdsaleToken, TOKEN_NAME, TOKEN_SYMBOL, INITIAL_SUPPLY, DECIMALS, MINTABLE);
-    console.log('CrowdsaleToken:', CrowdsaleToken.address);
-    
-    await deployer.deploy(FlatPricing, PRICE);
-    console.log('FlatPricing:', FlatPricing.address);
-    
-    // TODO: change to use client's MultiSigWallet
-    await deployer.deploy(MultiSigWallet, [0x4cdabc27b48893058aa1675683af3485e4409eff], 1);
-    console.log('MultiSigWallet:', MultiSigWallet.address);
-    
-    // TODO: set proper owner on DynamicCeiling
-    await deployer.deploy(DynamicCeiling, 0x4cdabc27b48893058aa1675683af3485e4409eff);
-    console.log('DynamicCeiling:', DynamicCeiling.address);
-    
-    await deployer.deploy(Crowdsale, CrowdsaleToken.address, DynamicCeiling.address, FlatPricing.address, MultiSigWallet.address, START_DATE,  END_DATE,  MINIMUM_FUNDING_GOAL);
-    console.log('Crowdsale:', Crowdsale.address);
-    
-    await deployer.deploy(BonusFinalizeAgent, CrowdsaleToken.address, Crowdsale.address, BONUS_BASE_POINTS, MultiSigWallet.address);
-    console.log('BonusFinalizeAgent:', BonusFinalizeAgent.address);
+    try {
+        await deployer.deploy(CrowdsaleToken, TOKEN_NAME, TOKEN_SYMBOL, INITIAL_SUPPLY, DECIMALS, MINTABLE);
+        console.log('CrowdsaleToken:', CrowdsaleToken.address);
+        
+        await deployer.deploy(FlatPricing, PRICE);
+        console.log('FlatPricing:', FlatPricing.address);
+        
+        // TODO: change to use client's MultiSigWallet
+        await deployer.deploy(MultiSigWallet, [0x4cdabc27b48893058aa1675683af3485e4409eff], 1);
+        console.log('MultiSigWallet:', MultiSigWallet.address);
+        
+        // TODO: set proper owner on DynamicCeiling
+        await deployer.deploy(DynamicCeiling, 0x4cdabc27b48893058aa1675683af3485e4409eff);
+        console.log('DynamicCeiling:', DynamicCeiling.address);
+        
+        await deployer.deploy(Crowdsale, CrowdsaleToken.address, DynamicCeiling.address, FlatPricing.address, MultiSigWallet.address, START_DATE,  END_DATE,  MINIMUM_FUNDING_GOAL);
+        console.log('Crowdsale:', Crowdsale.address);
+        
+        await deployer.deploy(BonusFinalizeAgent, CrowdsaleToken.address, Crowdsale.address, BONUS_BASE_POINTS, MultiSigWallet.address);
+        console.log('BonusFinalizeAgent:', BonusFinalizeAgent.address);
 
-    DynamicCeiling.deployed()
-    .then(function(ceilingInstance) {
-        setHiddenCurves(ceilingInstance, CURVES, NHIDDENCURVES);
-    });
+        DynamicCeiling.deployed()
+        .then(function(ceilingInstance) {
+            setHiddenCurves(ceilingInstance, CURVES, NHIDDENCURVES);
+        });
 
-    CrowdsaleToken.deployed()
-    .then(async function(tokenInstance) {
-        await tokenInstance.setMintAgent(Crowdsale.address, true);
-        await tokenInstance.setMintAgent(BonusFinalizeAgent.address, true);
-        await tokenInstance.setReleaseAgent(BonusFinalizeAgent.address);
-        tokenInstance.transferOwnership(MultiSigWallet.address);
-    });
+        CrowdsaleToken.deployed()
+        .then(async function(tokenInstance) {
+            await tokenInstance.setMintAgent(Crowdsale.address, true);
+            await tokenInstance.setMintAgent(BonusFinalizeAgent.address, true);
+            await tokenInstance.setReleaseAgent(BonusFinalizeAgent.address);
+            tokenInstance.transferOwnership(MultiSigWallet.address);
+        });
 
-    Crowdsale.deployed()
-    .then(async function(crowdsaleInstance) {
-        await crowdsaleInstance.setFinalizeAgent(BonusFinalizeAgent.address);
-        crowdsaleInstance.transferOwnership(MultiSigWallet.address);
-    });
+        Crowdsale.deployed()
+        .then(async function(crowdsaleInstance) {
+            await crowdsaleInstance.setFinalizeAgent(BonusFinalizeAgent.address);
+            crowdsaleInstance.transferOwnership(MultiSigWallet.address);
+        });
+
+    }
+    catch(error) {
+        console.log(error);
+    }
 
 };
