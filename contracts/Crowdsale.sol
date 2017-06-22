@@ -5,6 +5,8 @@ import "./FractionalERC20.sol";
 import "./PricingStrategy.sol";
 import "./FinalizeAgent.sol";
 import "./SafeMath.sol";
+import "./CeilingStrategy.sol";
+import "./MintableToken.sol";
 
 /**
  * Abstract base contract for token sales.
@@ -30,6 +32,9 @@ contract Crowdsale is Haltable {
 
   /* How we are going to price our offering */
   PricingStrategy public pricingStrategy;
+
+  /* How are we going to limit our offering */
+  CeilingStrategy public ceilingStrategy;
 
   /* Post-success callback */
   FinalizeAgent public finalizeAgent;
@@ -77,10 +82,10 @@ contract Crowdsale is Haltable {
   address public signerAddress;
 
   /** How much ETH each address has invested to this crowdsale */
-  mapping (address => uint256) public investedAmountOf;
+  mapping (address => uint) public investedAmountOf;
 
   /** How much tokens this crowdsale has credited for each investor address */
-  mapping (address => uint256) public tokenAmountOf;
+  mapping (address => uint) public tokenAmountOf;
 
   /** Addresses that are allowed to invest even before ICO offical opens. For testing, for ICO partners, etc. */
   mapping (address => bool) public earlyParticipantWhitelist;
@@ -115,7 +120,7 @@ contract Crowdsale is Haltable {
   // Crowdsale end time has been changed
   event EndsAtChanged(uint endsAt);
 
-  function Crowdsale(address _token, PricingStrategy _pricingStrategy, address _multisigWallet, uint _start, uint _end, uint _minimumFundingGoal) {
+  function Crowdsale(address _token, PricingStrategy _pricingStrategy, CeilingStrategy _ceilingStrategy, address _multisigWallet, uint _start, uint _end, uint _minimumFundingGoal) {
 
     token = FractionalERC20(_token);
 
@@ -123,6 +128,10 @@ contract Crowdsale is Haltable {
 
     require(_multisigWallet != 0);
     multisigWallet = _multisigWallet;
+
+    require(_ceilingStrategy.isCeilingStrategy());
+    ceilingStrategy = _ceilingStrategy;
+
 
     // Don't mess the dates
     require(_start != 0 && _end != 0);
@@ -165,8 +174,14 @@ contract Crowdsale is Haltable {
       require(false);
     }
 
-    uint weiAmount = msg.value;
+    uint weiAmount = ceilingStrategy.weiAllowedToReceive(msg.value, weiRaised);
     uint tokenAmount = pricingStrategy.calculatePrice(weiAmount, weiRaised, tokensSold, msg.sender, token.decimals());
+    
+    // Return excess of money
+    uint weiToReturn = msg.value.sub(weiAmount);
+    if (weiToReturn > 0) {
+      assert(msg.sender.send(weiToReturn));
+    }
 
     // Dust transaction if no tokens can be given
     require(tokenAmount != 0);
@@ -184,9 +199,6 @@ contract Crowdsale is Haltable {
     weiRaised = weiRaised.add(weiAmount);
     tokensSold = tokensSold.add(tokenAmount);
 
-    // Check that we did not bust the cap
-    require(!isBreakingCap(tokenAmount, weiAmount, weiRaised, tokensSold));
-
     assignTokens(receiver, tokenAmount);
 
     // Pocket the money
@@ -194,6 +206,7 @@ contract Crowdsale is Haltable {
 
     // Tell us that the investment was completed successfully
     Invested(receiver, weiAmount, tokenAmount, customerId);
+
   }
 
   /**
@@ -372,6 +385,17 @@ contract Crowdsale is Haltable {
   }
 
   /**
+   * Allow to (re)set ceiling strategy.
+   *
+   * Design choice: no state restrictions on the set, so that we can fix fat finger mistakes.
+   */
+  function setCeilingStrategy(CeilingStrategy _ceilingStrategy) onlyOwner {
+    require(_ceilingStrategy.isCeilingStrategy());
+
+    ceilingStrategy = _ceilingStrategy;
+  }
+
+  /**
    * Allow to change the team multisig address in the case of emergency.
    *
    * This allows to save a deployed crowdsale wallet in the case the crowdsale has not yet begun
@@ -399,7 +423,7 @@ contract Crowdsale is Haltable {
    * Investors can claim refund.
    */
   function refund() public inState(State.Refunding) {
-    uint256 weiValue = investedAmountOf[msg.sender];
+    uint weiValue = investedAmountOf[msg.sender];
     require(weiValue != 0);
     investedAmountOf[msg.sender] = 0;
     weiRefunded = weiRefunded.add(weiValue);
@@ -429,6 +453,13 @@ contract Crowdsale is Haltable {
   }
 
   /**
+   * Check if the contract relationship looks good.
+   */
+  function isCeilingSane() public constant returns (bool sane) {
+    return ceilingStrategy.isSane(address(this));
+  }
+
+  /**
    * Crowdfund state machine management.
    *
    * We make it a function and do not assign the result to a variable, so there is no chance of the variable being stale.
@@ -439,7 +470,7 @@ contract Crowdsale is Haltable {
     else if (!isFinalizerSane()) return State.Preparing;
     else if (!isPricingSane()) return State.Preparing;
     else if (block.timestamp < startsAt) return State.PreFunding;
-    else if (block.timestamp <= endsAt && !isCrowdsaleFull()) return State.Funding;
+    else if (block.timestamp <= endsAt && !ceilingStrategy.isCrowdsaleFull(weiRaised)) return State.Funding;
     else if (isMinimumGoalReached()) return State.Success;
     else if (!isMinimumGoalReached() && weiRaised > 0 && loadedRefund >= weiRaised) return State.Refunding;
     else return State.Failure;
@@ -448,6 +479,11 @@ contract Crowdsale is Haltable {
   /** This is for manual testing of multisig wallet interaction */
   function setOwnerTestValue(uint val) onlyOwner {
     ownerTestValue = val;
+  }
+
+  function assignTokens(address receiver, uint tokenAmount) private {
+    MintableToken mintableToken = MintableToken(token);
+    mintableToken.mint(receiver, tokenAmount);
   }
 
   /** Interface marker. */
@@ -465,37 +501,4 @@ contract Crowdsale is Haltable {
     _;
   }
 
-
-  //
-  // Abstract functions
-  //
-
-  /**
-   * Check if the current invested breaks our cap rules.
-   *
-   *
-   * The child contract must define their own cap setting rules.
-   * We allow a lot of flexibility through different capping strategies (ETH, token count)
-   * Called from invest().
-   *
-   * @param weiAmount The amount of wei the investor tries to invest in the current transaction
-   * @param tokenAmount The amount of tokens we try to give to the investor in the current transaction
-   * @param weiRaisedTotal What would be our total raised balance after this transaction
-   * @param tokensSoldTotal What would be our total sold tokens count after this transaction
-   *
-   * @return true if taking this investment would break our cap rules
-   */
-  function isBreakingCap(uint weiAmount, uint tokenAmount, uint weiRaisedTotal, uint tokensSoldTotal) constant returns (bool limitBroken);
-
-  /**
-   * Check if the current crowdsale is full and we can no longer sell any tokens.
-   */
-  function isCrowdsaleFull() public constant returns (bool);
-
-  /**
-   * Create new tokens or transfer issued tokens to the investor depending on the cap model.
-   */
-  function assignTokens(address receiver, uint tokenAmount) private;
 }
-
-
