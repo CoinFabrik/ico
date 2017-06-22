@@ -44,23 +44,14 @@ contract DynamicCeiling is CeilingStrategy, Ownable {
         uint collectMinimum;
     }
 
-    address public contribution;
-
     Curve[] public curves;
     uint public currentIndex;
     uint public revealedCurves;
     bool public allRevealed;
 
-    /// @dev `contribution` is the only address that can call a function with this
-    /// modifier
-    modifier onlyContribution {
-        require(msg.sender == contribution);
-        _;
-    }
 
-    function DynamicCeiling(address _owner, address _contribution) {
+    function DynamicCeiling(address _owner) {
         owner = _owner;
-        contribution = _contribution;
     }
 
     /// @notice This should be called by the creator of the contract to commit
@@ -129,7 +120,7 @@ contract DynamicCeiling is CeilingStrategy, Ownable {
 
     /// @return Return the funds to collect for the current point on the curve
     ///  (or 0 if no curves revealed yet)
-    function toCollect(uint collected) public onlyContribution returns (uint) {
+    function toCollect(uint collected) public returns (uint) {
         if (revealedCurves == 0) return 0;
 
         // Move to the next curve
