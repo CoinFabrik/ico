@@ -53,18 +53,21 @@ module.exports = async function(deployer) {
     deployer.link(SafeMath, Crowdsale);
 
     try {
-        await deployer.deploy(CrowdsaleToken, TOKEN_NAME, TOKEN_SYMBOL, INITIAL_SUPPLY, DECIMALS, MINTABLE);
-        console.log('CrowdsaleToken:', CrowdsaleToken.address);
-        
-        await deployer.deploy(FlatPricing, PRICE);
-        console.log('FlatPricing:', FlatPricing.address);
-        
+        let CT_prom = deployer.deploy(CrowdsaleToken, TOKEN_NAME, TOKEN_SYMBOL, INITIAL_SUPPLY, DECIMALS, MINTABLE);
+        let FP_prom = deployer.deploy(FlatPricing, PRICE);
         // TODO: change to use client's MultiSigWallet
-        await deployer.deploy(MultiSigWallet, [0x4cdabc27b48893058aa1675683af3485e4409eff], 1);
-        console.log('MultiSigWallet:', MultiSigWallet.address);
-        
+        let MW_prom = deployer.deploy(MultiSigWallet, [0x4cdabc27b48893058aa1675683af3485e4409eff], 1);
         // TODO: set proper owner on DynamicCeiling
-        await deployer.deploy(DynamicCeiling, 0x4cdabc27b48893058aa1675683af3485e4409eff);
+        let DC_prom = deployer.deploy(DynamicCeiling, 0x4cdabc27b48893058aa1675683af3485e4409eff);
+        DC_prom = DC_prom
+        .then(async function(ceilingInstance) {
+            setHiddenCurves(ceilingInstance, CURVES, NHIDDENCURVES);
+        });
+        await Promise.all([CT_prom, FP_prom, MW_prom, DC_prom]);
+        
+        console.log('CrowdsaleToken:', CrowdsaleToken.address);
+        console.log('FlatPricing:', FlatPricing.address);
+        console.log('MultiSigWallet:', MultiSigWallet.address);
         console.log('DynamicCeiling:', DynamicCeiling.address);
         
         await deployer.deploy(Crowdsale, CrowdsaleToken.address, DynamicCeiling.address, FlatPricing.address, MultiSigWallet.address, START_DATE,  END_DATE,  MINIMUM_FUNDING_GOAL);
@@ -73,10 +76,7 @@ module.exports = async function(deployer) {
         await deployer.deploy(BonusFinalizeAgent, CrowdsaleToken.address, Crowdsale.address, BONUS_BASE_POINTS, MultiSigWallet.address);
         console.log('BonusFinalizeAgent:', BonusFinalizeAgent.address);
 
-        DynamicCeiling.deployed()
-        .then(function(ceilingInstance) {
-            setHiddenCurves(ceilingInstance, CURVES, NHIDDENCURVES);
-        });
+
 
         CrowdsaleToken.deployed()
         .then(async function(tokenInstance) {
