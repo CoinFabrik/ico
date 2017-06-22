@@ -7,33 +7,43 @@ import "./MysteriumToken.sol";
  * Mysterium Upgrade agent interface inspired by Lunyr.
  *
  * Upgrade agent transfers tokens to a new contract.
- * Upgrade agent itself can be the token contract, or just a middle man contract doing the heavy lifting.
  */
 contract MysteriumUpgradeAgent is Ownable {
 
   uint public originalSupply;
-  MysteriumToken mysteriumToken;
+
+  MysteriumToken public mysteriumToken;
+
+  address public originalToken;
 
   modifier notInitialized() {
-    if (address(mysteriumToken) != 0) {
+    if (address(mysteriumToken) != 0 && address(originalToken) != 0) {
       throw;
     }
     _;
   }
 
   modifier initialized() {
-    if (address(mysteriumToken) == 0) {
+    if (address(mysteriumToken) == 0 || address(originalToken) == 0) {
       throw;
     }
     _;
   }
 
-  function MysteriumUpgradeAgent() {
+  modifier onlyOriginalToken() {
+    if (msg.sender != originalToken) {
+      throw;
+    }
+    _;
   }
 
-  function initialize(address _token) public onlyOwner notInitialized {
-    MysteriumToken mysteriumToken = MysteriumToken(_token);
-    originalSupply = mysteriumToken.totalSupply();
+  function MysteriumUpgradeAgent(address _mysteriumToken, uint256 _originalSupply) {
+    mysteriumToken = MysteriumToken(_mysteriumToken);
+    originalSupply = _originalSupply;
+  }
+
+  function initialize(address _originalToken) public onlyOwner notInitialized {
+    originalToken = _originalToken;
   }
 
   /** Interface marker */
@@ -41,8 +51,7 @@ contract MysteriumUpgradeAgent is Ownable {
     return true;
   }
 
-  function upgradeFrom(address _from, uint256 _value) public initialized {
-    mysteriumToken.upgradeFrom(_from, _value);
+  function upgradeFrom(address _from, uint256 _value) public onlyOriginalToken initialized {
+    mysteriumToken.upgradeTo(_from, _value);
   }
-
 }

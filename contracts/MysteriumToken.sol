@@ -27,10 +27,11 @@ contract MysteriumToken is ReleasableToken, UpgradeableToken {
 
   uint public decimals;
 
-  UpgradeAgent upgradeAgent;
+  /** We only accept upgrades from this address */
+  UpgradeAgent public upgradeClient;
 
-  modifier onlyUpgradeAgent () {
-    if (msg.sender != address(upgradeAgent)) {
+  modifier onlyUpgradeClient () {
+    if (msg.sender != address(upgradeClient)) {
       throw;
     }
     _;
@@ -41,30 +42,24 @@ contract MysteriumToken is ReleasableToken, UpgradeableToken {
    *
    * This token must be created through a team multisig wallet, so that it is owned by that wallet.
    */
-  function MysteriumToken(address _upgradeAgent)
+  function MysteriumToken(string _name, string _symbol, uint _initialSupply, uint _decimals)
     UpgradeableToken(msg.sender) {
 
-    // Create any address, can be transferred
-    // to team multisig via changeOwner(),
-    // also remember to call setUpgradeMaster()
     owner = msg.sender;
 
-    name = "Mysterium";
-    symbol = "MYST";
+    name = _name;
+    symbol = _symbol;
 
-    totalSupply = 3243336562220214;
+    totalSupply = _initialSupply;
 
-    decimals = 8;
+    decimals = _decimals;
 
-    // Create initially all balance on the team multisig
-    balances[owner] = totalSupply;
+    // address(0) has all the tokens
+    balances[address(0)] = totalSupply;
 
-    if(totalSupply > 0) {
-      Minted(owner, totalSupply);
+    if (totalSupply > 0) {
+      Minted(address(0), totalSupply);
     }
-
-    upgradeAgent = UpgradeAgent(_upgradeAgent);
-    setTransferAgent(_upgradeAgent, true);
   }
 
   /**
@@ -91,9 +86,19 @@ contract MysteriumToken is ReleasableToken, UpgradeableToken {
     UpdatedTokenInformation(name, symbol);
   }
 
-  function upgradeFrom(address _to, uint _value) onlyUpgradeAgent {
-    balances[owner] = balances[owner].sub(_value);
+  /**
+   * Owner can set upgrade client
+   */
+  function setUpgradeClient(address _upgradeClient) onlyOwner {
+    upgradeClient = UpgradeAgent(_upgradeClient);
+  }
+
+  /**
+   * Only upgrade client can upgrade tokens
+   */
+  function upgradeTo(address _to, uint _value) onlyUpgradeClient {
+    balances[address(0)] = balances[address(0)].sub(_value);
     balances[_to] = balances[_to].add(_value);
-    Transfer(owner, _to, _value);
+    Transfer(address(0), _to, _value);
   }
 }
