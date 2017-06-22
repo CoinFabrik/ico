@@ -404,7 +404,7 @@ contract Crowdsale is Haltable {
    */
   function setMultisig(address addr) public onlyOwner {
     // Change (?)
-    requre(investorCount <= MAX_INVESTMENTS_BEFORE_MULTISIG_CHANGE);
+    require(investorCount <= MAX_INVESTMENTS_BEFORE_MULTISIG_CHANGE);
 
     multisigWallet = addr;
   }
