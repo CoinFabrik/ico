@@ -1,5 +1,7 @@
 var MintedEthCappedCrowdsale = artifacts.require("./MintedEthCappedCrowdsale.sol");
 var CrowdsaleToken = artifacts.require("./CrowdsaleToken.sol");
+var MysteriumToken = artifacts.require("./MysteriumToken.sol");
+var MysteriumUpgradeAgent = artifacts.require("./MysteriumUpgradeAgent.sol");
 
 contract('Mysterium', function(accounts) {
   it("Initial check", function() {
@@ -90,6 +92,65 @@ contract('Mysterium', function(accounts) {
       return crowdsale.finalized.call();
     }).then(function(finalized) {
       assert.equal(finalized, true, "Should be finalized");
+    });
+  });
+  it.only("Upgrade", function() {
+    var crowdsale;
+    var token;
+    var upgradeToken;
+    var upgradeAgent;
+    var idxs = [];
+    for (var i=0; i<5; ++i) {
+      idxs.push(i);
+      idxs.push(i);
+    }
+    return Promise.all([
+      MintedEthCappedCrowdsale.deployed(),
+      CrowdsaleToken.deployed(),
+      MysteriumToken.deployed(),
+      MysteriumUpgradeAgent.deployed()
+    ]).then(function([crowdsaleInstance, tokenInstance, upgradeTokenInstance, upgradeAgentInstance]) {
+      crowdsale = crowdsaleInstance;
+      token = tokenInstance;
+      upgradeToken = upgradeTokenInstance;
+      upgradeAgent = upgradeAgentInstance;
+      return Promise.all(idxs.map((i) => crowdsale.buy({ from: accounts[i], value: 100 })));
+    }).then(function() {
+      return crowdsale.getState.call();
+    }).then(function(state) {
+      assert.equal(state.valueOf(), 4, "Should be success");
+      return crowdsale.finalize();
+    }).then(function() {
+      return Promise.all([
+        token.getUpgradeState.call(),
+        token.totalSupply.call(),
+        upgradeAgent.originalSupply.call(),
+      ]);
+    }).then(function([upgradeState, totalSupply, originalSupply]) {
+      //console.log('-- State: ', upgradeState.toNumber());
+      //console.log('-- total supply: ', totalSupply.toNumber());
+      //console.log('-- original supply: ', originalSupply.toNumber());
+      assert.equal(upgradeState.valueOf(), 2, "Should be waiting for upgrade");
+      return token.setUpgradeAgent(MysteriumUpgradeAgent.address);
+    }).then(function() {
+      return upgradeAgent.initialize(CrowdsaleToken.address);
+    }).then(function() {
+      return token.getUpgradeState.call();
+    }).then(function(upgradeState) {
+      assert.equal(upgradeState.valueOf(), 3, "Should be upgradeable");
+      console.log('Here we go');
+      return token.upgrade(200, { from: accounts[1] });
+    }).then(function() {
+      console.log('Here we do not go');
+      return Promise.all([
+        token.balanceOf.call(accounts[1]),
+        upgradeToken.balanceOf.call(accounts[1])
+      ]);
+    }).then(function([originalBalance, upgradedBalance]) {
+      console.log('-- upgraded balance: ', upgradedBalance.toNumber());
+      console.log('-- original balance: ', originalBalance.toNumber());
+      assert.equal(originalBalance.valueOf(), 0, "Should have balance of 0");
+      assert.equal(upgradedBalance.valueOf(), 200, "Should have a balance of 200");
     });
   });
 });
