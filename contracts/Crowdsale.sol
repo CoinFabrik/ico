@@ -192,7 +192,7 @@ contract Crowdsale is Haltable {
     uint weiAmount = ceilingStrategy.ethAllowedToSend(msg.value, weiRaised);
     uint weiToReturn = msg.value.sub(weiAmount);
     if (weiToReturn) > 0) {
-      // TODO: return remaining ether to msg.sender
+      assert(msg.sender.send(weiToReturn));
     }
 
     uint tokenAmount = pricingStrategy.calculatePrice(weiAmount, weiRaised, tokensSold, msg.sender, token.decimals());
