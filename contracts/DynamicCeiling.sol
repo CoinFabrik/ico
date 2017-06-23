@@ -50,8 +50,8 @@ contract DynamicCeiling is CeilingStrategy, Ownable {
     bool public allRevealed;
 
 
-    function DynamicCeiling(address _owner) {
-        owner = _owner;
+    function DynamicCeiling() {
+        
     }
 
     /// @notice This should be called by the creator of the contract to commit

@@ -31,7 +31,6 @@ const setHiddenCurves = async function(dynamicCeiling, curves, nHiddenCurves) {
     let i = 0;
     for (let c of curves) {
         let salt = await RandomBytes(32);
-        console.log('Curve', i, 'has salt:', salt.toString('hex'));
         let h = await dynamicCeiling.calculateHash(c[0], c[1], c[2], i === curves.length - 1, salt);
         hashes.push(h);
         i += 1;
@@ -41,7 +40,6 @@ const setHiddenCurves = async function(dynamicCeiling, curves, nHiddenCurves) {
         hashes.push(web3.sha3(salt));
     }
     await dynamicCeiling.setHiddenCurves(hashes);
-    console.log(i, 'curves set');
 };
 
 module.exports = async function(deployer) {
@@ -58,7 +56,7 @@ module.exports = async function(deployer) {
         // TODO: change to use client's MultiSigWallet
         let MW_prom = deployer.deploy(MultiSigWallet, [0x4cdabc27b48893058aa1675683af3485e4409eff], 1);
         // TODO: set proper owner on DynamicCeiling
-        let DC_prom = deployer.deploy(DynamicCeiling, 0x52f96788017f9185a67a86c3a270d28e0fccd751);
+        let DC_prom = deployer.deploy(DynamicCeiling);
         await Promise.all([CT_prom, FP_prom, MW_prom, DC_prom]);
         
         await deployer.deploy(Crowdsale, CrowdsaleToken.address, FlatPricing.address, DynamicCeiling.address, MultiSigWallet.address, START_DATE,  END_DATE,  MINIMUM_FUNDING_GOAL);
@@ -67,20 +65,27 @@ module.exports = async function(deployer) {
 
         DynamicCeiling.deployed()
         .then(async function(ceilingInstance) {
+            console.log('Setting hidden curves in ceiling strategy\'s contract...');
             await setHiddenCurves(ceilingInstance, CURVES, NHIDDENCURVES);
         });
 
         CrowdsaleToken.deployed()
         .then(async function(tokenInstance) {
+            console.log('Setting Crowdsale as mint agent of CrowdsaleToken...');
             await tokenInstance.setMintAgent(Crowdsale.address, true);
+            console.log('Setting BonusFinalizeAgent as mint agent of CrowdsaleToken...');
             await tokenInstance.setMintAgent(BonusFinalizeAgent.address, true);
+            console.log('Setting BonusFinalizeAgent as release agent of CrowdsaleToken...');
             await tokenInstance.setReleaseAgent(BonusFinalizeAgent.address);
+            console.log('Transfering ownership of CrowdsaleToken to MultiSigWallet...');
             tokenInstance.transferOwnership(MultiSigWallet.address);
         });
 
         Crowdsale.deployed()
         .then(async function(crowdsaleInstance) {
+            console.log('Setting BonusFinalizeAgent as finalize agent of Crowdsale...');
             await crowdsaleInstance.setFinalizeAgent(BonusFinalizeAgent.address);
+            console.log('Transfering ownership of Crowdsale contract to MultiSigWallet...');
             crowdsaleInstance.transferOwnership(MultiSigWallet.address);
         });
 
