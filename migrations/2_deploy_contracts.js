@@ -45,38 +45,30 @@ const setHiddenCurves = async function(dynamicCeiling, curves, nHiddenCurves) {
 };
 
 module.exports = async function(deployer) {
-    deployer.deploy(SafeMath);
-    deployer.link(SafeMath, FlatPricing);
-    deployer.link(SafeMath, BonusFinalizeAgent);
-    deployer.link(SafeMath, CrowdsaleToken);
-    deployer.link(SafeMath, DynamicCeiling);
-    deployer.link(SafeMath, Crowdsale);
-
     try {
+        deployer.deploy(SafeMath);
+        deployer.link(SafeMath, FlatPricing);
+        deployer.link(SafeMath, BonusFinalizeAgent);
+        deployer.link(SafeMath, CrowdsaleToken);
+        deployer.link(SafeMath, DynamicCeiling);
+        deployer.link(SafeMath, Crowdsale);
+
         let CT_prom = deployer.deploy(CrowdsaleToken, TOKEN_NAME, TOKEN_SYMBOL, INITIAL_SUPPLY, DECIMALS, MINTABLE);
         let FP_prom = deployer.deploy(FlatPricing, PRICE);
         // TODO: change to use client's MultiSigWallet
         let MW_prom = deployer.deploy(MultiSigWallet, [0x4cdabc27b48893058aa1675683af3485e4409eff], 1);
         // TODO: set proper owner on DynamicCeiling
         let DC_prom = deployer.deploy(DynamicCeiling, 0x4cdabc27b48893058aa1675683af3485e4409eff);
-        DC_prom = DC_prom
-        .then(async function(ceilingInstance) {
-            setHiddenCurves(ceilingInstance, CURVES, NHIDDENCURVES);
-        });
         await Promise.all([CT_prom, FP_prom, MW_prom, DC_prom]);
         
-        console.log('CrowdsaleToken:', CrowdsaleToken.address);
-        console.log('FlatPricing:', FlatPricing.address);
-        console.log('MultiSigWallet:', MultiSigWallet.address);
-        console.log('DynamicCeiling:', DynamicCeiling.address);
-        
         await deployer.deploy(Crowdsale, CrowdsaleToken.address, DynamicCeiling.address, FlatPricing.address, MultiSigWallet.address, START_DATE,  END_DATE,  MINIMUM_FUNDING_GOAL);
-        console.log('Crowdsale:', Crowdsale.address);
         
         await deployer.deploy(BonusFinalizeAgent, CrowdsaleToken.address, Crowdsale.address, BONUS_BASE_POINTS, MultiSigWallet.address);
-        console.log('BonusFinalizeAgent:', BonusFinalizeAgent.address);
 
-
+        DynamicCeiling.deployed()
+        .then(async function(ceilingInstance) {
+            await setHiddenCurves(ceilingInstance, CURVES, NHIDDENCURVES);
+        });
 
         CrowdsaleToken.deployed()
         .then(async function(tokenInstance) {
@@ -92,8 +84,7 @@ module.exports = async function(deployer) {
             crowdsaleInstance.transferOwnership(MultiSigWallet.address);
         });
 
-    }
-    catch(error) {
+    } catch(error) {
         console.log(error);
     }
 
