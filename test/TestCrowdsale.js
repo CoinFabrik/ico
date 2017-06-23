@@ -90,4 +90,24 @@ contract("Crowdsale", function(accounts) {
         assert.equal(web3.fromWei(balance, 'ether').toNumber(), (b * (10 ** DECIMALS)) / PRICE);
     });
 
+    it("Returns the remaining of transactions", async function() {
+        const initialBalance = await web3.eth.getBalance(EXAMPLE_ADDRESS_1);
+        let etherToSend = 5;
+        await crowdsale.buy.sendTransaction({value: web3.toWei(etherToSend), gas: 300000, gasPrice: "20000000000"});
+        const finalBalance = await web3.eth.getBalance(EXAMPLE_ADDRESS_1);
+
+        const b = Math.min(etherToSend, ((lim - cur) / divs));
+        cur += b;
+
+        /*const spent = web3.fromWei(initialBalance.sub(finalBalance)).toNumber();
+        assert.isAbove(spent, b);
+        assert.isBelow(spent, b + 0.02);*/
+
+        const totalCollected = await crowdsale.weiRaised();
+        assert.equal(web3.fromWei(totalCollected), cur);
+
+        const balanceContributionWallet = await web3.eth.getBalance(multiSigWallet.address);
+        assert.equal(web3.fromWei(balanceContributionWallet), cur);
+    });
+
 });
