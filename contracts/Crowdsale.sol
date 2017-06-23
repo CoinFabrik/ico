@@ -135,7 +135,7 @@ contract Crowdsale is Haltable {
 
     // Don't mess the dates
     require(_start != 0 && _end != 0);
-    require(startsAt < endsAt);
+    require(_start < _end);
     startsAt = _start;
     endsAt = _end;
 
