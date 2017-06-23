@@ -46,7 +46,7 @@ contract("Crowdsale", function(accounts) {
         crowdsale = await Crowdsale.new(crowdsaleToken.address, flatPricing.address, dynamicCeiling.address, multiSigWallet.address, START_DATE,  END_DATE,  MINIMUM_FUNDING_GOAL);
         bonusFinalizeAgent = await BonusFinalizeAgent.new(crowdsaleToken.address, crowdsale.address, BONUS_BASE_POINTS, multiSigWallet.address);
 
-        await setHiddenCurves(dynamicCeiling, CURVES, NHIDDENCURVES);
+        await setHiddenCurves(dynamicCeiling, CURVES);
 
         await crowdsaleToken.setMintAgent(crowdsale.address, true);
         await crowdsaleToken.setMintAgent(bonusFinalizeAgent.address, true);
@@ -78,14 +78,16 @@ contract("Crowdsale", function(accounts) {
         lim = 3;
         cur = 0;
 
-        await crowdsale.buy.sendTransaction({value: web3.toWei(1), gas: 300000, gasPrice: "20000000000", from: EXAMPLE_ADDRESS_1});
+        let etherToSend = 1;
 
-        const b = Math.min(1, ((lim - cur) / divs));
+        await crowdsale.buy.sendTransaction({value: web3.toWei(etherToSend, 'ether'), gas: 300000, gasPrice: "20000000000", from: EXAMPLE_ADDRESS_1});
+
+        const b = Math.min(etherToSend, ((lim - cur) / divs));
         cur += b;
 
         const balance = await crowdsaleToken.balanceOf(EXAMPLE_ADDRESS_1);
 
-        assert.equal(web3.fromWei(balance).toNumber(), b * 10000);
+        assert.equal(web3.fromWei(balance, 'ether').toNumber(), (b * (10 ** DECIMALS)) / PRICE);
     });
 
 });
