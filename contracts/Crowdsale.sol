@@ -177,12 +177,6 @@ contract Crowdsale is Haltable {
     uint weiAmount = ceilingStrategy.weiAllowedToReceive(msg.value, weiRaised);
     uint tokenAmount = pricingStrategy.calculatePrice(weiAmount, weiRaised, tokensSold, msg.sender, token.decimals());
     
-    // Return excess of money
-    uint weiToReturn = msg.value.sub(weiAmount);
-    if (weiToReturn > 0) {
-      assert(msg.sender.send(weiToReturn));
-    }
-
     // Dust transaction if no tokens can be given
     require(tokenAmount != 0);
 
@@ -203,6 +197,12 @@ contract Crowdsale is Haltable {
 
     // Pocket the money
     assert(multisigWallet.send(weiAmount));
+
+    // Return excess of money
+    uint weiToReturn = msg.value.sub(weiAmount);
+    if (weiToReturn > 0) {
+      assert(msg.sender.send(weiToReturn));
+    }
 
     // Tell us that the investment was completed successfully
     Invested(receiver, weiAmount, tokenAmount, customerId);
