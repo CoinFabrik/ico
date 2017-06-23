@@ -61,7 +61,7 @@ module.exports = async function(deployer) {
         let DC_prom = deployer.deploy(DynamicCeiling, 0x4cdabc27b48893058aa1675683af3485e4409eff);
         await Promise.all([CT_prom, FP_prom, MW_prom, DC_prom]);
         
-        await deployer.deploy(Crowdsale, CrowdsaleToken.address, DynamicCeiling.address, FlatPricing.address, MultiSigWallet.address, START_DATE,  END_DATE,  MINIMUM_FUNDING_GOAL);
+        await deployer.deploy(Crowdsale, CrowdsaleToken.address, FlatPricing.address, DynamicCeiling.address, MultiSigWallet.address, START_DATE,  END_DATE,  MINIMUM_FUNDING_GOAL);
         
         await deployer.deploy(BonusFinalizeAgent, CrowdsaleToken.address, Crowdsale.address, BONUS_BASE_POINTS, MultiSigWallet.address);
 
