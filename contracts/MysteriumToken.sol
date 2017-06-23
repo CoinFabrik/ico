@@ -18,8 +18,6 @@ import "./Ownable.sol";
  */
 contract MysteriumToken is UpgradeableToken, UpgradeAgent, Ownable {
 
-  event UpdatedTokenInformation(string newName, string newSymbol);
-
   string public name;
 
   string public symbol;
