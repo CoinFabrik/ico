@@ -4,20 +4,19 @@ import './StandardToken.sol';
 import "./UpgradeableToken.sol";
 import "./ReleasableToken.sol";
 import "./UpgradeAgent.sol";
+import "./Ownable.sol";
 
 
 /**
- * A crowdsaled token.
+ * An upgrade token.
  *
- * An ERC-20 token designed specifically for crowdsales with investor protection and further development path.
- *
- * - The token transfer() is disabled until the crowdsale is over
  * - The token contract gives an opt-in upgrade path to a new contract
- * - The same token can be part of several crowdsales through approve() mechanism
- * - The token can be capped (supply set in the constructor) or uncapped (crowdsale contract can mint new tokens)
+ * - The totalSupply is fixed at creation
+ * - The address(0) is allocated all tokens on creation
+ * - Tokens will be transfered on upgrade
  *
  */
-contract MysteriumToken is UpgradeableToken, UpgradeAgent {
+contract MysteriumToken is UpgradeableToken, UpgradeAgent, Ownable {
 
   event UpdatedTokenInformation(string newName, string newSymbol);
 
@@ -31,7 +30,7 @@ contract MysteriumToken is UpgradeableToken, UpgradeAgent {
   address public originaryToken;
 
   modifier onlyOriginaryToken () {
-    if (msg.sender != address(originaryToken)) {
+    if (msg.sender != originaryToken) {
       throw;
     }
     _;
@@ -39,10 +38,8 @@ contract MysteriumToken is UpgradeableToken, UpgradeAgent {
 
   /**
    * Construct the token.
-   *
-   * This token must be created through a team multisig wallet, so that it is owned by that wallet.
    */
-  function MysteriumToken(string _name, string _symbol, uint _initialSupply, uint _decimals)
+  function MysteriumToken(string _name, string _symbol, uint _totalSupply, uint _decimals)
     UpgradeableToken(msg.sender) {
 
     owner = msg.sender;
@@ -50,28 +47,23 @@ contract MysteriumToken is UpgradeableToken, UpgradeAgent {
     name = _name;
     symbol = _symbol;
 
-    totalSupply = _initialSupply;
-    originalSupply = _initialSupply;
+    totalSupply = _totalSupply;
+    originalSupply = _totalSupply;
 
     decimals = _decimals;
 
     // address(0) has all the tokens
     balances[address(0)] = totalSupply;
 
-    if (totalSupply > 0) {
-      Minted(address(0), totalSupply);
+    if (totalSupply == 0) {
+      throw;
     }
+
+    Minted(address(0), totalSupply);
   }
 
   /**
-   * Allow upgrade agent functionality kick in only if the crowdsale was success.
-   */
-  function canUpgrade() public constant returns (bool) {
-    return released && super.canUpgrade();
-  }
-
-  /**
-   * Owner can set original token
+   * Owner can set originary token
    */
   function setOriginaryToken(address _originaryToken) onlyOwner {
     originaryToken = _originaryToken;
