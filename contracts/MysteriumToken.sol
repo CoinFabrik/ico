@@ -17,7 +17,7 @@ import "./UpgradeAgent.sol";
  * - The token can be capped (supply set in the constructor) or uncapped (crowdsale contract can mint new tokens)
  *
  */
-contract MysteriumToken is ReleasableToken, UpgradeableToken {
+contract MysteriumToken is UpgradeableToken, UpgradeAgent {
 
   event UpdatedTokenInformation(string newName, string newSymbol);
 
@@ -28,10 +28,10 @@ contract MysteriumToken is ReleasableToken, UpgradeableToken {
   uint public decimals;
 
   /** We only accept upgrades from this address */
-  UpgradeAgent public upgradeClient;
+  address public originaryToken;
 
-  modifier onlyUpgradeClient () {
-    if (msg.sender != address(upgradeClient)) {
+  modifier onlyOriginaryToken () {
+    if (msg.sender != address(originaryToken)) {
       throw;
     }
     _;
@@ -51,6 +51,7 @@ contract MysteriumToken is ReleasableToken, UpgradeableToken {
     symbol = _symbol;
 
     totalSupply = _initialSupply;
+    originalSupply = _initialSupply;
 
     decimals = _decimals;
 
@@ -63,42 +64,25 @@ contract MysteriumToken is ReleasableToken, UpgradeableToken {
   }
 
   /**
-   * When token is released to be transferable, enforce no new tokens can be created.
-   */
-  function releaseTokenTransfer() public onlyReleaseAgent {
-    super.releaseTokenTransfer();
-  }
-
-  /**
    * Allow upgrade agent functionality kick in only if the crowdsale was success.
    */
-  function canUpgrade() public constant returns(bool) {
+  function canUpgrade() public constant returns (bool) {
     return released && super.canUpgrade();
   }
 
   /**
-   * Owner can update token information here
+   * Owner can set original token
    */
-  function setTokenInformation(string _name, string _symbol) onlyOwner {
-    name = _name;
-    symbol = _symbol;
-
-    UpdatedTokenInformation(name, symbol);
-  }
-
-  /**
-   * Owner can set upgrade client
-   */
-  function setUpgradeClient(address _upgradeClient) onlyOwner {
-    upgradeClient = UpgradeAgent(_upgradeClient);
+  function setOriginaryToken(address _originaryToken) onlyOwner {
+    originaryToken = _originaryToken;
   }
 
   /**
    * Only upgrade client can upgrade tokens
    */
-  function upgradeTo(address _to, uint _value) onlyUpgradeClient {
+  function upgradeFrom(address _from, uint256 _value) public onlyOriginaryToken {
     balances[address(0)] = balances[address(0)].sub(_value);
-    balances[_to] = balances[_to].add(_value);
-    Transfer(address(0), _to, _value);
+    balances[_from] = balances[_from].add(_value);
+    Transfer(address(0), _from, _value);
   }
 }

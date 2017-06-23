@@ -16,7 +16,7 @@ var START_DATE = new Date('2017-06-23').getTime()/1000;
 var END_DATE = new Date('2017-06-24').getTime()/1000;
 var MINIMUM_FUNDING_GOAL = 100;
 var WEI_CAP = 1000;
-var BONUS_BASE_POINTS = 300000; // equivalent to 30%
+var BONUS_BASE_POINTS = 0; // equivalent to 30%
 
 var wallet = "0xb8873fc3e5372cca6cd1e20cfeb77a2b322d59b5";
 
