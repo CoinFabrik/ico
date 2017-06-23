@@ -58,7 +58,7 @@ module.exports = async function(deployer) {
         // TODO: change to use client's MultiSigWallet
         let MW_prom = deployer.deploy(MultiSigWallet, [0x4cdabc27b48893058aa1675683af3485e4409eff], 1);
         // TODO: set proper owner on DynamicCeiling
-        let DC_prom = deployer.deploy(DynamicCeiling, 0x4cdabc27b48893058aa1675683af3485e4409eff);
+        let DC_prom = deployer.deploy(DynamicCeiling, 0x52f96788017f9185a67a86c3a270d28e0fccd751);
         await Promise.all([CT_prom, FP_prom, MW_prom, DC_prom]);
         
         await deployer.deploy(Crowdsale, CrowdsaleToken.address, FlatPricing.address, DynamicCeiling.address, MultiSigWallet.address, START_DATE,  END_DATE,  MINIMUM_FUNDING_GOAL);
