@@ -7,6 +7,7 @@ const DynamicCeiling = artifacts.require('./DynamicCeiling.sol');
 const Crowdsale = artifacts.require('./Crowdsale.sol');
 
 const setHiddenCurves = require('./helpers/hiddenCurves.js').setHiddenCurves;
+const assertFail = require('./helpers/assertFail');
 
 contract('Crowdsale', function(accounts) {
     const TOKEN_NAME = 'TokenI';
@@ -54,10 +55,10 @@ contract('Crowdsale', function(accounts) {
         await crowdsaleToken.setMintAgent(crowdsale.address, true);
         await crowdsaleToken.setMintAgent(bonusFinalizeAgent.address, true);
         await crowdsaleToken.setReleaseAgent(bonusFinalizeAgent.address);
-        await crowdsaleToken.transferOwnership(multiSigWallet.address);
+        // await crowdsaleToken.transferOwnership(multiSigWallet.address);
     
         await crowdsale.setFinalizeAgent(bonusFinalizeAgent.address);
-        await crowdsale.transferOwnership(multiSigWallet.address);
+        // await crowdsale.transferOwnership(multiSigWallet.address);
     });
 
     it('Checks contract\'s health', async function() {
@@ -112,6 +113,19 @@ contract('Crowdsale', function(accounts) {
 
         const balanceContributionWallet = await web3.eth.getBalance(multiSigWallet.address);
         assert.equal(web3.fromWei(balanceContributionWallet), cur);
+    });
+
+    it('Pauses and resumes the contribution', async function() {
+        await crowdsale.halt();
+        await assertFail(async function() {
+            await crowdsale.buy.sendTransaction({value: web3.toWei(1), gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
+        });
+        await crowdsale.unhalt();
+
+        const collectedBefore = await crowdsale.weiRaised();
+        await crowdsale.buy.sendTransaction({value: web3.toWei(1), gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
+        const collectedAfter = await crowdsale.weiRaised();
+        assert.isBelow(collectedBefore, collectedAfter);
     });
 
 });
