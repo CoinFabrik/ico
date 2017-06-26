@@ -19,11 +19,7 @@ const START_DATE = 1498867200;
 const END_DATE = 1500000000;
 const MINIMUM_FUNDING_GOAL = 2000;
 const BONUS_BASE_POINTS = 300000; // equivalent to 30%
-const CURVES = [
-    [web3.toWei(1000), 30, 10**12],
-    [web3.toWei(21000), 30, 10**12],
-    [web3.toWei(61000), 30, 10**12],
-];
+const CURVES = require('../config/conf.js').CURVES;
 const NUM_HIDDEN_CURVES = 7;
 
 const setHiddenCurves = async function(dynamicCeiling, curves, numHiddenCurves) {
@@ -77,16 +73,16 @@ module.exports = function(deployer) {
             await tokenInstance.setMintAgent(BonusFinalizeAgent.address, true);
             console.log('Setting BonusFinalizeAgent as release agent of CrowdsaleToken...');
             await tokenInstance.setReleaseAgent(BonusFinalizeAgent.address);
-            console.log('Transfering ownership of CrowdsaleToken to MultiSigWallet...');
-            tokenInstance.transferOwnership(MultiSigWallet.address);
+            // console.log('Transfering ownership of CrowdsaleToken to MultiSigWallet...');
+            // tokenInstance.transferOwnership(MultiSigWallet.address);
         });
         
         let C_prom = Crowdsale.deployed()
         .then(async function(crowdsaleInstance) {
             console.log('Setting BonusFinalizeAgent as finalize agent of Crowdsale...');
             await crowdsaleInstance.setFinalizeAgent(BonusFinalizeAgent.address);
-            console.log('Transfering ownership of Crowdsale contract to MultiSigWallet...');
-            crowdsaleInstance.transferOwnership(MultiSigWallet.address);
+            // console.log('Transfering ownership of Crowdsale contract to MultiSigWallet...');
+            // crowdsaleInstance.transferOwnership(MultiSigWallet.address);
         });
 
         await Promise.all([ DC_prom, CT_prom, C_prom ]);

@@ -6,62 +6,36 @@ const CrowdsaleToken = artifacts.require('./CrowdsaleToken.sol');
 const DynamicCeiling = artifacts.require('./DynamicCeiling.sol');
 const Crowdsale = artifacts.require('./Crowdsale.sol');
 
+const CURVES = require('../config/conf.js').CURVES;
+
 const setHiddenCurves = require('./helpers/hiddenCurves.js').setHiddenCurves;
 const assertFail = require('./helpers/assertFail');
 
-contract('Crowdsale', function(accounts) {
-    const TOKEN_NAME = 'TokenI';
-    const TOKEN_SYMBOL = 'TI';
-    const INITIAL_SUPPLY = 1000;
-    const DECIMALS = 2;
-    const MINTABLE = true;
-    const PRICE = 500;
-    const START_DATE = 1478867200;
-    const END_DATE = 1500000000;
-    const MINIMUM_FUNDING_GOAL = 2000;
-    const BONUS_BASE_POINTS = 300000; // equivalent to 30%
-    const CURVES = [
-        [web3.toWei(3), 30, 10**12],
-        [web3.toWei(8), 30, 10**12],
-        [web3.toWei(15), 30, 10**12],
-    ];
-    const NUM_HIDDEN_CURVES = 7;
+contract('Crowdsale', async function(accounts) {
+    let id_time = 1;
+    // Can be made async with sendAsync()
+    function increaseTime(delta_seconds) {
+        web3.currentProvider.send({ "jsonrpc": "2.0", method: "evm_increaseTime", "id": id_time, "params": [ delta_seconds ] });
+        id_time++;
+    }
     const EXAMPLE_ADDRESS_1 = accounts[1];
 
     const GAS = 300000;
     const GAS_PRICE = 20000000000;
 
-    let crowdsaleToken;
-    let flatPricing;
-    let multiSigWallet;
-    let dynamicCeiling;
-    let crowdsale;
-    let bonusFinalizeAgent;
+    let crowdsaleToken = await CrowdsaleToken.deployed();
+    let flatPricing = await FlatPricing.deployed();
+    let multiSigWallet = await MultiSigWallet.deployed();
+    let dynamicCeiling = await DynamicCeiling.deployed();
+    let crowdsale = await Crowdsale.deployed();
+    let bonusFinalizeAgent = await BonusFinalizeAgent.deployed();
 
     let cur;
     let lim;
     let divs = 30;
 
-    it('Deploys all the contracts', async function() {
-        crowdsaleToken = await CrowdsaleToken.new(TOKEN_NAME, TOKEN_SYMBOL, INITIAL_SUPPLY, DECIMALS, MINTABLE);
-        flatPricing = await FlatPricing.new(PRICE);
-        multiSigWallet = await MultiSigWallet.new([0x4cdabc27b48893058aa1675683af3485e4409eff], 1);
-        dynamicCeiling = await DynamicCeiling.new();
-        crowdsale = await Crowdsale.new(crowdsaleToken.address, flatPricing.address, dynamicCeiling.address, multiSigWallet.address, START_DATE,  END_DATE,  MINIMUM_FUNDING_GOAL);
-        bonusFinalizeAgent = await BonusFinalizeAgent.new(crowdsaleToken.address, crowdsale.address, BONUS_BASE_POINTS, multiSigWallet.address);
-
-        await setHiddenCurves(dynamicCeiling, CURVES);
-
-        await crowdsaleToken.setMintAgent(crowdsale.address, true);
-        await crowdsaleToken.setMintAgent(bonusFinalizeAgent.address, true);
-        await crowdsaleToken.setReleaseAgent(bonusFinalizeAgent.address);
-        // await crowdsaleToken.transferOwnership(multiSigWallet.address);
-    
-        await crowdsale.setFinalizeAgent(bonusFinalizeAgent.address);
-        // await crowdsale.transferOwnership(multiSigWallet.address);
-    });
-
     it('Checks contract\'s health', async function() {
+        await crowdsale;
         assert(crowdsale.isFinalizerSane() && crowdsale.isPricingSane() && crowdsale.isCeilingSane());
     });
 

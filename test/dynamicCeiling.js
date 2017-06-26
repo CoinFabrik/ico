@@ -1,40 +1,30 @@
 const DynamicCeiling = artifacts.require("DynamicCeiling");
 
 const setHiddenCurves = require("./helpers/hiddenCurves.js").setHiddenCurves;
+const curves = require('../config/conf.js').CURVES;
 
 contract("DynamicCeiling", function(accounts) {
-    let dynamicCeiling;
+    let dynamicCeiling = DynamicCeiling.deployed();
 
-    const curves = [
-        [web3.toWei(1000), 30, 10**12],
-        [web3.toWei(21000), 30, 10**12],
-        [web3.toWei(61000), 30, 10**12],
-    ];
+    // Curves are currently set as they are deployed in every network
+    // it("Checks that toCollect is 0 before curves are set", async function() {
+    //     assert.equal(await dynamicCeiling.toCollect.call(0), 0);
+    //     assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(10)), 0);
+    //     assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(15)), 0);
+    //     assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(20)), 0);
+    //     assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(30)), 0);
+    //     assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(55)), 0);
+    //     assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(676)), 0);
+    //     assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(5555)), 0);
+    //     assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(10**8)), 0);
 
-    it("Deploys dynamicCeiling", async function() {
-        dynamicCeiling = await DynamicCeiling.new();
+    //     assert.equal(await dynamicCeiling.currentIndex(), 0);
+    // });
 
-        assert.equal(await dynamicCeiling.currentIndex(), 0);
-    });
-
-    it("Checks that toCollect is 0 before curves are set", async function() {
-        assert.equal(await dynamicCeiling.toCollect.call(0), 0);
-        assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(10)), 0);
-        assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(15)), 0);
-        assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(20)), 0);
-        assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(30)), 0);
-        assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(55)), 0);
-        assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(676)), 0);
-        assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(5555)), 0);
-        assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(10**8)), 0);
-
-        assert.equal(await dynamicCeiling.currentIndex(), 0);
-    });
-
-    it("Sets the curves", async function() {
-        await setHiddenCurves(dynamicCeiling, curves);
-        assert.equal(await dynamicCeiling.nCurves(), 10);
-    });
+    // it("Sets the curves", async function() {
+    //     await setHiddenCurves(dynamicCeiling, curves);
+    //     assert.equal(await dynamicCeiling.nCurves(), 10);
+    // });
 
     it("Checks that toCollect is 0 before curves are revealed", async function() {
         assert.equal(await dynamicCeiling.toCollect.call('0'), '0');
