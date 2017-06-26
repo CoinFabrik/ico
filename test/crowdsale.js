@@ -6,9 +6,9 @@ const CrowdsaleToken = artifacts.require('./CrowdsaleToken.sol');
 const DynamicCeiling = artifacts.require('./DynamicCeiling.sol');
 const Crowdsale = artifacts.require('./Crowdsale.sol');
 
-const setHiddenCurves = require("./helpers/hiddenCurves.js").setHiddenCurves;
+const setHiddenCurves = require('./helpers/hiddenCurves.js').setHiddenCurves;
 
-contract("Crowdsale", function(accounts) {
+contract('Crowdsale', function(accounts) {
     const TOKEN_NAME = 'TokenI';
     const TOKEN_SYMBOL = 'TI';
     const INITIAL_SUPPLY = 1000;
@@ -24,8 +24,11 @@ contract("Crowdsale", function(accounts) {
         [web3.toWei(8), 30, 10**12],
         [web3.toWei(15), 30, 10**12],
     ];
-    const NHIDDENCURVES = 7;
+    const NUM_HIDDEN_CURVES = 7;
     const EXAMPLE_ADDRESS_1 = accounts[1];
+
+    const GAS = 300000;
+    const GAS_PRICE = 20000000000;
 
     let crowdsaleToken;
     let flatPricing;
@@ -38,7 +41,7 @@ contract("Crowdsale", function(accounts) {
     let lim;
     let divs = 30;
 
-    it("Deploys all contracts", async function() {
+    it('Deploys all the contracts', async function() {
         crowdsaleToken = await CrowdsaleToken.new(TOKEN_NAME, TOKEN_SYMBOL, INITIAL_SUPPLY, DECIMALS, MINTABLE);
         flatPricing = await FlatPricing.new(PRICE);
         multiSigWallet = await MultiSigWallet.new([0x4cdabc27b48893058aa1675683af3485e4409eff], 1);
@@ -57,21 +60,21 @@ contract("Crowdsale", function(accounts) {
         await crowdsale.transferOwnership(multiSigWallet.address);
     });
 
-    it("Checks contract's health", async function() {
+    it('Checks contract\'s health', async function() {
         assert(crowdsale.isFinalizerSane() && crowdsale.isPricingSane() && crowdsale.isCeilingSane());
     });
 
-    it("Checks that nobody can buy before the sale starts", async function() {
+    it('Checks that nobody can buy before the sale starts', async function() {
         // TODO changing testrpc time
     });
 
-    it("Reveals a curve, moves time to start of the ICO, and does the first buy", async function() {
+    it('Reveals a curve, moves time to start of the ICO, and does the first buy', async function() {
         await dynamicCeiling.revealCurve(
             CURVES[0][0],
             CURVES[0][1],
             CURVES[0][2],
             false,
-            web3.sha3("pwd0"));
+            web3.sha3('pwd0'));
 
         // TODO: move time (right now START_DATE is a past date)
 
@@ -80,7 +83,7 @@ contract("Crowdsale", function(accounts) {
 
         let etherToSend = 1;
 
-        await crowdsale.buy.sendTransaction({value: web3.toWei(etherToSend, 'ether'), gas: 300000, gasPrice: "20000000000", from: EXAMPLE_ADDRESS_1});
+        await crowdsale.buy.sendTransaction({value: web3.toWei(etherToSend, 'ether'), gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
 
         const b = Math.min(etherToSend, ((lim - cur) / divs));
         cur += b;
@@ -90,18 +93,19 @@ contract("Crowdsale", function(accounts) {
         assert.equal(web3.fromWei(balance, 'ether').toNumber(), (b * (10 ** DECIMALS)) / PRICE);
     });
 
-    it("Returns the remaining of transactions", async function() {
+    it('Returns the remaining of a transaction', async function() {
         const initialBalance = await web3.eth.getBalance(EXAMPLE_ADDRESS_1);
         let etherToSend = 5;
-        await crowdsale.buy.sendTransaction({value: web3.toWei(etherToSend), gas: 300000, gasPrice: "20000000000"});
+        await crowdsale.buy.sendTransaction({value: web3.toWei(etherToSend), gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
         const finalBalance = await web3.eth.getBalance(EXAMPLE_ADDRESS_1);
 
         const b = Math.min(etherToSend, ((lim - cur) / divs));
         cur += b;
 
-        /*const spent = web3.fromWei(initialBalance.sub(finalBalance)).toNumber();
+        const spent = web3.fromWei(initialBalance.sub(finalBalance)).toNumber();
         assert.isAbove(spent, b);
-        assert.isBelow(spent, b + 0.02);*/
+        // TODO: find a better approximation
+        assert.isBelow(spent, b + 0.006);
 
         const totalCollected = await crowdsale.weiRaised();
         assert.equal(web3.fromWei(totalCollected), cur);
