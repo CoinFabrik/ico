@@ -144,7 +144,7 @@ contract("DynamicCeiling test 1", function(accounts) {
         assert.equal((await dynamicCeiling.toCollect.call(curves[2][0])).toFixed(), '0');
     });
 
-}
+});
 
 contract("DynamicCeiling test 2", function(accounts) {
 
