@@ -3,7 +3,7 @@ const DynamicCeiling = artifacts.require("DynamicCeiling");
 const setHiddenCurves = require("./helpers/hiddenCurves.js").setHiddenCurves;
 const curves = require('../config/conf.js').CURVES;
 
-contract("DynamicCeiling", function(accounts) {
+contract("DynamicCeiling test 1", function(accounts) {
     let dynamicCeiling = DynamicCeiling.deployed();
 
     // Curves are currently set as they are deployed in every network
@@ -144,17 +144,15 @@ contract("DynamicCeiling", function(accounts) {
         assert.equal((await dynamicCeiling.toCollect.call(curves[2][0])).toFixed(), '0');
     });
 
+}
 
-    it("Deploys dynamicCeiling", async function() {
-        dynamicCeiling = await DynamicCeiling.new(accounts[0], accounts[0]);
+contract("DynamicCeiling test 2", function(accounts) {
 
-        assert.equal(await dynamicCeiling.currentIndex(), 0);
-    });
-
-    it("Sets the curves", async function() {
-        await setHiddenCurves(dynamicCeiling, curves);
-        assert.equal(await dynamicCeiling.nCurves(), 10);
-    });
+    // Curves are currently set during deployment
+    // it("Sets the curves", async function() {
+    //     await setHiddenCurves(dynamicCeiling, curves);
+    //     assert.equal(await dynamicCeiling.nCurves(), 10);
+    // });
 
     it("Reveals multiple curves", async function() {
         await dynamicCeiling.revealMulti(
