@@ -11,8 +11,8 @@
 - `truffle compile`
 - `truffle migrate`
 - `truffle test`
-- `npm run launch_testrpc`
-- `npm run launch_ropsten`
-- `npm run attach_ropsten`
+- `npm run testrpc`
+- `npm run ropsten`
+- `npm run ropsten_attach`
 
-In Truffle's commands you can specify the network to use using `--network`. Options are: `testrpc` and `ropsten`.
+In Truffle's commands you can specify the network to use with `--network`. Options are: `testrpc` and `ropsten`.
