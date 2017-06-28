@@ -9,34 +9,22 @@ const DynamicCeiling = artifacts.require('./DynamicCeiling.sol');
 const Crowdsale = artifacts.require('./Crowdsale.sol');
 
 // TODO: adapt to client needs
-const TOKEN_NAME = 'TokenI';
-const TOKEN_SYMBOL = 'TI';
-const INITIAL_SUPPLY = 1000;
-const DECIMALS = 2;
-const MINTABLE = true;
-const PRICE = 500;
-const START_DATE = 1498867200;
-const END_DATE = 1500000000;
-const MINIMUM_FUNDING_GOAL = 2000;
-const BONUS_BASE_POINTS = 300000; // equivalent to 30%
-const CURVES = require('../config/conf.js').CURVES;
-const NUM_HIDDEN_CURVES = 7;
+const Config = require('../config/conf.js');
 
-const setHiddenCurves = async function(dynamicCeiling, curves, numHiddenCurves) {
-    let hashes = [];
-    let i = 0;
-    for (let c of curves) {
-        let salt = await RandomBytes(32);
-        let h = await dynamicCeiling.calculateHash(c[0], c[1], c[2], i === curves.length - 1, salt);
-        hashes.push(h);
-        i += 1;
-    }
-    for (; i < numHiddenCurves; i += 1) {
-        let salt = RandomBytes(32);
-        hashes.push(web3.sha3(salt));
-    }
-    await dynamicCeiling.setHiddenCurves(hashes);
-};
+const TOKEN_NAME = Config.TOKEN_NAME;
+const TOKEN_SYMBOL = Config.TOKEN_SYMBOL;
+const INITIAL_SUPPLY = Config.INITIAL_SUPPLY;
+const DECIMALS = Config.DECIMALS;
+const MINTABLE = Config.MINTABLE;
+const PRICE = Config.PRICE;
+const START_DATE = Config.START_DATE;
+const END_DATE = Config.END_DATE;
+const MINIMUM_FUNDING_GOAL = Config.MINIMUM_FUNDING_GOAL;
+const BONUS_BASE_POINTS = Config.BONUS_BASE_POINTS;
+const CURVES = Config.CURVES;
+const NUM_HIDDEN_CURVES = Config.NUM_HIDDEN_CURVES;
+
+const setHiddenCurves = require('../helpers/hiddenCurves.js').setHiddenCurves;
 
 module.exports = function(deployer) {
     deployer.deploy(SafeMath);

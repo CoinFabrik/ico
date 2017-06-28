@@ -1,3 +1,4 @@
+// TODO: generalize into adding phony extra hashes
 exports.setHiddenCurves = async function(dynamicCeiling, curves) {
     const hashes = [];
     let i = 0;

@@ -8,10 +8,10 @@ const Crowdsale = artifacts.require('./Crowdsale.sol');
 
 const CURVES = require('../config/conf.js').CURVES;
 
-const setHiddenCurves = require('./helpers/hiddenCurves.js').setHiddenCurves;
+const setHiddenCurves = require('../helpers/hiddenCurves.js').setHiddenCurves;
 const assertFail = require('./helpers/assertFail');
 
-contract('Crowdsale', async function(accounts) {
+contract('Crowdsale', function(accounts) {
     let id_time = 1;
     // Can be made async with sendAsync()
     function increaseTime(delta_seconds) {
@@ -23,27 +23,32 @@ contract('Crowdsale', async function(accounts) {
     const GAS = 300000;
     const GAS_PRICE = 20000000000;
 
-    let crowdsaleToken = await CrowdsaleToken.deployed();
-    let flatPricing = await FlatPricing.deployed();
-    let multiSigWallet = await MultiSigWallet.deployed();
-    let dynamicCeiling = await DynamicCeiling.deployed();
-    let crowdsale = await Crowdsale.deployed();
-    let bonusFinalizeAgent = await BonusFinalizeAgent.deployed();
+    let crowdsaleToken = CrowdsaleToken.deployed().then(function(instance) {crowdsaleToken = instance});
+    let flatPricing = FlatPricing.deployed().then(function(instance) {flatPricing = instance});
+    let multiSigWallet = MultiSigWallet.deployed().then(function(instance) {multiSigWallet = instance});
+    let dynamicCeiling = DynamicCeiling.deployed().then(function(instance) {dynamicCeiling = instance});
+    let crowdsale = Crowdsale.deployed().then(function(instance) {crowdsale = instance});
+    let bonusFinalizeAgent = BonusFinalizeAgent.deployed().then(function(instance) {bonusFinalizeAgent = instance});
+    let init_prom = Promise.all([ crowdsaleToken, flatPricing, multiSigWallet, dynamicCeiling, crowdsale, bonusFinalizeAgent ]);
 
     let cur;
     let lim;
     let divs = 30;
 
-    it('Checks contract\'s health', async function() {
-        await crowdsale;
-        assert(crowdsale.isFinalizerSane() && crowdsale.isPricingSane() && crowdsale.isCeilingSane());
+    //TODO: add error logging?
+    const it_synched = function(message, test_f) {
+        it(message, function() { return init_prom.then(test_f); });
+    }
+
+    it_synched('Checks contract\'s health', async function() {
+        assert(await crowdsale.isFinalizerSane() && await crowdsale.isPricingSane() && await crowdsale.isCeilingSane());
     });
 
-    it('Checks that nobody can buy before the sale starts', async function() {
+    it_synched('Checks that nobody can buy before the sale starts', async function() {
         // TODO changing testrpc time
     });
 
-    it('Reveals a curve, moves time to start of the ICO, and does the first buy', async function() {
+    it_synched('Reveals a curve, moves time to start of the ICO, and does the first buy', async function() {
         await dynamicCeiling.revealCurve(
             CURVES[0][0],
             CURVES[0][1],
@@ -68,7 +73,7 @@ contract('Crowdsale', async function(accounts) {
         assert.equal(web3.fromWei(balance, 'ether').toNumber(), (b * (10 ** DECIMALS)) / PRICE);
     });
 
-    it('Returns the remaining of a transaction', async function() {
+    it_synched('Returns the remaining of a transaction', async function() {
         const initialBalance = await web3.eth.getBalance(EXAMPLE_ADDRESS_1);
         let etherToSend = 5;
         await crowdsale.buy.sendTransaction({value: web3.toWei(etherToSend), gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
@@ -89,7 +94,7 @@ contract('Crowdsale', async function(accounts) {
         assert.equal(web3.fromWei(balanceContributionWallet), cur);
     });
 
-    it('Pauses and resumes the contribution', async function() {
+    it_synched('Pauses and resumes the contribution', async function() {
         await crowdsale.halt();
         await assertFail(async function() {
             await crowdsale.buy.sendTransaction({value: web3.toWei(1), gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});

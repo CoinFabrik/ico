@@ -1,10 +1,17 @@
 const DynamicCeiling = artifacts.require("DynamicCeiling");
 
-const setHiddenCurves = require("./helpers/hiddenCurves.js").setHiddenCurves;
+const setHiddenCurves = require("../helpers/hiddenCurves.js").setHiddenCurves;
 const curves = require('../config/conf.js').CURVES;
 
 contract("DynamicCeiling test 1", function(accounts) {
-    let dynamicCeiling = DynamicCeiling.deployed();
+    
+    let dynamicCeiling;
+    let init_prom = DynamicCeiling.deployed().then(function(instance) { dynamicCeiling = instance; });
+
+    //TODO: add error logging?
+    const it_synched = function(message, test_f) {
+        it(message, function() { return init_prom.then(test_f); });
+    }
 
     // Curves are currently set as they are deployed in every network
     // it("Checks that toCollect is 0 before curves are set", async function() {
@@ -26,8 +33,10 @@ contract("DynamicCeiling test 1", function(accounts) {
     //     assert.equal(await dynamicCeiling.nCurves(), 10);
     // });
 
-    it("Checks that toCollect is 0 before curves are revealed", async function() {
-        assert.equal(await dynamicCeiling.toCollect.call('0'), '0');
+
+
+    it_synched("Checks that toCollect is 0 before curves are revealed", async function() {
+        assert.equal(await dynamicCeiling.toCollect.call(0), 0);
         assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(10)), 0);
         assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(15)), 0);
         assert.equal(await dynamicCeiling.toCollect.call(web3.toWei(20)), 0);
@@ -40,7 +49,7 @@ contract("DynamicCeiling test 1", function(accounts) {
         assert.equal(await dynamicCeiling.currentIndex(), 0);
     });
 
-    it("Reveals 1st curve", async function() {
+    it_synched("Reveals 1st curve", async function() {
         await dynamicCeiling.revealCurve(
             curves[0][0],
             curves[0][1],
@@ -53,7 +62,7 @@ contract("DynamicCeiling test 1", function(accounts) {
         assert.equal(await dynamicCeiling.allRevealed(), false);
     });
 
-    it("Checks toCollect after 1st curve is revealed", async function() {
+    it_synched("Checks toCollect after 1st curve is revealed", async function() {
         assert.equal((await dynamicCeiling.currentIndex()).toFixed(), '0');
         assert.equal((await dynamicCeiling.toCollect.call(0)).toFixed(), '33333333333333333333');
 
@@ -74,7 +83,7 @@ contract("DynamicCeiling test 1", function(accounts) {
         assert.equal((await dynamicCeiling.toCollect.call(curves[0][0])).toFixed(), '0');
     });
 
-    it("Reveals 2nd curve", async function() {
+    it_synched("Reveals 2nd curve", async function() {
         await dynamicCeiling.revealCurve(
             curves[1][0],
             curves[1][1],
@@ -87,7 +96,7 @@ contract("DynamicCeiling test 1", function(accounts) {
         assert.equal(await dynamicCeiling.allRevealed(), false);
     });
 
-    it("Checks toCollect after 2nd curve is revealed", async function() {
+    it_synched("Checks toCollect after 2nd curve is revealed", async function() {
         await dynamicCeiling.toCollect(curves[0][0]);
         assert.equal((await dynamicCeiling.currentIndex()).toFixed(), '1');
         assert.equal((await dynamicCeiling.toCollect.call(curves[0][0])).toFixed(), '666666666666666666666')
@@ -109,7 +118,7 @@ contract("DynamicCeiling test 1", function(accounts) {
         assert.equal((await dynamicCeiling.toCollect.call(curves[1][0])).toFixed(), '0');
     });
 
-    it("Reveals last curve", async function() {
+    it_synched("Reveals last curve", async function() {
         await dynamicCeiling.revealCurve(
             curves[2][0],
             curves[2][1],
@@ -122,7 +131,7 @@ contract("DynamicCeiling test 1", function(accounts) {
         assert.equal(await dynamicCeiling.allRevealed(), true);
     });
 
-    it("Checks toCollect after 3rd curve is revealed", async function() {
+    it_synched("Checks toCollect after 3rd curve is revealed", async function() {
         await dynamicCeiling.toCollect(curves[1][0]);
         assert.equal((await dynamicCeiling.currentIndex()).toFixed(), '2');
         assert.equal((await dynamicCeiling.toCollect.call(curves[1][0])).toFixed(), '1333333333333333333333');
@@ -143,49 +152,48 @@ contract("DynamicCeiling test 1", function(accounts) {
         assert.equal((await dynamicCeiling.currentIndex()).toFixed(), '2');
         assert.equal((await dynamicCeiling.toCollect.call(curves[2][0])).toFixed(), '0');
     });
-
 });
 
-contract("DynamicCeiling test 2", function(accounts) {
+// contract("DynamicCeiling test 2", function(accounts) {
 
-    // Curves are currently set during deployment
-    // it("Sets the curves", async function() {
-    //     await setHiddenCurves(dynamicCeiling, curves);
-    //     assert.equal(await dynamicCeiling.nCurves(), 10);
-    // });
+//     // Curves are currently set during deployment
+//     // it("Sets the curves", async function() {
+//     //     await setHiddenCurves(dynamicCeiling, curves);
+//     //     assert.equal(await dynamicCeiling.nCurves(), 10);
+//     // });
 
-    it("Reveals multiple curves", async function() {
-        await dynamicCeiling.revealMulti(
-            [
-                curves[0][0],
-                curves[1][0],
-                curves[2][0],
-            ],
-            [
-                curves[0][1],
-                curves[1][1],
-                curves[2][1],
-            ],
-            [
-                curves[0][2],
-                curves[1][2],
-                curves[2][2],
-            ],
-            [
-                false,
-                false,
-                true,
-            ],
-            [
-                web3.sha3("pwd0"),
-                web3.sha3("pwd1"),
-                web3.sha3("pwd2"),
-            ]
-        );
+//     it("Reveals multiple curves", async function() {
+//         await dynamicCeiling.revealMulti(
+//             [
+//                 curves[0][0],
+//                 curves[1][0],
+//                 curves[2][0],
+//             ],
+//             [
+//                 curves[0][1],
+//                 curves[1][1],
+//                 curves[2][1],
+//             ],
+//             [
+//                 curves[0][2],
+//                 curves[1][2],
+//                 curves[2][2],
+//             ],
+//             [
+//                 false,
+//                 false,
+//                 true,
+//             ],
+//             [
+//                 web3.sha3("pwd0"),
+//                 web3.sha3("pwd1"),
+//                 web3.sha3("pwd2"),
+//             ]
+//         );
 
-        assert.equal(await dynamicCeiling.currentIndex(), 0);
-        assert.equal(await dynamicCeiling.revealedCurves(), 3);
-        assert.equal(await dynamicCeiling.allRevealed(), true);
-    });
+//         assert.equal(await dynamicCeiling.currentIndex(), 0);
+//         assert.equal(await dynamicCeiling.revealedCurves(), 3);
+//         assert.equal(await dynamicCeiling.allRevealed(), true);
+//     });
 
-});
+// });
