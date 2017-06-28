@@ -23,13 +23,19 @@ contract('Crowdsale', function(accounts) {
     const GAS = 300000;
     const GAS_PRICE = 20000000000;
 
-    let crowdsaleToken = CrowdsaleToken.deployed().then(function(instance) {crowdsaleToken = instance});
-    let flatPricing = FlatPricing.deployed().then(function(instance) {flatPricing = instance});
-    let multiSigWallet = MultiSigWallet.deployed().then(function(instance) {multiSigWallet = instance});
-    let dynamicCeiling = DynamicCeiling.deployed().then(function(instance) {dynamicCeiling = instance});
-    let crowdsale = Crowdsale.deployed().then(function(instance) {crowdsale = instance});
-    let bonusFinalizeAgent = BonusFinalizeAgent.deployed().then(function(instance) {bonusFinalizeAgent = instance});
-    let init_prom = Promise.all([ crowdsaleToken, flatPricing, multiSigWallet, dynamicCeiling, crowdsale, bonusFinalizeAgent ]);
+    let crowdsaleToken;
+    let flatPricing;
+    let multiSigWallet;
+    let dynamicCeiling;
+    let crowdsale;
+    let bonusFinalizeAgent;
+    let init_prom = Promise.all([ CrowdsaleToken.deployed().then(function(instance) {crowdsaleToken = instance}),
+                                  FlatPricing.deployed().then(function(instance) {flatPricing = instance}),
+                                  MultiSigWallet.deployed().then(function(instance) {multiSigWallet = instance}),
+                                  DynamicCeiling.deployed().then(function(instance) {dynamicCeiling = instance}),
+                                  Crowdsale.deployed().then(function(instance) {crowdsale = instance}),
+                                  BonusFinalizeAgent.deployed().then(function(instance) {bonusFinalizeAgent = instance}) 
+                                ]);
 
     let cur;
     let lim;
