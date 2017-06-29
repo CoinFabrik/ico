@@ -1,5 +1,3 @@
-const RandomBytes = require('random-bytes');
-
 const SafeMath = artifacts.require('./SafeMath.sol');
 const MultiSigWallet = artifacts.require('./MultiSigWallet.sol');
 const FlatPricing = artifacts.require('./FlatPricing.sol');
@@ -7,19 +5,18 @@ const BonusFinalizeAgent = artifacts.require('./BonusFinalizeAgent.sol');
 const CrowdsaleToken = artifacts.require('./CrowdsaleToken.sol');
 const Crowdsale = artifacts.require('./Crowdsale.sol');
 
-// TODO: adapt to client needs
-const Config = require('../config/conf.js');
+const config = require('../config.js');
 
-const TOKEN_NAME = Config.TOKEN_NAME;
-const TOKEN_SYMBOL = Config.TOKEN_SYMBOL;
-const INITIAL_SUPPLY = Config.INITIAL_SUPPLY;
-const DECIMALS = Config.DECIMALS;
-const MINTABLE = Config.MINTABLE;
-const PRICE = Config.PRICE;
-const START_DATE = Config.START_DATE;
-const END_DATE = Config.END_DATE;
-const MINIMUM_FUNDING_GOAL = Config.MINIMUM_FUNDING_GOAL;
-const BONUS_BASE_POINTS = Config.BONUS_BASE_POINTS;
+const TOKEN_NAME = config.TOKEN_NAME;
+const TOKEN_SYMBOL = config.TOKEN_SYMBOL;
+const INITIAL_SUPPLY = config.INITIAL_SUPPLY;
+const DECIMALS = config.DECIMALS;
+const MINTABLE = config.MINTABLE;
+const PRICE = config.PRICE;
+const START_DATE = config.START_DATE;
+const END_DATE = config.END_DATE;
+const MINIMUM_FUNDING_GOAL = config.MINIMUM_FUNDING_GOAL;
+const BONUS_BASE_POINTS = config.BONUS_BASE_POINTS;
 
 module.exports = function(deployer) {
     deployer.deploy(SafeMath);
@@ -30,6 +27,7 @@ module.exports = function(deployer) {
 
     let CT_contract = [ CrowdsaleToken, TOKEN_NAME, TOKEN_SYMBOL, INITIAL_SUPPLY, DECIMALS, MINTABLE ];
     let FP_contract = [ FlatPricing, PRICE ];
+    // TODO: change to use client's MultiSigWallet
     let MW_contract = [ MultiSigWallet, [0x4cdabc27b48893058aa1675683af3485e4409eff], 1 ];
     
     return deployer.deploy([ CT_contract, FP_contract, MW_contract ])

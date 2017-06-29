@@ -1,3 +1,6 @@
+const config = require('../config.js');
+const assertFail = require('./helpers/assertFail');
+
 const SafeMath = artifacts.require('./SafeMath.sol');
 const MultiSigWallet = artifacts.require('./MultiSigWallet.sol');
 const FlatPricing = artifacts.require('./FlatPricing.sol');
@@ -5,10 +8,9 @@ const BonusFinalizeAgent = artifacts.require('./BonusFinalizeAgent.sol');
 const CrowdsaleToken = artifacts.require('./CrowdsaleToken.sol');
 const Crowdsale = artifacts.require('./Crowdsale.sol');
 
-const config = require('../config/conf.js');
-const assertFail = require('./helpers/assertFail');
 const DECIMALS = config.DECIMALS;
 const PRICE = config.PRICE;
+const START_DATE = config.START_DATE;
 
 contract('Crowdsale', function(accounts) {
     let id_time = 1;
@@ -17,9 +19,9 @@ contract('Crowdsale', function(accounts) {
         web3.currentProvider.send({ "jsonrpc": "2.0", method: "evm_increaseTime", "id": id_time, "params": [ delta_seconds ] });
         id_time++;
     }
+
     const EXAMPLE_ADDRESS_0 = accounts[0];
     const EXAMPLE_ADDRESS_1 = accounts[1];
-
     const GAS = 300000;
     const GAS_PRICE = 20000000000;
 
@@ -35,10 +37,10 @@ contract('Crowdsale', function(accounts) {
                                   BonusFinalizeAgent.deployed().then(function(instance) {bonusFinalizeAgent = instance}) 
                                 ]);
 
-    // current balance of EXAMPLE_ADDRESS_1
+    // Current amount of ether raised
     let cur = 0;
 
-    //TODO: add error logging?
+    // TODO: add error logging?
     const it_synched = function(message, test_f) {
         it(message, function() { return init_prom.then(test_f); });
     }
@@ -55,7 +57,7 @@ contract('Crowdsale', function(accounts) {
 
         // We move time forward if it's necessary
         // TODO: check whether we can go back in time
-        time_delta = config.START_DATE - ((Date.now() / 1000) | 0); //!! cast expression to int with OR 0
+        time_delta = START_DATE - ((Date.now() / 1000) | 0); //!! cast expression to int with OR 0
         if (time_delta > 0)
             increaseTime(time_delta);
 
