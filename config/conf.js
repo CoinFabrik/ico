@@ -13,10 +13,3 @@ exports.END_DATE = 1500000000;
 exports.MINIMUM_FUNDING_GOAL = 2000;
 exports.BONUS_BASE_POINTS = 300000; // equivalent to 30%
 
-
-exports.CURVES = [
-    [web3.toWei(3), 30, 10**12],
-    [web3.toWei(8), 30, 10**12],
-    [web3.toWei(15), 30, 10**12],
-];
-exports.NUM_HIDDEN_CURVES = 7;

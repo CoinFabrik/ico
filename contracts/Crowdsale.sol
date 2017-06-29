@@ -5,7 +5,6 @@ import "./FractionalERC20.sol";
 import "./PricingStrategy.sol";
 import "./FinalizeAgent.sol";
 import "./SafeMath.sol";
-import "./CeilingStrategy.sol";
 import "./MintableToken.sol";
 
 /**
@@ -33,9 +32,6 @@ contract Crowdsale is Haltable {
   /* How we are going to price our offering */
   PricingStrategy public pricingStrategy;
 
-  /* How are we going to limit our offering */
-  CeilingStrategy public ceilingStrategy;
-
   /* Post-success callback */
   FinalizeAgent public finalizeAgent;
 
@@ -44,6 +40,9 @@ contract Crowdsale is Haltable {
 
   /* if the funding goal is not reached, investors may withdraw their funds */
   uint public minimumFundingGoal;
+
+  /* the funding cannot exceed this cap; may be set later on during the crowdsale */
+  uint public fundingCap;
 
   /* the UNIX timestamp start date of the crowdsale */
   uint public startsAt;
@@ -120,7 +119,7 @@ contract Crowdsale is Haltable {
   // Crowdsale end time has been changed
   event EndsAtChanged(uint endsAt);
 
-  function Crowdsale(address _token, PricingStrategy _pricingStrategy, CeilingStrategy _ceilingStrategy, address _multisigWallet, uint _start, uint _end, uint _minimumFundingGoal) {
+  function Crowdsale(address _token, PricingStrategy _pricingStrategy, address _multisigWallet, uint _start, uint _end, uint _minimumFundingGoal) {
 
     token = FractionalERC20(_token);
 
@@ -128,9 +127,6 @@ contract Crowdsale is Haltable {
 
     require(_multisigWallet != 0);
     multisigWallet = _multisigWallet;
-
-    require(_ceilingStrategy.isCeilingStrategy());
-    ceilingStrategy = _ceilingStrategy;
 
 
     // Don't mess the dates
@@ -174,7 +170,7 @@ contract Crowdsale is Haltable {
       require(false);
     }
 
-    uint weiAmount = ceilingStrategy.weiAllowedToReceive(msg.value, weiRaised);
+    uint weiAmount = weiAllowedToReceive(msg.value, weiRaised);
     uint tokenAmount = pricingStrategy.calculatePrice(weiAmount, weiRaised, tokensSold, msg.sender, token.decimals());
     
     // Dust transaction if no tokens can be given
@@ -209,6 +205,18 @@ contract Crowdsale is Haltable {
 
   }
 
+  function weiAllowedToReceive(uint tentativeAmount, uint weiRaised) private returns (uint) {
+    if (fundingCap == 0) return tentativeAmount;
+    uint total = tentativeAmount.add(weiRaised);
+    if (total < fundingCap) return tentativeAmount;
+    else return fundingCap.sub(weiRaised);
+  }
+
+  function setFundingCap(uint newCap) public onlyOwner {
+    //TODO: set to the next multiple of a big number
+    fundingCap = newCap;
+  }
+
   /**
    * Preallocate tokens for the early investors.
    *
@@ -227,7 +235,7 @@ contract Crowdsale is Haltable {
   function preallocate(address receiver, uint fullTokens, uint weiPrice) public onlyOwner {
 
     uint tokenAmount = fullTokens * 10**token.decimals();
-    uint weiAmount = weiPrice * tokenAmount; // This can be also 0, we give out tokens for free
+    uint weiAmount = weiPrice * tokenAmount; // This can be also 0, in which case we give out tokens for free
 
     weiRaised = weiRaised.add(weiAmount);
     tokensSold = tokensSold.add(tokenAmount);
@@ -237,7 +245,7 @@ contract Crowdsale is Haltable {
 
     assignTokens(receiver, tokenAmount);
 
-    // Tell us invest was success
+    // Tell us that the investment was a success
     Invested(receiver, weiAmount, tokenAmount, 0);
   }
 
@@ -385,17 +393,6 @@ contract Crowdsale is Haltable {
   }
 
   /**
-   * Allow to (re)set ceiling strategy.
-   *
-   * Design choice: no state restrictions on the set, so that we can fix fat finger mistakes.
-   */
-  function setCeilingStrategy(CeilingStrategy _ceilingStrategy) onlyOwner {
-    require(_ceilingStrategy.isCeilingStrategy());
-
-    ceilingStrategy = _ceilingStrategy;
-  }
-
-  /**
    * Allow to change the team multisig address in the case of emergency.
    *
    * This allows to save a deployed crowdsale wallet in the case the crowdsale has not yet begun
@@ -452,11 +449,8 @@ contract Crowdsale is Haltable {
     return pricingStrategy.isSane(address(this));
   }
 
-  /**
-   * Check if the contract relationship looks good.
-   */
-  function isCeilingSane() public constant returns (bool sane) {
-    return ceilingStrategy.isSane(address(this));
+  function isCrowdsaleFull() private constant returns (bool full) {
+    return fundingCap > 0 && weiRaised >= fundingCap;
   }
 
   /**
@@ -470,7 +464,7 @@ contract Crowdsale is Haltable {
     else if (!isFinalizerSane()) return State.Preparing;
     else if (!isPricingSane()) return State.Preparing;
     else if (block.timestamp < startsAt) return State.PreFunding;
-    else if (block.timestamp <= endsAt && !ceilingStrategy.isCrowdsaleFull(weiRaised)) return State.Funding;
+    else if (block.timestamp <= endsAt && !isCrowdsaleFull()) return State.Funding;
     else if (isMinimumGoalReached()) return State.Success;
     else if (!isMinimumGoalReached() && weiRaised > 0 && loadedRefund >= weiRaised) return State.Refunding;
     else return State.Failure;
