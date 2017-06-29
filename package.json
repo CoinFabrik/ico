@@ -7,6 +7,6 @@
   "scripts": {
     "testrpc": "testrpc -p 20487 --account=\"0xb3a7675a3ca6976d0c29fd8eeb04e8c68c0ced322b96671b04c51d54162fff81,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF\" --account=\"0x0156f5d7ef74552352abbde8db173f69336d5623e7dd4a9dc7b524feb2d4826f,0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF\"",
     "ropsten": "geth --testnet --fast --bootnodes \"enode://20c9ad97c081d63397d7b685a412227a40e23c8bdc6688c6f37e97cfbc22d2b4d1db1510d8f61e6a8866ad7f0e17c02b14182d37ea7c3c8b9c2683aeb6b733a1@52.169.14.227:30303,enode://6ce05930c72abc632c58e2e4324f7c7ea478cec0ed4fa2528982cf34483094e9cbc9216e7aa349691242576d552a2a56aaeae426c5303ded677ce455ba1acd9d@13.84.180.240:30303\" --cache=512 --rpc --rpcaddr 192.168.0.149 --rpcapi \"eth,net,web3,miner,personal,admin\" console",
-  	"ropsten_attach": "geth attach http://192.168.0.149:8545"
+    "ropsten_attach": "geth attach http://192.168.0.149:8545"
   }
 }
