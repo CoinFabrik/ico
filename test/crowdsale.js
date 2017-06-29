@@ -111,4 +111,25 @@ contract('Crowdsale', function(accounts) {
         assert.isBelow(collectedBefore, collectedAfter);
     });
 
+    it_synched('Check transfers fail before tokens are released', async function() {
+        await assertFail(async function() {
+            await crowdsaleToken.transfer(EXAMPLE_ADDRESS_0, 1);
+        });
+    });
+
+    it_synched('Check finalization', async function() {
+        const initialBalance = await crowdsaleToken.balanceOf(EXAMPLE_ADDRESS_0);
+        assert(initialBalance, 0);
+        
+        /*let remToMin = crowdsale.minimumFundingGoal() - crowdsale.weiRaised();
+        await crowdsale.buy.sendTransaction({value: remToMin, gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
+        assert(crowdsale.isMinimumGoalReached());
+
+        await crowdsale.finalize();
+
+        let toTransfer = 1;
+        await crowdsaleToken.transfer(EXAMPLE_ADDRESS_0, toTransfer);
+        const finalBalance = await crowdsaleToken.balanceOf(EXAMPLE_ADDRESS_0);
+        /*assert(finalBalance, toTransfer);*/
+    });
 });
