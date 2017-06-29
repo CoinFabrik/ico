@@ -30,7 +30,7 @@ contract StandardToken is BasicToken, ERC20 {
    * @param _to address The address which you want to transfer to
    * @param _value uint the amout of tokens to be transfered
    */
-  function transferFrom(address _from, address _to, uint _value) onlyPayloadSize(3 * 32) returns (bool success) {
+  function transferFrom(address _from, address _to, uint _value) returns (bool success) {
     uint _allowance = allowed[_from][msg.sender];
 
     // Check is not needed because sub(_allowance, _value) will already throw if this condition is not met
@@ -79,7 +79,6 @@ contract StandardToken is BasicToken, ERC20 {
    *
    */
   function addApproval(address _spender, uint _addedValue)
-  onlyPayloadSize(2 * 32)
   returns (bool success) {
       uint oldValue = allowed[msg.sender][_spender];
       allowed[msg.sender][_spender] = oldValue.add(_addedValue);
@@ -93,7 +92,6 @@ contract StandardToken is BasicToken, ERC20 {
    * Works around https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
    */
   function subApproval(address _spender, uint _subtractedValue)
-  onlyPayloadSize(2 * 32)
   returns (bool success) {
 
       uint oldVal = allowed[msg.sender][_spender];
