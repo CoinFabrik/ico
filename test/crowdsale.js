@@ -1,5 +1,8 @@
+const fs = require('fs');
+
 const config = require('../config.js');
-const assertFail = require('./helpers/assertFail');
+const assertFail = require('./helpers/assertFail.js');
+var testrpc = require('./helpers/testrpc.json');
 
 const SafeMath = artifacts.require('./SafeMath.sol');
 const MultiSigWallet = artifacts.require('./MultiSigWallet.sol');
@@ -11,20 +14,12 @@ const Crowdsale = artifacts.require('./Crowdsale.sol');
 const DECIMALS = config.DECIMALS;
 const PRICE = config.PRICE;
 const START_DATE = config.START_DATE;
+const GAS = 300000;
+const GAS_PRICE = 20000000000;
 
 contract('Crowdsale', function(accounts) {
-    let id_time = 1;
-    // TODO: check whether we can go back in time
-    // Can be made async with sendAsync()
-    function increaseTime(delta_seconds) {
-        web3.currentProvider.send({ "jsonrpc": "2.0", method: "evm_increaseTime", "id": id_time, "params": [ delta_seconds ] });
-        id_time++;
-    }
-
     const EXAMPLE_ADDRESS_0 = accounts[0];
     const EXAMPLE_ADDRESS_1 = accounts[1];
-    const GAS = 300000;
-    const GAS_PRICE = 20000000000;
 
     let crowdsaleToken;
     let flatPricing;
@@ -41,6 +36,18 @@ contract('Crowdsale', function(accounts) {
     // Current amount of ether raised
     let cur = 0;
 
+    let id_time = 1;
+    // TODO: check whether we can go back in time
+    // Can be made async with sendAsync()
+    function increaseTime(delta_seconds) {
+        web3.currentProvider.send({ "jsonrpc": "2.0", method: "evm_increaseTime", "id": id_time, "params": [ delta_seconds ] });
+        id_time++;
+
+        testrpc.timeChanged = testrpc.timeChanged + delta_seconds;
+        fs.writeFileSync('./test/helpers/testrpc.json', JSON.stringify(testrpc, null, 2));
+        testrpc = require('./helpers/testrpc.json');
+    }
+
     // TODO: add error logging?
     const it_synched = function(message, test_f) {
         it(message, function() {
@@ -53,20 +60,20 @@ contract('Crowdsale', function(accounts) {
         assert(await crowdsale.isFinalizerSane() && await crowdsale.isPricingSane());
     });
 
-    it_synched('Checks that nobody can buy before the sale starts', async function() {
+    it_synched('Moves time to a day before the ICO and checks that nobody can buy', async function() {
         let actualTime = (Date.now() / 1000) | 0;
-        if (actualTime < START_DATE) {
-            await assertFail(async function() {
-                await crowdsale.buy.sendTransaction({value: web3.toWei(1), gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
-            });
-        }
+        var timeDelta = actualTime - START_DATE + (60 * 60 * 24) + testrpc.timeChanged;
+        timeDelta = timeDelta * (-1);
+        increaseTime(timeDelta);
+        await assertFail(async function() {
+            await crowdsale.buy.sendTransaction({value: web3.toWei(1), gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
+        });
     });
 
     it_synched('Moves time to start of the ICO, buys, and checks that tokens belong to new owner', async function() {
         // We move time forward if it's necessary
-        var timeDelta = START_DATE - ((Date.now() / 1000) | 0); //!! cast expression to int with OR 0
-        if (timeDelta > 0)
-            increaseTime(timeDelta);
+        var timeDelta = START_DATE - (((Date.now() / 1000) | 0) + testrpc.timeChanged); //!! cast expression to int with OR 0
+        increaseTime(timeDelta);
 
         let etherToSend = 1;
 
