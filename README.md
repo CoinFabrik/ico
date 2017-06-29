@@ -10,8 +10,7 @@
 
 - `truffle compile`
 - `truffle migrate`
-- `truffle test`
-- `npm run testrpc`
+- `npm run test
 - `npm run ropsten`
 - `npm run ropsten_attach`
 
