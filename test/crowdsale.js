@@ -6,6 +6,7 @@ const MultiSigWallet = artifacts.require('./MultiSigWallet.sol');
 const FlatPricing = artifacts.require('./FlatPricing.sol');
 const BonusFinalizeAgent = artifacts.require('./BonusFinalizeAgent.sol');
 const CrowdsaleToken = artifacts.require('./CrowdsaleToken.sol');
+const FixedCeiling = artifacts.require('./FixedCeiling.sol');
 const Crowdsale = artifacts.require('./Crowdsale.sol');
 
 const DECIMALS = config.DECIMALS;
@@ -23,17 +24,20 @@ contract('Crowdsale', function(accounts) {
 
     const EXAMPLE_ADDRESS_0 = accounts[0];
     const EXAMPLE_ADDRESS_1 = accounts[1];
+
     const GAS = 300000;
     const GAS_PRICE = 20000000000;
 
     let crowdsaleToken;
     let flatPricing;
     let multiSigWallet;
+    let fixedCeiling;
     let crowdsale;
     let bonusFinalizeAgent;
     let init_prom = Promise.all([ CrowdsaleToken.deployed().then(function(instance) {crowdsaleToken = instance}),
                                   FlatPricing.deployed().then(function(instance) {flatPricing = instance}),
                                   MultiSigWallet.deployed().then(function(instance) {multiSigWallet = instance}),
+                                  FixedCeiling.deployed().then(function(instance) {fixedCeiling = instance}),
                                   Crowdsale.deployed().then(function(instance) {crowdsale = instance}),
                                   BonusFinalizeAgent.deployed().then(function(instance) {bonusFinalizeAgent = instance}) 
                                 ]);
@@ -50,7 +54,7 @@ contract('Crowdsale', function(accounts) {
     }
 
     it_synched('Checks contract\'s health', async function() {
-        assert(await crowdsale.isFinalizerSane() && await crowdsale.isPricingSane());
+        assert(await crowdsale.isFinalizerSane() && await crowdsale.isPricingSane() && await crowdsale.isCeilingSane());
     });
 
     it_synched('Checks that nobody can buy before the sale starts', async function() {

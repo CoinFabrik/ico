@@ -5,6 +5,7 @@ import "./FractionalERC20.sol";
 import "./PricingStrategy.sol";
 import "./FinalizeAgent.sol";
 import "./SafeMath.sol";
+import "./CeilingStrategy.sol";
 import "./MintableToken.sol";
 
 /**
@@ -32,6 +33,9 @@ contract Crowdsale is Haltable {
   /* How we are going to price our offering */
   PricingStrategy public pricingStrategy;
 
+  /* How are we going to limit our offering */
+  CeilingStrategy public ceilingStrategy;
+
   /* Post-success callback */
   FinalizeAgent public finalizeAgent;
 
@@ -42,7 +46,7 @@ contract Crowdsale is Haltable {
   uint public minimumFundingGoal;
 
   /* the funding cannot exceed this cap; may be set later on during the crowdsale */
-  uint public fundingCap;
+  uint public weiFundingCap = 0;
 
   /* the UNIX timestamp start date of the crowdsale */
   uint public startsAt;
@@ -119,7 +123,7 @@ contract Crowdsale is Haltable {
   // Crowdsale end time has been changed
   event EndsAtChanged(uint endsAt);
 
-  function Crowdsale(address _token, PricingStrategy _pricingStrategy, address _multisigWallet, uint _start, uint _end, uint _minimumFundingGoal) {
+  function Crowdsale(address _token, PricingStrategy _pricingStrategy, CeilingStrategy _ceilingStrategy, address _multisigWallet, uint _start, uint _end, uint _minimumFundingGoal) {
 
     token = FractionalERC20(_token);
 
@@ -127,6 +131,9 @@ contract Crowdsale is Haltable {
 
     require(_multisigWallet != 0);
     multisigWallet = _multisigWallet;
+
+    require(_ceilingStrategy.isCeilingStrategy());
+    ceilingStrategy = _ceilingStrategy;
 
 
     // Don't mess the dates
@@ -170,7 +177,7 @@ contract Crowdsale is Haltable {
       require(false);
     }
 
-    uint weiAmount = weiAllowedToReceive(msg.value, weiRaised);
+    uint weiAmount = ceilingStrategy.weiAllowedToReceive(msg.value, weiRaised, investedAmountOf[receiver], weiFundingCap);
     uint tokenAmount = pricingStrategy.calculatePrice(weiAmount, weiRaised, tokensSold, msg.sender, token.decimals());
     
     // Dust transaction if no tokens can be given
@@ -205,16 +212,8 @@ contract Crowdsale is Haltable {
 
   }
 
-  function weiAllowedToReceive(uint tentativeAmount, uint weiRaised) private returns (uint) {
-    if (fundingCap == 0) return tentativeAmount;
-    uint total = tentativeAmount.add(weiRaised);
-    if (total < fundingCap) return tentativeAmount;
-    else return fundingCap.sub(weiRaised);
-  }
-
   function setFundingCap(uint newCap) public onlyOwner {
-    //TODO: set to the next multiple of a big number
-    fundingCap = newCap;
+    weiFundingCap = ceilingStrategy.relaxFundingCap(newCap, weiRaised);
   }
 
   /**
@@ -393,6 +392,17 @@ contract Crowdsale is Haltable {
   }
 
   /**
+   * Allow to (re)set ceiling strategy.
+   *
+   * Design choice: no state restrictions on the set, so that we can fix fat finger mistakes.
+   */
+  function setCeilingStrategy(CeilingStrategy _ceilingStrategy) onlyOwner {
+    require(_ceilingStrategy.isCeilingStrategy());
+
+    ceilingStrategy = _ceilingStrategy;
+  }
+
+  /**
    * Allow to change the team multisig address in the case of emergency.
    *
    * This allows to save a deployed crowdsale wallet in the case the crowdsale has not yet begun
@@ -449,8 +459,11 @@ contract Crowdsale is Haltable {
     return pricingStrategy.isSane(address(this));
   }
 
-  function isCrowdsaleFull() private constant returns (bool full) {
-    return fundingCap > 0 && weiRaised >= fundingCap;
+  /**
+   * Check if the contract relationship looks good.
+   */
+  function isCeilingSane() public constant returns (bool sane) {
+    return ceilingStrategy.isSane(address(this));
   }
 
   /**
@@ -464,7 +477,7 @@ contract Crowdsale is Haltable {
     else if (!isFinalizerSane()) return State.Preparing;
     else if (!isPricingSane()) return State.Preparing;
     else if (block.timestamp < startsAt) return State.PreFunding;
-    else if (block.timestamp <= endsAt && !isCrowdsaleFull()) return State.Funding;
+    else if (block.timestamp <= endsAt && !ceilingStrategy.isCrowdsaleFull(weiRaised, weiFundingCap)) return State.Funding;
     else if (isMinimumGoalReached()) return State.Success;
     else if (!isMinimumGoalReached() && weiRaised > 0 && loadedRefund >= weiRaised) return State.Refunding;
     else return State.Failure;

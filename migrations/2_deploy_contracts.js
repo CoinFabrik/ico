@@ -3,6 +3,7 @@ const MultiSigWallet = artifacts.require('./MultiSigWallet.sol');
 const FlatPricing = artifacts.require('./FlatPricing.sol');
 const BonusFinalizeAgent = artifacts.require('./BonusFinalizeAgent.sol');
 const CrowdsaleToken = artifacts.require('./CrowdsaleToken.sol');
+const FixedCeiling = artifacts.require('./FixedCeiling.sol');
 const Crowdsale = artifacts.require('./Crowdsale.sol');
 
 const config = require('../config.js');
@@ -23,16 +24,18 @@ module.exports = function(deployer) {
     deployer.link(SafeMath, FlatPricing);
     deployer.link(SafeMath, BonusFinalizeAgent);
     deployer.link(SafeMath, CrowdsaleToken);
+    deployer.link(SafeMath, FixedCeiling);
     deployer.link(SafeMath, Crowdsale);
 
     let CT_contract = [ CrowdsaleToken, TOKEN_NAME, TOKEN_SYMBOL, INITIAL_SUPPLY, DECIMALS, MINTABLE ];
     let FP_contract = [ FlatPricing, PRICE ];
+    let FC_contract = [ FixedCeiling, web3.toWei(config.CHUNKED_MULTIPLE_CAP), web3.toWei(config.LIMIT_PER_ADDRESS) ];
     // TODO: change to use client's MultiSigWallet
     let MW_contract = [ MultiSigWallet, [0x4cdabc27b48893058aa1675683af3485e4409eff], 1 ];
     
-    return deployer.deploy([ CT_contract, FP_contract, MW_contract ])
+    return deployer.deploy([ CT_contract, FP_contract, FC_contract, MW_contract ])
     .then(async function() {
-        await deployer.deploy(Crowdsale, CrowdsaleToken.address, FlatPricing.address, MultiSigWallet.address, START_DATE,  END_DATE,  MINIMUM_FUNDING_GOAL);
+        await deployer.deploy(Crowdsale, CrowdsaleToken.address, FlatPricing.address, FixedCeiling.address, MultiSigWallet.address, START_DATE,  END_DATE,  MINIMUM_FUNDING_GOAL);
     })
     .then(async function() {
         await deployer.deploy(BonusFinalizeAgent, CrowdsaleToken.address, Crowdsale.address, BONUS_BASE_POINTS, MultiSigWallet.address);
