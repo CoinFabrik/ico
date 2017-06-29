@@ -14,6 +14,7 @@ const START_DATE = config.START_DATE;
 
 contract('Crowdsale', function(accounts) {
     let id_time = 1;
+    // TODO: check whether we can go back in time
     // Can be made async with sendAsync()
     function increaseTime(delta_seconds) {
         web3.currentProvider.send({ "jsonrpc": "2.0", method: "evm_increaseTime", "id": id_time, "params": [ delta_seconds ] });
@@ -42,7 +43,10 @@ contract('Crowdsale', function(accounts) {
 
     // TODO: add error logging?
     const it_synched = function(message, test_f) {
-        it(message, function() { return init_prom.then(test_f); });
+        it(message, function() {
+            return init_prom
+            .then(test_f);
+        });
     }
 
     it_synched('Checks contract\'s health', async function() {
@@ -50,33 +54,35 @@ contract('Crowdsale', function(accounts) {
     });
 
     it_synched('Checks that nobody can buy before the sale starts', async function() {
-        // TODO changing testrpc time
+        let actualTime = (Date.now() / 1000) | 0;
+        if (actualTime < START_DATE) {
+            await assertFail(async function() {
+                await crowdsale.buy.sendTransaction({value: web3.toWei(1), gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
+            });
+        }
     });
 
-    it_synched('Moves time to start of the ICO, and does the first buy', async function() {
-
+    it_synched('Moves time to start of the ICO, buys, and checks that tokens belong to new owner', async function() {
         // We move time forward if it's necessary
-        // TODO: check whether we can go back in time
-        time_delta = START_DATE - ((Date.now() / 1000) | 0); //!! cast expression to int with OR 0
-        if (time_delta > 0)
-            increaseTime(time_delta);
+        var timeDelta = START_DATE - ((Date.now() / 1000) | 0); //!! cast expression to int with OR 0
+        if (timeDelta > 0)
+            increaseTime(timeDelta);
 
         let etherToSend = 1;
 
         await crowdsale.buy.sendTransaction({value: web3.toWei(etherToSend, 'ether'), gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
-
         const balance = await crowdsaleToken.balanceOf(EXAMPLE_ADDRESS_1);
 
         assert.equal(web3.fromWei(balance, 'ether').toNumber(), (etherToSend * (10 ** DECIMALS)) / PRICE);
+        
         cur += etherToSend;
     });
 
-    it_synched('Returns the remainder of a transaction', async function() {
+    it_synched('Checks that ether goes where it should after a purchase', async function() {
         const initialBalance = await web3.eth.getBalance(EXAMPLE_ADDRESS_1);
         let etherToSend = 5;
         await crowdsale.buy.sendTransaction({value: web3.toWei(etherToSend), gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
         const finalBalance = await web3.eth.getBalance(EXAMPLE_ADDRESS_1);
-
 
         const spent = web3.fromWei(initialBalance.sub(finalBalance)).toNumber();
         assert.isAbove(spent, etherToSend);
@@ -88,6 +94,7 @@ contract('Crowdsale', function(accounts) {
 
         const balanceContributionWallet = await web3.eth.getBalance(multiSigWallet.address);
         assert.equal(web3.fromWei(balanceContributionWallet).toNumber(), cur + etherToSend);
+        
         cur += etherToSend;
     });
 
