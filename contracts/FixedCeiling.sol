@@ -7,7 +7,9 @@ import "./CeilingStrategy.sol";
 contract FixedCeiling is CeilingStrategy {
     using SafeMath for uint;
 
+    /* When relaxing a cap is necessary, we use this multiple to determine the relaxed cap */
     uint public chunkedWeiMultiple;
+    /* The limit an individual address can invest */
     uint public weiLimitPerAddress;
 
     function FixedCeiling(uint multiple, uint limit) {
@@ -30,6 +32,7 @@ contract FixedCeiling is CeilingStrategy {
         return weiFundingCap > 0 && weiRaised >= weiFundingCap;
     }
 
+    /* If the new target cap has not been reached yet, we don't need to relax it */
     function relaxFundingCap(uint newCap, uint weiRaised) public constant returns (uint) {
         if (newCap > weiRaised) return newCap;
         else return weiRaised.div(chunkedWeiMultiple).add(1).mul(chunkedWeiMultiple);

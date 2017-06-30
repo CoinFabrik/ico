@@ -5,7 +5,7 @@ pragma solidity ^0.4.11;
  */
 
 /**
- * Finalize agent defines what happens at the end of succeseful crowdsale.
+ * Finalize agent defines what happens at the end of a succesful crowdsale.
  *
  * - Allocate tokens for founders, bounties and community
  * - Make tokens transferable
@@ -24,7 +24,7 @@ contract FinalizeAgent {
    */
   function isSane() public constant returns (bool);
 
-  /** Called once by crowdsale finalize() if the sale was success. */
+  /** Called once by crowdsale finalize() if the sale was a success. */
   function finalizeCrowdsale();
 
 }

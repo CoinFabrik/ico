@@ -10,7 +10,7 @@ import "./MintableToken.sol";
 import "./UpgradeableToken.sol";
 
 /**
- * A crowdsaled token.
+ * A crowdsale token.
  *
  * An ERC-20 token designed specifically for crowdsales with investor protection and further development path.
  *

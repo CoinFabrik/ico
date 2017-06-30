@@ -26,8 +26,8 @@ contract PricingStrategy {
    * When somebody tries to buy tokens for X eth, calculate how many tokens they get.
    *
    *
-   * @param value - What is the value of the transaction send in as wei
-   * @param tokensSold - how much tokens have been sold this far
+   * @param value - What is the value of the transaction sent in as wei
+   * @param tokensSold - how many tokens have been sold this far
    * @param weiRaised - how much money has been raised this far
    * @param msgSender - who is the investor of this transaction
    * @param decimals - how many decimal units the token has

@@ -24,7 +24,8 @@ contract BonusFinalizeAgent is FinalizeAgent {
   CrowdsaleToken public token;
   Crowdsale public crowdsale;
 
-  /** Total percent of tokens minted to the team at the end of the sale as base points (0.0001) */
+  /** Total percent of tokens minted to the team at the end of the sale as base points
+  bonus tokens = tokensSold * bonusBasePoints * 0.0001         */
   uint public bonusBasePoints;
 
   /** Where we move the tokens at the end of the sale. */
@@ -50,7 +51,7 @@ contract BonusFinalizeAgent is FinalizeAgent {
   function finalizeCrowdsale() {
     require(msg.sender == address(crowdsale));
 
-    // How many % of tokens the founders and others get
+    // How many % points of tokens the founders and others get
     uint tokensSold = crowdsale.tokensSold();
     allocatedBonus = tokensSold.mul(bonusBasePoints) / 10000;
 

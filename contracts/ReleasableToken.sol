@@ -13,7 +13,7 @@ import "./Ownable.sol";
  */
 contract ReleasableToken is ERC20, Ownable {
 
-  /* The finalizer contract that allows unlift the transfer limits on this token */
+  /* The finalizer contract that allows lifting the transfer limits on this token */
   address public releaseAgent;
 
   /** A crowdsale contract can release us to the wild if ICO success. If false we are are in transfer lock up period.*/
@@ -58,7 +58,7 @@ contract ReleasableToken is ERC20, Ownable {
     released = true;
   }
 
-  /** The function can be called only before or after the tokens have been releasesd */
+  /** The function can be called only before or after the tokens have been released */
   modifier inReleaseState(bool releaseState) {
     require(releaseState == released);
     _;

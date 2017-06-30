@@ -38,7 +38,7 @@ contract Crowdsale is Haltable {
   /* How we are going to price our offering */
   PricingStrategy public pricingStrategy;
 
-  /* How are we going to limit our offering */
+  /* How we are going to limit our offering */
   CeilingStrategy public ceilingStrategy;
 
   /* Post-success callback */
@@ -68,10 +68,10 @@ contract Crowdsale is Haltable {
   /* How many distinct addresses have invested */
   uint public investorCount = 0;
 
-  /* How much wei we have returned back to the contract after a failed crowdfund. */
+  /* How many wei we have returned back to the contract after a failed crowdfund. */
   uint public loadedRefund = 0;
 
-  /* How much wei we have given back to investors.*/
+  /* How many wei we have given back to investors.*/
   uint public weiRefunded = 0;
 
   /* Has this crowdsale been finalized */
@@ -89,16 +89,16 @@ contract Crowdsale is Haltable {
   /* Server side address that signed allowed contributors (Ethereum addresses) that can participate the crowdsale */
   address public signerAddress;
 
-  /** How much ETH each address has invested to this crowdsale */
+  /** How many ETH each address has invested to this crowdsale */
   mapping (address => uint) public investedAmountOf;
 
-  /** How much tokens this crowdsale has credited for each investor address */
+  /** How many tokens this crowdsale has credited for each investor address */
   mapping (address => uint) public tokenAmountOf;
 
   /** Addresses that are allowed to invest even before ICO offical opens. For testing, for ICO partners, etc. */
   mapping (address => bool) public earlyParticipantWhitelist;
 
-  /** This is for manul testing for the interaction from owner wallet. You can set it to any value and inspect this in blockchain explorer to see that crowdsale interaction works. */
+  /** This is for manual testing for the interaction from owner wallet. You can set it to any value and inspect this in blockchain explorer to see that crowdsale interaction works. */
   uint public ownerTestValue;
 
   /** State machine
@@ -119,7 +119,7 @@ contract Crowdsale is Haltable {
   // Refund was processed for a contributor
   event Refund(address investor, uint weiAmount);
 
-  // The rules were changed what kind of investments we accept
+  // The rules about what kind of investments we accept were changed
   event InvestmentPolicyChanged(bool requireCustomerId, bool requiredSignedAddress, address signerAddress);
 
   // Address early participation whitelist status changed
@@ -411,8 +411,8 @@ contract Crowdsale is Haltable {
    * Allow to change the team multisig address in the case of emergency.
    *
    * This allows to save a deployed crowdsale wallet in the case the crowdsale has not yet begun
-   * (we have done only few test transactions). After the crowdsale is going
-   * then multisig address stays locked for the safety reasons.
+   * (we have done only few test transactions). After the crowdsale is started up,
+   * the multisig address stays locked for safety reasons.
    */
   function setMultisig(address addr) public onlyOwner {
     // Change (?)
@@ -424,7 +424,7 @@ contract Crowdsale is Haltable {
   /**
    * Allow load refunds back on the contract for the refunding.
    *
-   * The team can transfer the funds back on the smart contract in the case the minimum goal was not reached.
+   * The team can transfer the funds back on the smart contract in the case that the minimum goal was not reached.
    */
   function loadRefund() public payable inState(State.Failure) {
     require(msg.value != 0);
@@ -444,7 +444,7 @@ contract Crowdsale is Haltable {
   }
 
   /**
-   * @return true if the crowdsale has raised enough money to be a succes
+   * @return true if the crowdsale has raised enough money to be a success
    */
   function isMinimumGoalReached() public constant returns (bool reached) {
     return weiRaised >= minimumFundingGoal;
