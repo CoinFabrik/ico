@@ -18,12 +18,15 @@ contract BasicToken is ERC20Basic {
   mapping(address => uint) balances;
 
   /**
+   * Obsolete. Removed this check based on:
+   * https://blog.coinfabrik.com/smart-contract-short-address-attack-mitigation-failure/
    * @dev Fix for the ERC20 short address attack.
+   *
+   * modifier onlyPayloadSize(uint size) {
+   *    require(msg.data.length >= size + 4);
+   *    _;
+   * }
    */
-  // modifier onlyPayloadSize(uint size) {
-  //    require(msg.data.length >= size + 4);
-  //    _;
-  // }
 
   /**
   * @dev transfer token for a specified address
