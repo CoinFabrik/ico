@@ -162,18 +162,31 @@ contract('Crowdsale', function(accounts) {
         let remaining = fundingCap - initialWeiRaised;
 
         await crowdsale.buy.sendTransaction({value: remaining, gas: GAS, gasPrice: GAS_PRICE, from: exampleAddress1});
-        
+        cur += remaining;
+
         let finalWeiRaised = await crowdsale.weiRaised();
         finalWeiRaised = finalWeiRaised.toNumber();
         assert.equal(finalWeiRaised, initialWeiRaised + remaining);
 
         await crowdsale.finalize();
 
+        /*const tokensSold = await crowdsale.tokensSold();
+        const teamFinalBalance = await crowdsaleToken.balanceOf(multiSigWallet.address);
+        assert.equal(teamFinalBalance.toNumber(), tokensSold.toNumber() * config.bonusBasePoints / 10000);*/
+
         let finalized = await crowdsale.finalized();
         assert.isTrue(finalized);
 
-        // await crowdsaleToken.transfer(exampleAddress0, 1);
+        let initialBalance0 = await crowdsaleToken.balanceOf(exampleAddress0);
+        initialBalance0 = initialBalance0.toNumber();
+        assert.equal(initialBalance0, 0);
 
+        const weiToSend = 1;
+        await crowdsaleToken.transfer.sendTransaction(exampleAddress0, weiToSend, {from: exampleAddress1});
+
+        let finalBalance0 = await crowdsaleToken.balanceOf(exampleAddress0);
+        finalBalance0 = finalBalance0.toNumber();
+        assert.equal(finalBalance0, weiToSend);
     });
 
     // TODO: test finalization by date
