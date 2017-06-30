@@ -82,6 +82,10 @@ contract('Crowdsale', function(accounts) {
 
         assert.equal(web3.fromWei(balance).toNumber(), (etherToSend * (10 ** config.decimals)) / web3.toWei(config.price));
         
+        let investorCount = await crowdsale.investorCount();
+        investorCount = investorCount.toNumber();
+        assert.equal(investorCount, 1);
+
         cur += etherToSend;
     });
 
@@ -135,18 +139,44 @@ contract('Crowdsale', function(accounts) {
         });
     });
 
-    it_synched('Check funding cap change', async function() {
+    it_synched('Sets funding cap', async function() {
         let initialFundingCap = await crowdsale.weiFundingCap();
         assert.equal(initialFundingCap, 0);
 
         let weiRaised = await crowdsale.weiRaised();
         weiRaised = weiRaised.toNumber();
-        let newFundingCap = ((weiRaised / web3.toWei(config.chunkedMultipleCap)) + 1) * web3.toWei(config.chunkedMultipleCap);
-
+        let chunckedWeiMultiple = parseInt(web3.toWei(config.chunkedMultipleCap));
+        let newFundingCap = (Math.trunc(weiRaised / chunckedWeiMultiple) + 1) * chunckedWeiMultiple;
         await crowdsale.setFundingCap(newFundingCap);
 
         let finalFundingCap = await crowdsale.weiFundingCap();
         finalFundingCap = finalFundingCap.toNumber();
         assert.equal(finalFundingCap, newFundingCap);
     });
+
+    it_synched('Buys all the remaining tokens and checks crowdsale state', async function() {
+        let fundingCap = await crowdsale.weiFundingCap();
+        fundingCap = fundingCap.toNumber();
+        let initialWeiRaised = await crowdsale.weiRaised();
+        initialWeiRaised = initialWeiRaised.toNumber();
+        let remaining = fundingCap - initialWeiRaised;
+
+        await crowdsale.buy.sendTransaction({value: remaining, gas: GAS, gasPrice: GAS_PRICE, from: exampleAddress1});
+        
+        let finalWeiRaised = await crowdsale.weiRaised();
+        finalWeiRaised = finalWeiRaised.toNumber();
+        assert.equal(finalWeiRaised, initialWeiRaised + remaining);
+
+        await crowdsale.finalize();
+
+        let finalized = await crowdsale.finalized();
+        assert.isTrue(finalized);
+
+        // await crowdsaleToken.transfer(exampleAddress0, 1);
+
+    });
+
+    // TODO: test finalization by date
+    // TODO: test multiple buyers and multiple purchases
+
 });
