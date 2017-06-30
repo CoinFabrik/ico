@@ -5,6 +5,7 @@
 - Node.js 8.1.2
 - npm 4.6.1
 - Truffle 3.2.2
+- EthereumJS TestRPC
 
 ## Commands
 
