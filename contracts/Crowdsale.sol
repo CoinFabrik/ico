@@ -14,9 +14,9 @@ import "./CeilingStrategy.sol";
 import "./MintableToken.sol";
 
 /**
- * Abstract base contract for token sales.
+ * Concrete base contract for token sales.
  *
- * Handle
+ * Handles
  * - start and end dates
  * - accepting investments
  * - minimum funding goal and refund

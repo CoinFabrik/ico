@@ -4,6 +4,9 @@ import "./SafeMath.sol";
 import "./Ownable.sol";
 import "./CeilingStrategy.sol";
 
+/**
+ * Fixed cap investment per address and crowdsale
+ */
 contract FixedCeiling is CeilingStrategy {
     using SafeMath for uint;
 
@@ -32,7 +35,7 @@ contract FixedCeiling is CeilingStrategy {
         return weiFundingCap > 0 && weiRaised >= weiFundingCap;
     }
 
-    /* If the new target cap has not been reached yet, we don't need to relax it */
+    /* If the new target cap has not been reached yet, it's fine as it is */
     function relaxFundingCap(uint newCap, uint weiRaised) public constant returns (uint) {
         if (newCap > weiRaised) return newCap;
         else return weiRaised.div(chunkedWeiMultiple).add(1).mul(chunkedWeiMultiple);
