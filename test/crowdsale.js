@@ -11,11 +11,18 @@ const Crowdsale = artifacts.require('./Crowdsale.sol');
 
 contract('Crowdsale', function(accounts) {
     let id_time = 1;
+    let increased_time = 0;
     // TODO: check whether we can go back in time
     // Can be made async with sendAsync()
+    // These tests are written assuming a fresh instance of testrpc
+    // Though, as a reminder, the result of the evm_increaseTime has the total increased time of the instance
     function increaseTime(delta_seconds) {
         web3.currentProvider.send({ "jsonrpc": "2.0", method: "evm_increaseTime", "id": id_time, "params": [ delta_seconds ] });
         id_time++;
+        increased_time += delta_seconds;
+    }
+    function currentTime() {
+        return ((Date.now() / 1000) | 0) + increased_time;
     }
 
     const GAS = 300000;
@@ -41,7 +48,7 @@ contract('Crowdsale', function(accounts) {
     // Current amount of ether raised
     let cur = 0;
 
-    // TODO: add error logging?
+    // Error logging handled by mocha/chai
     const it_synched = function(message, test_f) {
         it(message, function() {
             return init_prom
@@ -54,7 +61,7 @@ contract('Crowdsale', function(accounts) {
     });
 
     it_synched('Checks that nobody can buy before the sale starts', async function() {
-        let actualTime = (Date.now() / 1000) | 0;
+        let actualTime = currentTime();
         if (actualTime < config.startDate) {
             await assertFail(async function() {
                 await crowdsale.buy.sendTransaction({value: web3.toWei(1), gas: GAS, gasPrice: GAS_PRICE, from: exampleAddress1});
@@ -64,7 +71,7 @@ contract('Crowdsale', function(accounts) {
 
     it_synched('Moves time to start of the ICO, buys, and checks that tokens belong to new owner', async function() {
         // We move time forward if it's necessary
-        var timeDelta = config.startDate - ((Date.now() / 1000) | 0); //!! cast expression to int with OR 0
+        var timeDelta = config.startDate - currentTime(); //!! cast expression to int with OR 0
         if (timeDelta > 0)
             increaseTime(timeDelta);
 
