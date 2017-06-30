@@ -1,5 +1,9 @@
 pragma solidity ^0.4.11;
 
+/**
+ * Originally from  https://github.com/OpenZeppelin/zeppelin-solidity
+ * Modified by https://www.coinfabrik.com/
+ */
 
 /**
  * Math operations with safety checks

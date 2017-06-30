@@ -1,9 +1,12 @@
 pragma solidity ^0.4.11;
 
+/**
+ * Originally from https://github.com/OpenZeppelin/zeppelin-solidity
+ * Modified by https://www.coinfabrik.com/
+ */
 
 import './ERC20Basic.sol';
 import './SafeMath.sol';
-
 
 /**
  * @title Basic token

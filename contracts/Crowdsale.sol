@@ -1,5 +1,10 @@
 pragma solidity ^0.4.11;
 
+/**
+ * Originally from https://github.com/TokenMarketNet/ico
+ * Modified by https://www.coinfabrik.com/
+ */
+
 import "./Haltable.sol";
 import "./FractionalERC20.sol";
 import "./PricingStrategy.sol";

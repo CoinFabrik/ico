@@ -1,6 +1,10 @@
 pragma solidity ^0.4.11;
 
 /**
+ * Originally from https://github.com/TokenMarketNet/ico
+ */
+
+/**
  * Finalize agent defines what happens at the end of succeseful crowdsale.
  *
  * - Allocate tokens for founders, bounties and community

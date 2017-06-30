@@ -1,10 +1,14 @@
 pragma solidity ^0.4.11;
 
 /**
- * Upgrade agent interface inspired by Lunyr.
- *
+ * Inspired by Lunyr.
+ * Originally from https://github.com/TokenMarketNet/ico
+ */
+
+/**
  * Upgrade agent transfers tokens to a new contract.
  * Upgrade agent itself can be the token contract, or just a middle man contract doing the heavy lifting.
+ *
  */
 contract UpgradeAgent {
 

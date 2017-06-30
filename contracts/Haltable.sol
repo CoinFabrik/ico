@@ -1,15 +1,17 @@
 pragma solidity ^0.4.11;
 
+/**
+ * Envisioned in FirstBlood ICO contract.
+ * Originally from https://github.com/TokenMarketNet/ico
+ * Modified by https://www.coinfabrik.com/
+ */
+
 import "./Ownable.sol";
 
-/*
- * Haltable
- *
+/**
  * Abstract contract that allows children to implement an
  * emergency stop mechanism. Differs from Pausable by causing a throw when in halt mode.
  *
- *
- * Originally envisioned in FirstBlood ICO contract.
  */
 contract Haltable is Ownable {
   bool public halted;

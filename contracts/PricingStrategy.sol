@@ -1,6 +1,10 @@
 pragma solidity ^0.4.11;
 
 /**
+ * Originally from https://github.com/TokenMarketNet/ico
+ */
+
+/**
  * Interface for defining crowdsale pricing.
  */
 contract PricingStrategy {

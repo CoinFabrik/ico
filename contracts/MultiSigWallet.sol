@@ -2,9 +2,8 @@ pragma solidity ^0.4.11;
 
 /**
  * Originally from https://github.com/ConsenSys/MultiSigWallet
+ * Modified by https://www.coinfabrik.com/
  */
-
-
 
 /// @title Multisignature wallet - Allows multiple parties to agree on transactions before execution.
 /// @author Stefan George - <stefan.george@consensys.net>

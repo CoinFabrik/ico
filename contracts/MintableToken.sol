@@ -1,5 +1,10 @@
 pragma solidity ^0.4.11;
 
+/**
+ * Originally from https://github.com/TokenMarketNet/ico
+ * Modified by https://www.coinfabrik.com/
+ */
+
 import "./Ownable.sol";
 import './StandardToken.sol';
 import "./SafeMath.sol";

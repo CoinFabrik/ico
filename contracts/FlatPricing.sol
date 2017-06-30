@@ -1,5 +1,9 @@
 pragma solidity ^0.4.11;
 
+/**
+ * Originally from https://github.com/TokenMarketNet/ico
+ */
+
 import "./PricingStrategy.sol";
 import "./SafeMath.sol";
 
