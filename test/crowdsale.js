@@ -168,14 +168,16 @@ contract('Crowdsale', function(accounts) {
         finalWeiRaised = finalWeiRaised.toNumber();
         assert.equal(finalWeiRaised, initialWeiRaised + remaining);
 
+        assert.isFalse(await crowdsaleToken.released());
         await crowdsale.finalize();
 
-        /*const tokensSold = await crowdsale.tokensSold();
+        const tokensSold = await crowdsale.tokensSold();
         const teamFinalBalance = await crowdsaleToken.balanceOf(multiSigWallet.address);
-        assert.equal(teamFinalBalance.toNumber(), tokensSold.toNumber() * config.bonusBasePoints / 10000);*/
+        assert.equal(teamFinalBalance.toNumber(), tokensSold.toNumber() * config.bonusBasePoints / 10000);
 
         let finalized = await crowdsale.finalized();
         assert.isTrue(finalized);
+        assert.isTrue(await crowdsaleToken.released());
 
         let initialBalance0 = await crowdsaleToken.balanceOf(exampleAddress0);
         initialBalance0 = initialBalance0.toNumber();

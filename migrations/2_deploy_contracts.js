@@ -27,7 +27,7 @@ module.exports = function(deployer) {
         await deployer.deploy(Crowdsale, CrowdsaleToken.address, FlatPricing.address, FixedCeiling.address, MultiSigWallet.address, config.startDate,  config.endDate,  web3.toWei(config.minimumFundingGoal));
     })
     .then(async function() {
-        await deployer.deploy(BonusFinalizeAgent, CrowdsaleToken.address, Crowdsale.address, config.BONUS_BASE_POINTS, MultiSigWallet.address);
+        await deployer.deploy(BonusFinalizeAgent, CrowdsaleToken.address, Crowdsale.address, config.bonusBasePoints, MultiSigWallet.address);
     })
     .then(async function() {
         let CT_prom = CrowdsaleToken.deployed()
