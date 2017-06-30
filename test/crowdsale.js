@@ -45,7 +45,7 @@ contract('Crowdsale', function(accounts) {
                                   BonusFinalizeAgent.deployed().then(function(instance) {bonusFinalizeAgent = instance}) 
                                 ]);
 
-    // Current amount of ether raised
+    // Current amount of ether purchased by exampleAddress1
     let cur = 0;
 
     // Error logging handled by mocha/chai
@@ -102,6 +102,17 @@ contract('Crowdsale', function(accounts) {
         const balanceContributionWallet = await web3.eth.getBalance(multiSigWallet.address);
         assert.equal(web3.fromWei(balanceContributionWallet).toNumber(), cur + etherToSend);
         
+        cur += etherToSend;
+    });
+
+    it_synched('Checks that customers can buy using its id', async function() {
+        let etherToSend = 2;
+        let id = 123;
+        await crowdsale.buyWithCustomerId.sendTransaction(id, {value: web3.toWei(etherToSend), gas: GAS, gasPrice: GAS_PRICE, from: exampleAddress1});
+        const balance = await crowdsaleToken.balanceOf(exampleAddress1);
+
+        assert.equal(web3.fromWei(balance).toNumber(), ((etherToSend + cur) * (10 ** config.decimals)) / web3.toWei(config.price));
+
         cur += etherToSend;
     });
 
