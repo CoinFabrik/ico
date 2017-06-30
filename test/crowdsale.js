@@ -85,13 +85,13 @@ contract('Crowdsale', function(accounts) {
     it_synched('Checks that ether goes where it should after a purchase', async function() {
         const initialBalance = await web3.eth.getBalance(EXAMPLE_ADDRESS_1);
         let etherToSend = 5;
-        await crowdsale.buy.sendTransaction({value: web3.toWei(etherToSend), gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
+        let tx = await crowdsale.buy.sendTransaction({value: web3.toWei(etherToSend), gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
         const finalBalance = await web3.eth.getBalance(EXAMPLE_ADDRESS_1);
 
         const spent = web3.fromWei(initialBalance.sub(finalBalance)).toNumber();
-        assert.isAbove(spent, etherToSend);
-        // TODO: find a better approximation
-        assert.isBelow(spent, etherToSend + 0.006);
+        let tx_receipt = await web3.eth.getTransactionReceipt(tx);
+        const expected_gas_usage = etherToSend + parseFloat(web3.fromWei(tx_receipt.cumulativeGasUsed * GAS_PRICE));
+        assert.equal(spent, expected_gas_usage);
 
         const totalCollected = await crowdsale.weiRaised();
         assert.equal(web3.fromWei(totalCollected).toNumber(), cur + etherToSend);
