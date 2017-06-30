@@ -16,15 +16,15 @@ module.exports = function(deployer) {
     deployer.link(SafeMath, FixedCeiling);
     deployer.link(SafeMath, Crowdsale);
 
-    let CT_contract = [ CrowdsaleToken, config.TOKEN_NAME, config.TOKEN_SYMBOL, web3.toWei(config.INITIAL_SUPPLY), config.DECIMALS, config.MINTABLE ];
-    let FP_contract = [ FlatPricing, config.PRICE ];
-    let FC_contract = [ FixedCeiling, web3.toWei(config.CHUNKED_MULTIPLE_CAP), web3.toWei(config.LIMIT_PER_ADDRESS) ];
+    let CT_contract = [ CrowdsaleToken, config.tokenName, config.tokenSymbol, web3.toWei(config.initialSupply), config.decimals, config.mintable ];
+    let FP_contract = [ FlatPricing, web3.toWei(config.price) ];
+    let FC_contract = [ FixedCeiling, web3.toWei(config.chunkedMultipleCap), web3.toWei(config.limitPerAddress) ];
     // TODO: change to use client's MultiSigWallet
     let MW_contract = [ MultiSigWallet, [0x4cdabc27b48893058aa1675683af3485e4409eff], 1 ];
     
     return deployer.deploy([ CT_contract, FP_contract, FC_contract, MW_contract ])
     .then(async function() {
-        await deployer.deploy(Crowdsale, CrowdsaleToken.address, FlatPricing.address, FixedCeiling.address, MultiSigWallet.address, config.START_DATE,  config.END_DATE,  web3.toWei(config.MINIMUM_FUNDING_GOAL));
+        await deployer.deploy(Crowdsale, CrowdsaleToken.address, FlatPricing.address, FixedCeiling.address, MultiSigWallet.address, config.startDate,  config.endDate,  web3.toWei(config.minimumFundingGoal));
     })
     .then(async function() {
         await deployer.deploy(BonusFinalizeAgent, CrowdsaleToken.address, Crowdsale.address, config.BONUS_BASE_POINTS, MultiSigWallet.address);

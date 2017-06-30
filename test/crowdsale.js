@@ -9,10 +9,6 @@ const CrowdsaleToken = artifacts.require('./CrowdsaleToken.sol');
 const FixedCeiling = artifacts.require('./FixedCeiling.sol');
 const Crowdsale = artifacts.require('./Crowdsale.sol');
 
-const DECIMALS = config.DECIMALS;
-const PRICE = config.PRICE;
-const START_DATE = config.START_DATE;
-
 contract('Crowdsale', function(accounts) {
     let id_time = 1;
     // TODO: check whether we can go back in time
@@ -22,11 +18,11 @@ contract('Crowdsale', function(accounts) {
         id_time++;
     }
 
-    const EXAMPLE_ADDRESS_0 = accounts[0];
-    const EXAMPLE_ADDRESS_1 = accounts[1];
-
     const GAS = 300000;
     const GAS_PRICE = 20000000000;
+
+    const exampleAddress0 = accounts[0];
+    const exampleAddress1 = accounts[1];
 
     let crowdsaleToken;
     let flatPricing;
@@ -59,34 +55,34 @@ contract('Crowdsale', function(accounts) {
 
     it_synched('Checks that nobody can buy before the sale starts', async function() {
         let actualTime = (Date.now() / 1000) | 0;
-        if (actualTime < START_DATE) {
+        if (actualTime < config.startDate) {
             await assertFail(async function() {
-                await crowdsale.buy.sendTransaction({value: web3.toWei(1), gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
+                await crowdsale.buy.sendTransaction({value: web3.toWei(1), gas: GAS, gasPrice: GAS_PRICE, from: exampleAddress1});
             });
         }
     });
 
     it_synched('Moves time to start of the ICO, buys, and checks that tokens belong to new owner', async function() {
         // We move time forward if it's necessary
-        var timeDelta = START_DATE - ((Date.now() / 1000) | 0); //!! cast expression to int with OR 0
+        var timeDelta = config.startDate - ((Date.now() / 1000) | 0); //!! cast expression to int with OR 0
         if (timeDelta > 0)
             increaseTime(timeDelta);
 
         let etherToSend = 1;
 
-        await crowdsale.buy.sendTransaction({value: web3.toWei(etherToSend, 'ether'), gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
-        const balance = await crowdsaleToken.balanceOf(EXAMPLE_ADDRESS_1);
+        await crowdsale.buy.sendTransaction({value: web3.toWei(etherToSend), gas: GAS, gasPrice: GAS_PRICE, from: exampleAddress1});
+        const balance = await crowdsaleToken.balanceOf(exampleAddress1);
 
-        assert.equal(web3.fromWei(balance, 'ether').toNumber(), (etherToSend * (10 ** DECIMALS)) / PRICE);
+        assert.equal(web3.fromWei(balance).toNumber(), (etherToSend * (10 ** config.decimals)) / web3.toWei(config.price));
         
         cur += etherToSend;
     });
 
     it_synched('Checks that ether goes where it should after a purchase', async function() {
-        const initialBalance = await web3.eth.getBalance(EXAMPLE_ADDRESS_1);
+        const initialBalance = await web3.eth.getBalance(exampleAddress1);
         let etherToSend = 5;
-        let tx = await crowdsale.buy.sendTransaction({value: web3.toWei(etherToSend), gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
-        const finalBalance = await web3.eth.getBalance(EXAMPLE_ADDRESS_1);
+        let tx = await crowdsale.buy.sendTransaction({value: web3.toWei(etherToSend), gas: GAS, gasPrice: GAS_PRICE, from: exampleAddress1});
+        const finalBalance = await web3.eth.getBalance(exampleAddress1);
 
         const spent = web3.fromWei(initialBalance.sub(finalBalance)).toNumber();
         let tx_receipt = await web3.eth.getTransactionReceipt(tx);
@@ -105,35 +101,35 @@ contract('Crowdsale', function(accounts) {
     it_synched('Pauses and resumes the contribution', async function() {
         await crowdsale.halt();
         await assertFail(async function() {
-            await crowdsale.buy.sendTransaction({value: web3.toWei(1), gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
+            await crowdsale.buy.sendTransaction({value: web3.toWei(1), gas: GAS, gasPrice: GAS_PRICE, from: exampleAddress1});
         });
         await crowdsale.unhalt();
 
         const collectedBefore = await crowdsale.weiRaised();
-        await crowdsale.buy.sendTransaction({value: web3.toWei(1), gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
+        await crowdsale.buy.sendTransaction({value: web3.toWei(1), gas: GAS, gasPrice: GAS_PRICE, from: exampleAddress1});
         const collectedAfter = await crowdsale.weiRaised();
         assert.isBelow(collectedBefore, collectedAfter);
     });
 
     it_synched('Check transfers fail before tokens are released', async function() {
         await assertFail(async function() {
-            await crowdsaleToken.transfer(EXAMPLE_ADDRESS_0, 1);
+            await crowdsaleToken.transfer(exampleAddress0, 1);
         });
     });
 
     it_synched('Check finalization', async function() {
-        const initialBalance = await crowdsaleToken.balanceOf(EXAMPLE_ADDRESS_0);
+        const initialBalance = await crowdsaleToken.balanceOf(exampleAddress0);
         assert(initialBalance, 0);
         
         /*let remToMin = crowdsale.minimumFundingGoal() - crowdsale.weiRaised();
-        await crowdsale.buy.sendTransaction({value: remToMin, gas: GAS, gasPrice: GAS_PRICE, from: EXAMPLE_ADDRESS_1});
+        await crowdsale.buy.sendTransaction({value: remToMin, gas: GAS, gasPrice: GAS_PRICE, from: exampleAddress1});
         assert(crowdsale.isMinimumGoalReached());
 
         await crowdsale.finalize();
 
         let toTransfer = 1;
-        await crowdsaleToken.transfer(EXAMPLE_ADDRESS_0, toTransfer);
-        const finalBalance = await crowdsaleToken.balanceOf(EXAMPLE_ADDRESS_0);
+        await crowdsaleToken.transfer(exampleAddress0, toTransfer);
+        const finalBalance = await crowdsaleToken.balanceOf(exampleAddress0);
         /*assert(finalBalance, toTransfer);*/
     });
 });
