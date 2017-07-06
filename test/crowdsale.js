@@ -135,7 +135,7 @@ contract('Crowdsale', function(accounts) {
 
     it_synched('Check transfers fail before tokens are released', async function() {
         await assertFail(async function() {
-            await crowdsaleToken.transfer(exampleAddress0, 1);
+            await crowdsaleToken.transfer.sendTransaction(exampleAddress0, 1, {from: exampleAddress1});
         });
     });
 
@@ -145,8 +145,8 @@ contract('Crowdsale', function(accounts) {
 
         let weiRaised = await crowdsale.weiRaised();
         weiRaised = weiRaised.toNumber();
-        let chunckedWeiMultiple = parseInt(web3.toWei(config.chunkedMultipleCap));
-        let newFundingCap = (Math.trunc(weiRaised / chunckedWeiMultiple) + 1) * chunckedWeiMultiple;
+        let chunkedWeiMultiple = parseInt(web3.toWei(config.chunkedMultipleCap));
+        let newFundingCap = (Math.trunc(weiRaised / chunkedWeiMultiple) + 1) * chunkedWeiMultiple;
         await crowdsale.setFundingCap(newFundingCap);
 
         let finalFundingCap = await crowdsale.weiFundingCap();
@@ -193,5 +193,4 @@ contract('Crowdsale', function(accounts) {
 
     // TODO: test finalization by date
     // TODO: test multiple buyers and multiple purchases
-
 });
