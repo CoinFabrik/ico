@@ -8,21 +8,20 @@ const BonusFinalizeAgent = artifacts.require('./BonusFinalizeAgent.sol');
 const CrowdsaleToken = artifacts.require('./CrowdsaleToken.sol');
 const FixedCeiling = artifacts.require('./FixedCeiling.sol');
 const Crowdsale = artifacts.require('./Crowdsale.sol');
-
-//Test para finalizacion por fecha
+var index = 0;
 contract('Crowdsale', function(accounts) {
     let id_time = 1;
-    var increased_time = 0;
+    let increased_time = 0;
     // TODO: check whether we can go back in time
     // Can be made async with sendAsync()
     // These tests are written assuming a fresh instance of testrpc
     // Though, as a reminder, the result of the evm_increaseTime has the total increased time of the instance
     function increaseTime(delta_seconds) {
-        web3.currentProvider.send({ "jsonrpc": "2.0", method: "evm_increaseTime", "id": id_time, "params": [ delta_seconds ] });
+        var time = web3.currentProvider.send({ "jsonrpc": "2.0", method: "evm_increaseTime", "id": id_time, "params": [ delta_seconds ] });
+        
         id_time++;
         increased_time += delta_seconds;
     }
-
     function currentTime() {
         return ((Date.now() / 1000) | 0) + increased_time;
     }
@@ -47,7 +46,7 @@ contract('Crowdsale', function(accounts) {
                                   BonusFinalizeAgent.deployed().then(function(instance) {bonusFinalizeAgent = instance}) 
                                 ]);
 
-    // Current amount of ether spent by exampleAddress1
+    // Current amount of ether purchased by exampleAddress1
     let cur = 0;
 
     // Error logging handled by mocha/chai
@@ -76,7 +75,7 @@ contract('Crowdsale', function(accounts) {
         var timeDelta = config.startDate - currentTime(); //!! cast expression to int with OR 0
         if (timeDelta > 0)
             increaseTime(timeDelta + 1);
-    
+
         let etherToSend = 1;
 
         await crowdsale.buy.sendTransaction({value: web3.toWei(etherToSend), gas: GAS, gasPrice: GAS_PRICE, from: exampleAddress1});
@@ -137,7 +136,7 @@ contract('Crowdsale', function(accounts) {
 
     it_synched('Check transfers fail before tokens are released', async function() {
         await assertFail(async function() {
-            await crowdsaleToken.transfer(exampleAddress0, 1);
+            await crowdsaleToken.transfer.sendTransaction(exampleAddress0, 1, {from: exampleAddress1});
         });
     });
 
@@ -156,49 +155,58 @@ contract('Crowdsale', function(accounts) {
         assert.equal(finalFundingCap, newFundingCap);
     });
 
-    it_synched('Checks crowdsale finalization on success and end date reached', async function() {
-        let minimumReached = await crowdsale.isMinimumGoalReached();
-        assert.isFalse(minimumReached);
+    it_synched('Multiple accounts buy all remaining tokens and crowdsale finalizes', async function() {
 
-        let minimumFundingGoal = await crowdsale.minimumFundingGoal();
-        minimumFundingGoal= minimumFundingGoal.toNumber();
-        let initialWeiRaised = await crowdsale.weiRaised();
-        initialWeiRaised = initialWeiRaised.toNumber();
-        let remainingUntilMinimum = minimumFundingGoal - initialWeiRaised + 1;
-        
-        await crowdsale.buy.sendTransaction({value: remainingUntilMinimum, gas: GAS, gasPrice: GAS_PRICE, from: exampleAddress1});
-        cur += remainingUntilMinimum;
+        let fundingCap = await crowdsale.weiFundingCap()
+        fundingCap = fundingCap.toNumber();
+        let actualWeiRaised = await crowdsale.weiRaised()
+        actualWeiRaised = actualWeiRaised.toNumber();
+        let remaining = fundingCap - actualWeiRaised;
 
-        assert.isTrue(await crowdsale.isMinimumGoalReached());
 
-        let minimumFundingWeiRaised = await crowdsale.weiRaised();
-        minimumFundingWeiRaised = minimumFundingWeiRaised.toNumber();
+        while(actualWeiRaised < fundingCap) {
+            randomInvestment = Math.floor((Math.random() * (remaining/20)) + 1);
+            randomAccountIndex = Math.floor((Math.random() * (accounts.length-1)) + 1);
+            await crowdsale.buy.sendTransaction({value: randomInvestment, gas: GAS, gasPrice: GAS_PRICE, from: accounts[randomAccountIndex]});
+            cur += randomInvestment;
+            actualWeiRaised = await crowdsale.weiRaised();
+            actualWeiRaised = actualWeiRaised.toNumber();
+        } 
 
-        assert.equal(minimumFundingWeiRaised, initialWeiRaised + remainingUntilMinimum);
+        fundingCap = await crowdsale.weiFundingCap();
+        fundingCap = fundingCap.toNumber();
+        let finalWeiRaised = await crowdsale.weiRaised();
+        finalWeiRaised = finalWeiRaised.toNumber();
 
+
+        assert.equal(finalWeiRaised, fundingCap);
         assert.isFalse(await crowdsaleToken.released());
-
-        var timeDelta = config.endDate - currentTime(); //!! cast expression to int with OR 0
-        if (timeDelta > 0)
-            increaseTime(timeDelta + 1);
+        state = await crowdsale.getState()
+        assert.equal(state.toNumber(), 4);
 
         await crowdsale.finalize();
 
         const tokensSold = await crowdsale.tokensSold();
         const teamFinalBalance = await crowdsaleToken.balanceOf(multiSigWallet.address);
-        assert.equal(teamFinalBalance.toNumber(), Math.floor(tokensSold.toNumber() * config.bonusBasePoints / 10000)); //Solidity truncates non-literal divisions.
+        console.log("bonusBasePoints: ", config.bonusBasePoints/10000);
+        console.log("tokensSold: ", tokensSold);
+        console.log("teamFinalBalance: ", teamFinalBalance);
 
+        assert.equal(teamFinalBalance.toNumber(), Math.floor(tokensSold.toNumber() * config.bonusBasePoints / 10000)); //Solidity truncates non-literal divisions.
+ 
         let finalized = await crowdsale.finalized();
-        assert.isTrue(finalized)
+        assert.isTrue(finalized);
         assert.isTrue(await crowdsaleToken.released());
 
         let initialBalance0 = await crowdsaleToken.balanceOf(exampleAddress0);
+        initialBalance0 = initialBalance0.toNumber();
         assert.equal(initialBalance0, 0);
 
         const weiToSend = 1;
         await crowdsaleToken.transfer.sendTransaction(exampleAddress0, weiToSend, {from: exampleAddress1});
 
         let finalBalance0 = await crowdsaleToken.balanceOf(exampleAddress0);
+        finalBalance0 = finalBalance0.toNumber();
         assert.equal(finalBalance0, weiToSend);
     });
 });
