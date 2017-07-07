@@ -84,9 +84,7 @@ contract('Crowdsale', function(accounts) {
         assert.equal(web3.fromWei(balance).toNumber(), (etherToSend * (10 ** config.decimals)) / web3.toWei(config.price));
         
         let investorCount = await crowdsale.investorCount();
-        investorCount = investorCount.toNumber();
-        assert.equal(investorCount, 1);
-
+        assert.equal(investorCount.toNumber(), 1);
         cur += etherToSend;
     });
 
@@ -151,12 +149,10 @@ contract('Crowdsale', function(accounts) {
         await crowdsale.setFundingCap(newFundingCap);
 
         let finalFundingCap = await crowdsale.weiFundingCap();
-        finalFundingCap = finalFundingCap.toNumber();
-        assert.equal(finalFundingCap, newFundingCap);
+        assert.equal(finalFundingCap.toNumber(), newFundingCap);
     });
 
-    it_synched('Multiple accounts buy all remaining tokens and crowdsale finalizes', async function() {
-
+    it_synched('Checks crowdsale finalization after all tokens been sold to multiple accounts', async function() {
         let fundingCap = await crowdsale.weiFundingCap()
         fundingCap = fundingCap.toNumber();
         let actualWeiRaised = await crowdsale.weiRaised()
@@ -173,34 +169,23 @@ contract('Crowdsale', function(accounts) {
             actualWeiRaised = actualWeiRaised.toNumber();
         } 
 
-        fundingCap = await crowdsale.weiFundingCap();
-        fundingCap = fundingCap.toNumber();
         let finalWeiRaised = await crowdsale.weiRaised();
-        finalWeiRaised = finalWeiRaised.toNumber();
 
-
-        assert.equal(finalWeiRaised, fundingCap);
+        assert.equal(finalWeiRaised.toNumber(), fundingCap);
         assert.isFalse(await crowdsaleToken.released());
-        state = await crowdsale.getState()
-        assert.equal(state.toNumber(), 4);
+        state = await crowdsale.getState();
+        assert.equal(state.toNumber(), 4); // Checks if state is Success
 
         await crowdsale.finalize();
-
         const tokensSold = await crowdsale.tokensSold();
         const teamFinalBalance = await crowdsaleToken.balanceOf(multiSigWallet.address);
-        console.log("bonusBasePoints: ", config.bonusBasePoints/10000);
-        console.log("tokensSold: ", tokensSold);
-        console.log("teamFinalBalance: ", teamFinalBalance);
-
+        
         assert.equal(teamFinalBalance.toNumber(), Math.floor(tokensSold.toNumber() * config.bonusBasePoints / 10000)); //Solidity truncates non-literal divisions.
- 
-        let finalized = await crowdsale.finalized();
-        assert.isTrue(finalized);
+        assert.isTrue(await crowdsale.finalized());
         assert.isTrue(await crowdsaleToken.released());
 
         let initialBalance0 = await crowdsaleToken.balanceOf(exampleAddress0);
-        initialBalance0 = initialBalance0.toNumber();
-        assert.equal(initialBalance0, 0);
+        assert.equal(initialBalance0.toNumber(), 0);
 
         const weiToSend = 1;
         await crowdsaleToken.transfer.sendTransaction(exampleAddress0, weiToSend, {from: exampleAddress1});

@@ -152,8 +152,7 @@ contract('Crowdsale', function(accounts) {
         await crowdsale.setFundingCap(newFundingCap);
 
         let finalFundingCap = await crowdsale.weiFundingCap();
-        finalFundingCap = finalFundingCap.toNumber();
-        assert.equal(finalFundingCap, newFundingCap);
+        assert.equal(finalFundingCap.toNumber(), newFundingCap);
     });
 
     it_synched('Checks crowdsale finalization on success and end date reached', async function() {
@@ -172,9 +171,8 @@ contract('Crowdsale', function(accounts) {
         assert.isTrue(await crowdsale.isMinimumGoalReached());
 
         let minimumFundingWeiRaised = await crowdsale.weiRaised();
-        minimumFundingWeiRaised = minimumFundingWeiRaised.toNumber();
 
-        assert.equal(minimumFundingWeiRaised, initialWeiRaised + remainingUntilMinimum);
+        assert.equal(minimumFundingWeiRaised.toNumber(), initialWeiRaised + remainingUntilMinimum);
 
         assert.isFalse(await crowdsaleToken.released());
 
