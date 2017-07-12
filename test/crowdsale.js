@@ -71,7 +71,7 @@ contract('Crowdsale', function(accounts) {
 
     it_synched('Moves time to start of the ICO, buys, and checks that tokens belong to new owner', async function() {
         // We move time forward if it's necessary
-        var timeDelta = config.startDate - currentTime(); //!! cast expression to int with OR 0
+        const timeDelta = config.startDate - currentTime(); //!! cast expression to int with OR 0
         if (timeDelta > 0)
             increaseTime(timeDelta);
 
@@ -145,8 +145,8 @@ contract('Crowdsale', function(accounts) {
 
         let weiRaised = await crowdsale.weiRaised();
         weiRaised = weiRaised.toNumber();
-        let chunckedWeiMultiple = parseInt(web3.toWei(config.chunkedMultipleCap));
-        let newFundingCap = (Math.trunc(weiRaised / chunckedWeiMultiple) + 1) * chunckedWeiMultiple;
+        let chunkedWeiMultiple = parseInt(web3.toWei(config.chunkedMultipleCap));
+        let newFundingCap = (Math.trunc(weiRaised / chunkedWeiMultiple) + 1) * chunkedWeiMultiple;
         await crowdsale.setFundingCap(newFundingCap);
 
         let finalFundingCap = await crowdsale.weiFundingCap();
@@ -189,6 +189,7 @@ contract('Crowdsale', function(accounts) {
         let finalBalance0 = await crowdsaleToken.balanceOf(exampleAddress0);
         finalBalance0 = finalBalance0.toNumber();
         assert.equal(finalBalance0, weiToSend);
+        web3.currentProvider.send({ "jsonrpc": "2.0", method: "evm_revert", "id": id_time, "params": [ 1 ] });
     });
 
     // TODO: test finalization by date
