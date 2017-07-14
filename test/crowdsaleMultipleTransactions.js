@@ -72,7 +72,7 @@ contract('Crowdsale', function(accounts) {
 
     it_synched('Moves time to start of the ICO, buys, and checks that tokens belong to new owner', async function() {
         // We move time forward if it's necessary
-        var timeDelta = config.startDate - currentTime(); //!! cast expression to int with OR 0
+        const timeDelta = config.startDate - currentTime(); //!! cast expression to int with OR 0
         if (timeDelta > 0)
             increaseTime(timeDelta + 1);
 
@@ -193,5 +193,6 @@ contract('Crowdsale', function(accounts) {
         let finalBalance0 = await crowdsaleToken.balanceOf(exampleAddress0);
         finalBalance0 = finalBalance0.toNumber();
         assert.equal(finalBalance0, weiToSend);
+        web3.currentProvider.send({ "jsonrpc": "2.0", method: "evm_revert", "id": id_time, "params": [ 1 ] });
     });
 });
