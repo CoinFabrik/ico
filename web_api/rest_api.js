@@ -20,6 +20,7 @@ const callbackGenerator = function (resolve, reject) {
     };
 };
 
+// Promisify a web3 asynchronous call (this becomes unnecessary as soon as web3 promisifies its API)
 function async_call(method, ...args) {
     return new Promise(function (resolve, reject) {
         method(...args, callbackGenerator(resolve, reject));
@@ -56,6 +57,18 @@ async function get_crowdsale_state(block) {
 }
 
 
+//TODO: replace volatile number with database connection
+let customer_id = 0;
+function generate_customer_id(registration_info) {
+    let feedback = {};
+    customer_id++;
+    feedback.customer_id = customer_id;
+    feedback.delegate_call_data = crowdsale.buyWithCustomerId.getData(customer_id);
+    return feedback;
+}
+
+
+
 
 // testing only
 let id_time = 0;
@@ -77,4 +90,4 @@ function test_buy(amount) {
     return crowdsale.buy.sendTransaction({ value: web3.toWei(amount), gas: 300000, gas_price: 20000000000 });
 }
 
-module.exports = { get_crowdsale_state, crowdsale, test_buy };
+module.exports = { get_crowdsale_state, crowdsale, test_buy, generate_customer_id };
