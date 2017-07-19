@@ -52,8 +52,8 @@ contract('Crowdsale', function(accounts) {
     // Error logging handled by mocha/chai
     const it_synched = function(message, test_f) {
         it(message, function() {
-            return promise_chain
-            .then(test_f);
+            promise_chain = promise_chain.then(test_f);
+            return promise_chain;
         });
     }
 
