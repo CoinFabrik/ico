@@ -38,21 +38,21 @@ contract('Crowdsale', function(accounts) {
     let fixedCeiling;
     let crowdsale;
     let bonusFinalizeAgent;
-    let init_prom = Promise.all([ CrowdsaleToken.deployed().then(function(instance) {crowdsaleToken = instance}),
+    const init_prom = Promise.all([ CrowdsaleToken.deployed().then(function(instance) {crowdsaleToken = instance}),
                                   FlatPricing.deployed().then(function(instance) {flatPricing = instance}),
                                   MultiSigWallet.deployed().then(function(instance) {multiSigWallet = instance}),
                                   FixedCeiling.deployed().then(function(instance) {fixedCeiling = instance}),
                                   Crowdsale.deployed().then(function(instance) {crowdsale = instance}),
                                   BonusFinalizeAgent.deployed().then(function(instance) {bonusFinalizeAgent = instance}) 
                                 ]);
-
+    let promise_chain = init_prom;
     // Current amount of ether purchased by exampleAddress1
     let cur = 0;
 
     // Error logging handled by mocha/chai
     const it_synched = function(message, test_f) {
         it(message, function() {
-            return init_prom
+            return promise_chain
             .then(test_f);
         });
     }
@@ -91,7 +91,7 @@ contract('Crowdsale', function(accounts) {
     it_synched('Checks that ether goes where it should after a purchase', async function() {
         const initialBalance = await web3.eth.getBalance(exampleAddress1);
         let etherToSend = 5;
-        let tx = await crowdsale.buy.sendTransaction({value: web3.toWei(etherToSend), gas: GAS, gasPrice: GAS_PRICE, from: exampleAddress1});
+        const tx = await crowdsale.buy.sendTransaction({value: web3.toWei(etherToSend), gas: GAS, gasPrice: GAS_PRICE, from: exampleAddress1});
         const finalBalance = await web3.eth.getBalance(exampleAddress1);
 
         const spent = web3.fromWei(initialBalance.sub(finalBalance)).toNumber();
