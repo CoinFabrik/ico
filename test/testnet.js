@@ -8,12 +8,34 @@ const BonusFinalizeAgent = artifacts.require('./BonusFinalizeAgent.sol');
 const CrowdsaleToken = artifacts.require('./CrowdsaleToken.sol');
 const FixedCeiling = artifacts.require('./FixedCeiling.sol');
 const Crowdsale = artifacts.require('./Crowdsale.sol');
-var index = 0;
-var timeoutLimit = 120;
+const timeoutLimit = 120;
+
+function delay_promise(delay) {
+    return new Promise(function(resolve, reject) {
+        setTimeout(function() { resolve(); }, delay);
+    });
+}
+
+const callbackGenerator = function (resolve, reject) {
+    return function (error, value) {
+        if (error) {
+            reject(error);
+        } else {
+            resolve(value);
+        }
+    };
+};
+
+// Promisify a web3 asynchronous call (this becomes unnecessary as soon as web3 promisifies its API)
+function async_call(method, ...args) {
+    return new Promise(function (resolve, reject) {
+        method(...args, callbackGenerator(resolve, reject));
+    });
+}
 
 contract('Crowdsale', function(accounts) {
-    var investmentPerAccount = {};  
-    for (var i = 0; i < accounts.length; i++) {
+    const investmentPerAccount = {};
+    for (let i = 0; i < accounts.length; i++) {
         investmentPerAccount[accounts[i]] = 0;
     }
 
@@ -25,7 +47,7 @@ contract('Crowdsale', function(accounts) {
     const exampleAddress2 = accounts[2];
     const exampleAddress3 = accounts[3];
 
-    var rpcId = 2000;
+    let rpcId = 2000;
 
     let crowdsaleToken;
     let flatPricing;
@@ -51,86 +73,53 @@ contract('Crowdsale', function(accounts) {
         });
     }
 
-    async function mineTransaction(params) {
-        let operation = params.operation; 
-        let sender = params.sender; 
-        let etherToSend = params.etherToSend; 
-        let newFundingCap = params.newFundingCap; 
-        let receiver = params.receiver; 
-        let tokensToSend = params.tokensToSend; 
-        let expectedResult = params.expectedResult; 
-        let id = params.id;
-        switch(operation) {
-            case crowdsale.buy:
-                txHash = await operation.sendTransaction({value: web3.toWei(etherToSend), gas: GAS, gasPrice: GAS_PRICE, from: sender});
-                break;
-            case crowdsale.buyWithCustomerId:
-                txHash = await operation.sendTransaction(id, {value: web3.toWei(etherToSend), gas: GAS, gasPrice: GAS_PRICE, from: sender});
-                break;
-            case crowdsale.halt:
-                txHash = await operation();
-                return;
-            case crowdsale.unhalt:
-                txHash = await operation();
-                return;
-            case crowdsale.finalize:
-                txHash = await operation();
-                return;
-            case crowdsale.setFundingCap:
-                txHash = await operation(newFundingCap);
-                return;
-            case crowdsaleToken.transfer:
-                txHash = await operation.sendTransaction(receiver, tokensToSend, {from: sender});
-                break;
-            default:
-                throw "Operation not expected";
+    async function mineTransaction({operation, sender, etherToSend, newFundingCap, receiver, tokensToSend, expectedResult, id}) {
+        if (operation == crowdsale.buy) {
+            txHash = await operation.sendTransaction({value: web3.toWei(etherToSend), gas: GAS, gasPrice: GAS_PRICE, from: sender});
+        } else if (operation == crowdsale.buyWithCustomerId) {
+            txHash = await operation.sendTransaction(id, {value: web3.toWei(etherToSend), gas: GAS, gasPrice: GAS_PRICE, from: sender});
+        } else if (operation == crowdsale.halt || operation == crowdsale.unhalt || operation == crowdsale.finalize) {
+            txHash = await operation();
+            return;
+        } else if (operation == crowdsale.setFundingCap) {
+            txHash = await operation(newFundingCap);
+            return;
+        } else if (operation == crowdsaleToken.transfer) {
+            txHash = await operation.sendTransaction(receiver, tokensToSend, {from: sender});
+        } else {
+            throw "Operation not supported";
         }
 
         async function start(counter) {
-            if(counter < timeoutLimit) {
-                await new Promise(function(resolve, reject) { 
-                setTimeout(
-                    async function() {
-                        const transaction = await web3.eth.getTransaction(txHash);
-                        if(transaction["blockNumber"] != null) {
-                            let tx_receipt = await web3.eth.getTransactionReceipt(txHash);
-                            await new Promise( (internalResolve, internalReject) => {
-                                web3.currentProvider.sendAsync({ method: "debug_traceTransaction", params: [txHash, {}], jsonrpc: "2.0", id: rpcId}, function (err, response) { 
-                                    if(!err) {
-                                        let lastOperationIndex = response["result"]["structLogs"].length-1;
-                                        if(expectedResult == "failure") {
-                                            assert.notEqual(response["result"]["structLogs"][lastOperationIndex]["error"], null, "Transaction succeeded although failure expected 🗙");
-                                        } else if(expectedResult == "success") {
-                                            assert.equal(response["result"]["structLogs"][lastOperationIndex]["error"], null, "Transaction failed despite succeeding was expected 🗙");
-                                        }
-                                        internalResolve();
-                                        resolve();
-                                    } else {
-                                        console.log("UNEXPECTED ERROR <- \"handled by mineTransaction\", handle in function in order to trace error. 🗙");
-                                        console.log(err);
-                                        internalReject();
-                                        reject(); 
-                                    }
-                                });
-                            });
-                            rpcId = rpcId + 1;
-                            console.log("Awaited seconds until mined 🔨: ", counter);
-                        } else {
-                            counter++;
-                            await start(counter);
-                            resolve();
-                            return;
-                        }
+            if(counter < timeoutLimit) {//check "once per second"
+                await delay_promise(1000).then(async function() {
+                    const transaction = await web3.eth.getTransaction(txHash);
+                    if(transaction["blockNumber"] != null) {
+                        let tx_receipt = await web3.eth.getTransactionReceipt(txHash);
+                        await async_call(web3.currentProvider.sendAsync, { method: "debug_traceTransaction", params: [txHash, {}], jsonrpc: "2.0", id: rpcId}).then(function (response) {
+                            let lastOperationIndex = response["result"]["structLogs"].length-1;
+                            if(expectedResult == "failure") {
+                                assert.notEqual(response["result"]["structLogs"][lastOperationIndex]["error"], null, "Transaction expected to succeed failed 🗙");
+                            } else if(expectedResult == "success") {
+                                assert.equal(response["result"]["structLogs"][lastOperationIndex]["error"], null, "Transaction expected to fail succeeded 🗙");
+                            }
+                        }).catch(function(error) {
+                            console.log("UNEXPECTED ERROR <- \"handled by mineTransaction\", handle in function in order to trace error. 🗙");
+                            console.log(error);
+                        });
+                        rpcId = rpcId + 1;
+                        console.log("Awaited iterations until mined 🔨: ", counter);
+                    } else {
+                        return start(counter + 1);
                     }
-                , 1000); //check "once per second"
-                })  
+                });
             } else if (counter == timeoutLimit) {
                 throw "TRANSACTION WAS NOT MINED 🗙";
             } else {
                 console.log("STUCK IN THE LIMBO 🌈");
             }
         };
-        var counter = 0;
+        let counter = 0;
         await start(counter);
     };
 
@@ -155,17 +144,14 @@ contract('Crowdsale', function(accounts) {
     it_synched('Waits until the start of the ICO, buys, and checks that tokens belong to new owner', async function() {
         let startTime = await crowdsale.startsAt();
         let timeDelta = startTime * 1000 - Date.now(); 
-        await new Promise(function(resolve, reject) { 
-            setTimeout(async function() {
-                let etherToSend = 3;
-                await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress1, "operation":crowdsale.buy, "expectedResult":"success"});
-                const balance = await crowdsaleToken.balanceOf(exampleAddress1);    
-                investmentPerAccount[exampleAddress1] += etherToSend;
-                assert.equal(web3.fromWei(balance).toNumber(), (etherToSend * (10 ** config.decimals)) / web3.toWei(config.price));
-                let investorCount = await crowdsale.investorCount();
-                assert.equal(investorCount.toNumber(), 1);
-                resolve();
-            }, Math.max(timeDelta, 10)); 
+        await delay_promise(Math.max(timeDelta, 10)).then(async function() {
+            let etherToSend = 3;
+            await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress1, "operation":crowdsale.buy, "expectedResult":"success"});
+            const balance = await crowdsaleToken.balanceOf(exampleAddress1);    
+            investmentPerAccount[exampleAddress1] += etherToSend;
+            assert.equal(web3.fromWei(balance).toNumber(), (etherToSend * (10 ** config.decimals)) / web3.toWei(config.price));
+            let investorCount = await crowdsale.investorCount();
+            assert.equal(investorCount.toNumber(), 1);
         });
     });
 
@@ -236,7 +222,6 @@ contract('Crowdsale', function(accounts) {
     });
 
     it_synched('Checks state after all tokens been sold to multiple accounts', async function() {
-
         let fundingCap = await crowdsale.weiFundingCap();
         fundingCap = fundingCap.toNumber();
         let actualWeiRaised = await crowdsale.weiRaised();
