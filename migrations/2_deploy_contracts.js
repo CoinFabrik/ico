@@ -8,21 +8,18 @@ const Crowdsale = artifacts.require('./Crowdsale.sol');
 
 const config = require('../config.js');
 
-module.exports = function(deployer) {
+module.exports = function(deployer, network, accounts) {
     deployer.deploy(SafeMath);
-    deployer.link(SafeMath, FlatPricing);
-    deployer.link(SafeMath, BonusFinalizeAgent);
-    deployer.link(SafeMath, CrowdsaleToken);
-    deployer.link(SafeMath, FixedCeiling);
-    deployer.link(SafeMath, Crowdsale);
+    deployer.link(SafeMath, [FlatPricing, BonusFinalizeAgent, CrowdsaleToken, FixedCeiling, Crowdsale]);
 
-    let CT_contract = [ CrowdsaleToken, config.tokenName, config.tokenSymbol, web3.toWei(config.initialSupply), config.decimals, config.mintable ];
-    let FP_contract = [ FlatPricing, web3.toWei(config.price) ];
-    let FC_contract = [ FixedCeiling, web3.toWei(config.chunkedMultipleCap), web3.toWei(config.limitPerAddress) ];
+    const CT_contract = [ CrowdsaleToken, config.tokenName, config.tokenSymbol, web3.toWei(config.initialSupply), config.decimals, config.mintable ];
+    // const CT_data = CrowdsaleToken.new.getData(CT_contract.slice(1, CT_contract.length));
+    const FP_contract = [ FlatPricing, web3.toWei(config.price) ];
+    const FC_contract = [ FixedCeiling, web3.toWei(config.chunkedMultipleCap), web3.toWei(config.limitPerAddress) ];
     // TODO: change to use client's MultiSigWallet
-    let MW_contract = [ MultiSigWallet, [0x4cdabc27b48893058aa1675683af3485e4409eff], 1 ];
+    const MW_contract = [ MultiSigWallet, [0x4cdabc27b48893058aa1675683af3485e4409eff], 1 ];
     
-    return deployer.deploy([ CT_contract, FP_contract, FC_contract, MW_contract ])
+    deployer.deploy([ CT_contract, FP_contract, FC_contract, MW_contract ])
     .then(async function() {
         await deployer.deploy(Crowdsale, CrowdsaleToken.address, FlatPricing.address, FixedCeiling.address, MultiSigWallet.address, config.startDate,  config.endDate,  web3.toWei(config.minimumFundingGoal));
     })
