@@ -22,16 +22,18 @@ function send_request(method, body, on_ready_state) {
 }
 
 submit_button.addEventListener("click", () => send_request("POST", { "name": name_field.textContent, "email": email_field.textContent, "method": "generate_customer_id" }, function(response) {
-    id_field.textContent = response.customer_id
-    call_data_field.textContent = response.call_data;
+    const res = JSON.parse(response);
+    id_field.textContent = res.customer_id
+    call_data_field.textContent = res.call_data;
 }));
 
 
 function refresh_state() {
     send_request("GET", { "method": "query_crowdsale" },  function(response) {
-        let percent = (response.phase_progress / response.chunked_wei_multiple) * 100;
+        const res = JSON.parse(response);
+        let percent = (res.phase_progress / res.chunked_wei_multiple) * 100;
         progress_bar.style = "width: " + percent.toString() + "%";
-        phase_field.textContent = "Current phase: " + response.current_phase.toString();
+        phase_field.textContent = "Current phase: " + res.current_phase.toString();
     });
 }
 
