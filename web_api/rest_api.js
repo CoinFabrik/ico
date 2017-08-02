@@ -112,8 +112,8 @@ async function generate_customer_id(registration_info) {
     const feedback = { customer_id: new ObjectID() };
     const customer_data = { ip_address: registration_info.ip_address, name: registration_info.name,
                             email: registration_info.email, customer_id: feedback.customer_id };
-    db_connection.collections("customers").insertOne(customer_data);
-    feedback.delegate_call_data = crowdsale.buyWithCustomerId.getData(feedback.customer_id);
+    db_connection.collection("customers").insertOne(customer_data);
+    feedback.delegate_call_data = crowdsale.buyWithCustomerId.getData("0x" + feedback.customer_id.toString());
     return feedback;
 }
 

@@ -1,5 +1,3 @@
-
-
 const progress_bar = document.getElementById("progress_bar");
 const submit_button = document.getElementById("submit_button");
 const refresh_button = document.getElementById("refresh_button");
@@ -11,7 +9,7 @@ const phase_field = document.getElementById("phase_field");
 
 function send_request(method, body, on_ready_state) {
     const http_req = new XMLHttpRequest();
-    http_req.open(method, "http://192.168.0.167:8080/");
+    http_req.open(method, "http://localhost:8080/");
     http_req.setRequestHeader("Content-Type", "application/json");
     http_req.onreadystatechange = function() {
         if (http_req.readyState == XMLHttpRequest.DONE && http_req.status == 200) {
@@ -23,8 +21,8 @@ function send_request(method, body, on_ready_state) {
 
 submit_button.addEventListener("click", () => send_request("POST", { "name": name_field.textContent, "email": email_field.textContent, "method": "generate_customer_id" }, function(response) {
     const res = JSON.parse(response);
-    id_field.textContent = res.customer_id
-    call_data_field.textContent = res.call_data;
+    id_field.textContent = res.customer_id;
+    call_data_field.textContent = res.delegate_call_data;
 }));
 
 
