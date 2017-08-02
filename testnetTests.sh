@@ -1,0 +1,1 @@
+truffle test ./test/testnet.js --network privateTestnet
