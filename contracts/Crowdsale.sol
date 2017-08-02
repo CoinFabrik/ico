@@ -28,7 +28,7 @@ import "./MintableToken.sol";
 contract Crowdsale is Haltable {
 
   /* Max investment count when we are still allowed to change the multisig address */
-  uint public MAX_INVESTMENTS_BEFORE_MULTISIG_CHANGE = 5;
+  uint constant public MAX_INVESTMENTS_BEFORE_MULTISIG_CHANGE = 5;
 
   using SafeMath for uint;
 
@@ -329,7 +329,7 @@ contract Crowdsale is Haltable {
    *
    * Design choice: no state restrictions on setting this, so that we can fix fat finger mistakes.
    */
-  function setFinalizeAgent(FinalizeAgent addr) onlyOwner {
+  function setFinalizeAgent(FinalizeAgent addr) public onlyOwner {
     // Don't allow setting bad agent
     require(addr.isFinalizeAgent());
 
@@ -340,7 +340,7 @@ contract Crowdsale is Haltable {
    * Set policy do we need to have server-side customer ids for the investments.
    *
    */
-  function setRequireCustomerId(bool value) onlyOwner {
+  function setRequireCustomerId(bool value) public onlyOwner {
     requireCustomerId = value;
     InvestmentPolicyChanged(requireCustomerId, requiredSignedAddress, signerAddress);
   }
@@ -351,7 +351,7 @@ contract Crowdsale is Haltable {
    * This is e.g. for the accredited investor clearing.
    *
    */
-  function setRequireSignedAddress(bool value, address _signerAddress) onlyOwner {
+  function setRequireSignedAddress(bool value, address _signerAddress) public onlyOwner {
     requiredSignedAddress = value;
     signerAddress = _signerAddress;
     InvestmentPolicyChanged(requireCustomerId, requiredSignedAddress, signerAddress);
@@ -361,7 +361,7 @@ contract Crowdsale is Haltable {
    * Allow addresses to do early participation.
    *
    */
-  function setEarlyParticipantWhitelist(address addr, bool status) onlyOwner {
+  function setEarlyParticipantWhitelist(address addr, bool status) public onlyOwner {
     earlyParticipantWhitelist[addr] = status;
     Whitelisted(addr, status);
   }
@@ -376,7 +376,7 @@ contract Crowdsale is Haltable {
    * but we trust owners know what they are doing.
    *
    */
-  function setEndsAt(uint time) onlyOwner {
+  function setEndsAt(uint time) public onlyOwner {
     // Don't change the past
     require(now <= time);
 
@@ -389,7 +389,7 @@ contract Crowdsale is Haltable {
    *
    * Design choice: no state restrictions on the set, so that we can fix fat finger mistakes.
    */
-  function setPricingStrategy(PricingStrategy _pricingStrategy) onlyOwner {
+  function setPricingStrategy(PricingStrategy _pricingStrategy) public onlyOwner {
     // Don't allow setting bad agent
     require(_pricingStrategy.isPricingStrategy());
 
@@ -401,7 +401,7 @@ contract Crowdsale is Haltable {
    *
    * Design choice: no state restrictions on the set, so that we can fix fat finger mistakes.
    */
-  function setCeilingStrategy(CeilingStrategy _ceilingStrategy) onlyOwner {
+  function setCeilingStrategy(CeilingStrategy _ceilingStrategy) public onlyOwner {
     require(_ceilingStrategy.isCeilingStrategy());
 
     ceilingStrategy = _ceilingStrategy;
@@ -489,7 +489,7 @@ contract Crowdsale is Haltable {
   }
 
   /** This is for manual testing of multisig wallet interaction */
-  function setOwnerTestValue(uint val) onlyOwner {
+  function setOwnerTestValue(uint val) public onlyOwner {
     ownerTestValue = val;
   }
 
