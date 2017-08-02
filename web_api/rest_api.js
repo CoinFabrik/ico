@@ -16,6 +16,7 @@ const CS_contract = web3.eth.contract(abi.Crowdsale);
 const crowdsale = CS_contract.at(config.crowdsale.address);
 const ceiling_contract = web3.eth.contract(abi.FixedCeiling);
 
+app.use(express.static("../web_test"));
 app.use(body_parser.json());
 app.set("trust proxy", true);
 
