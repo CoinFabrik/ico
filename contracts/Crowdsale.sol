@@ -33,7 +33,7 @@ contract Crowdsale is Haltable {
   using SafeMath for uint;
 
   /* The token we are selling */
-  FractionalERC20 public token;
+  MintableToken public token;
 
   /* How we are going to price our offering */
   PricingStrategy public pricingStrategy;
