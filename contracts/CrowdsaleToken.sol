@@ -5,6 +5,7 @@ pragma solidity ^0.4.14;
  * Modified by https://www.coinfabrik.com/
  */
 
+import "./FractionalERC20.sol"
 import "./ReleasableToken.sol";
 import "./MintableToken.sol";
 import "./UpgradeableToken.sol";
@@ -20,7 +21,7 @@ import "./UpgradeableToken.sol";
  * - The token can be capped (supply set in the constructor) or uncapped (crowdsale contract can mint new tokens)
  *
  */
-contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken {
+contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, FractionalERC20 {
 
   event UpdatedTokenInformation(string newName, string newSymbol);
 
