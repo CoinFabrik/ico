@@ -7,6 +7,7 @@ pragma solidity ^0.4.14;
 
 import "./Haltable.sol";
 import "./FractionalERC20.sol";
+import "./CrowdsaleToken.sol"
 import "./PricingStrategy.sol";
 import "./FinalizeAgent.sol";
 import "./SafeMath.sol";
@@ -130,7 +131,7 @@ contract Crowdsale is Haltable {
 
   function Crowdsale(address _token, PricingStrategy _pricingStrategy, CeilingStrategy _ceilingStrategy, address _multisigWallet, uint _start, uint _end, uint _minimumFundingGoal) {
 
-    token = FractionalERC20(_token);
+    token = CrowdsaleToken(_token);
 
     setPricingStrategy(_pricingStrategy);
 
