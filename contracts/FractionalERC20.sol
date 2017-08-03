@@ -11,6 +11,6 @@ import "./ERC20.sol";
  */
 contract FractionalERC20 is ERC20 {
 
-  uint public decimals;
+  uint8 public decimals;
 
 }

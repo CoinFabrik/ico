@@ -28,7 +28,7 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken {
 
   string public symbol;
 
-  uint public decimals;
+  uint8 public decimals;
 
   /**
    * Construct the token.
