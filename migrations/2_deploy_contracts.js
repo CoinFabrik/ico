@@ -8,13 +8,14 @@ const Crowdsale = artifacts.require('./Crowdsale.sol');
 
 const config = require('../config.js');
 
+// TODO: update migration to use HubiiCrowdsale
 module.exports = function(deployer, network, accounts) {
     deployer.deploy(SafeMath);
     deployer.link(SafeMath, [FlatPricing, BonusFinalizeAgent, CrowdsaleToken, FixedCeiling, Crowdsale]);
 
     const CT_contract = [ CrowdsaleToken, config.tokenName, config.tokenSymbol, web3.toWei(config.initialSupply), config.decimals, config.mintable ];
     // const CT_data = CrowdsaleToken.new.getData(CT_contract.slice(1, CT_contract.length));
-    const FP_contract = [ FlatPricing, web3.toWei(config.price) ];
+    const FP_contract = [ FlatPricing, config.price ];
     const FC_contract = [ FixedCeiling, web3.toWei(config.chunkedMultipleCap), web3.toWei(config.limitPerAddress) ];
     // TODO: change to use client's MultiSigWallet
     // const MW_contract = [ MultiSigWallet, [0x485de458fbcac6a7d35227842d652641384cb333], 1 ];

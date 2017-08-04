@@ -14,7 +14,7 @@ import "./CeilingStrategy.sol";
 import "./MintableToken.sol";
 
 /**
- * Concrete base contract for token sales.
+ * Abstract base contract for token sales.
  *
  * Handles
  * - start and end dates
@@ -128,14 +128,8 @@ contract Crowdsale is Haltable {
   // Crowdsale end time has been changed
   event EndsAtChanged(uint ends_at);
 
-  function Crowdsale(address _token, PricingStrategy _pricingStrategy, CeilingStrategy _ceilingStrategy, address _multisigWallet, FinalizeAgent _finalizeAgent, uint _start, uint _end, uint _minimumFundingGoal) {
-
-    token = CrowdsaleToken(_token);
-
-    setPricingStrategy(_pricingStrategy);
-    setCeilingStrategy(_ceilingStrategy);
+  function Crowdsale(address _multisigWallet, uint _start, uint _end, uint _minimumFundingGoal) internal {
     setMultisig(_multisigWallet);
-    setFinalizeAgent(_finalizeAgent);
 
     // Don't mess the dates
     require(_start != 0 && _end != 0);
@@ -180,12 +174,12 @@ contract Crowdsale is Haltable {
     updateInvestorFunds(tokenAmount, weiAmount, receiver, customerId);
 
     // Pocket the money
-    assert(multisigWallet.send(weiAmount));
+    multisigWallet.transfer(weiAmount);
 
     // Return excess of money
     uint weiToReturn = msg.value.sub(weiAmount);
     if (weiToReturn > 0) {
-      assert(msg.sender.send(weiToReturn));
+      msg.sender.transfer(weiToReturn);
     }
   }
 
@@ -202,11 +196,11 @@ contract Crowdsale is Haltable {
    *
    */
   function preallocate(address receiver, uint fullTokens, uint weiPrice) public onlyOwner notFinished {
-
+    require(receiver != address(0));
     uint tokenAmount = fullTokens.mul(10**uint(token.decimals()));
-    uint weiAmount = weiPrice.mul(tokenAmount); // This can also be 0, in which case we give out tokens for free
-    if (tokensSold == 0)
+    if (tokenAmount == 0)
         return;
+    uint weiAmount = weiPrice.mul(tokenAmount); // This can also be 0, in which case we give out tokens for free
     updateInvestorFunds(tokenAmount, weiAmount, receiver , 0);
   }
 
@@ -404,7 +398,7 @@ contract Crowdsale is Haltable {
     investedAmountOf[msg.sender] = 0;
     weiRefunded = weiRefunded.add(weiValue);
     Refund(msg.sender, weiValue);
-    assert(msg.sender.send(weiValue));
+    msg.sender.transfer(weiValue);
   }
 
   /**
@@ -456,8 +450,7 @@ contract Crowdsale is Haltable {
   }
 
   function assignTokens(address receiver, uint tokenAmount) private {
-    MintableToken mintableToken = MintableToken(token);
-    mintableToken.mint(receiver, tokenAmount);
+    token.mint(receiver, tokenAmount);
   }
 
   /** Interface marker. */
