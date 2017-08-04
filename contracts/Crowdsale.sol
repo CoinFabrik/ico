@@ -429,6 +429,7 @@ contract Crowdsale is Haltable {
    */
   function loadRefund() public payable inState(State.Failure) {
     require(msg.value != 0);
+    require(msg.value == weiRaised);
     loadedRefund = loadedRefund.add(msg.value);
   }
 
