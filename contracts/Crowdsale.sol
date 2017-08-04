@@ -238,6 +238,10 @@ contract Crowdsale is Haltable {
     weiRaised = weiRaised.add(weiAmount);
     tokensSold = tokensSold.add(tokenAmount);
 
+    if (investedAmountOf[receiver] == 0 && tokensSold > 0) {
+       // A new investor
+       investorCount++;
+    }
     investedAmountOf[receiver] = investedAmountOf[receiver].add(weiAmount);
     tokenAmountOf[receiver] = tokenAmountOf[receiver].add(tokenAmount);
 
