@@ -410,9 +410,11 @@ contract Crowdsale is Haltable {
    * The team can transfer the funds back on the smart contract in the case that the minimum goal was not reached.
    */
   function loadRefund() public payable inState(State.Failure) {
-    require(msg.value != 0);
-    require(msg.value == weiRaised);
-    loadedRefund = loadedRefund.add(msg.value);
+    require(msg.value >= weiRaised);
+    require(weiRefunded == 0);
+    uint excedent = msg.value.sub(weiRaised);
+    loadedRefund = loadedRefund.add(msg.value.sub(excedent));
+    investedAmountOf[msg.sender].add(excedent);
   }
 
   /**
