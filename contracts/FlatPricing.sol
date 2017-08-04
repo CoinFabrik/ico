@@ -4,6 +4,7 @@ pragma solidity ^0.4.14;
  * Originally from https://github.com/TokenMarketNet/ico
  */
 
+import "./Crowdsale.sol";
 import "./PricingStrategy.sol";
 import "./SafeMath.sol";
 
@@ -21,14 +22,18 @@ contract FlatPricing is PricingStrategy {
     oneTokenInWei = _oneTokenInWei;
   }
 
+  function isSane(Crowdsale crowdsale) public constant returns (bool) {
+     return address(crowdsale.pricingStrategy()) == address(this);
+  }
+
   /**
    * Calculate the current price for buy in amount.
    *
    * @ param  {uint amount} Buy-in value in wei.
    */
-  function calculatePrice(uint value, uint weiRaised, uint tokensSold, address msgSender, uint decimals) public constant returns (uint) {
+  function calculatePrice(uint value, uint, uint, address, uint decimals) public constant returns (uint) {
     uint multiplier = 10 ** decimals;
-    return value.mul(multiplier) / oneTokenInWei;
+    return value.mul(multiplier).div(oneTokenInWei);
   }
 
 }

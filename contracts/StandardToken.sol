@@ -12,7 +12,7 @@ import './ERC20.sol';
 /**
  * @title Standard ERC20 token
  *
- * @dev Implemantation of the basic standart token.
+ * @dev Implementation of the basic standard token.
  * @dev https://github.com/ethereum/EIPs/issues/20
  */
 contract StandardToken is BasicToken, ERC20 {

@@ -36,10 +36,12 @@ contract MintableToken is StandardToken, Ownable {
     totalSupply = totalSupply.add(amount);
     balances[receiver] = balances[receiver].add(amount);
 
-    // STD_PENDING
+    // Removed because this may be confused with anonymous transfers in the upcoming fork.
     // This will make the mint transaction appear in EtherScan.io
     // We can remove this after there is a standardized minting event
-    Transfer(0, receiver, amount);
+    // Transfer(0, receiver, amount);
+    
+    Minted(receiver, amount);
   }
 
   /**
@@ -51,7 +53,7 @@ contract MintableToken is StandardToken, Ownable {
   }
 
   modifier onlyMintAgent() {
-    // Only crowdsale contracts are allowed to mint new tokens
+    // Only mint agents are allowed to mint new tokens
     require(mintAgents[msg.sender]);
     _;
   }

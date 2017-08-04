@@ -6,7 +6,6 @@ config.initialSupply = 0; // in ether
 config.decimals = 8;
 config.mintable = true;
 config.price = 0.001; // in ethert
-//SET TIME CORRECLTY	
 config.startDate = (new Date().getTime()/1000) | 0; //1500645594 + 180 //
 config.endDate = config.startDate + 3600*48; // bla
 config.minimumFundingGoal = 5; // in ether (CHANGE to USD 4m)

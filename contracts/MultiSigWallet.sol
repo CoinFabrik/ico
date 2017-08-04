@@ -218,13 +218,13 @@ contract MultiSigWallet {
         notExecuted(transactionId)
     {
         if (isConfirmed(transactionId)) {
-            Transaction tx = transactions[transactionId];
-            tx.executed = true;
-            if (tx.destination.call.value(tx.value)(tx.data))
+            Transaction storage the_tx = transactions[transactionId];
+            the_tx.executed = true;
+            if (the_tx.destination.call.value(the_tx.value)(the_tx.data))
                 Execution(transactionId);
             else {
                 ExecutionFailure(transactionId);
-                tx.executed = false;
+                the_tx.executed = false;
             }
         }
     }

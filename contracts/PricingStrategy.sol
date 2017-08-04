@@ -4,6 +4,8 @@ pragma solidity ^0.4.14;
  * Originally from https://github.com/TokenMarketNet/ico
  */
 
+ import "./Crowdsale.sol";
+
 /**
  * Interface for defining crowdsale pricing.
  */
@@ -18,9 +20,7 @@ contract PricingStrategy {
    *
    * Checks that pricing strategy matches crowdsale parameters.
    */
-  function isSane(address crowdsale) public constant returns (bool) {
-    return true;
-  }
+  function isSane(Crowdsale crowdsale) public constant returns (bool);
 
   /**
    * When somebody tries to buy tokens for X eth, calculate how many tokens they get.

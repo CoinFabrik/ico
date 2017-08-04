@@ -175,10 +175,9 @@ contract('Crowdsale', function(accounts) {
         let id = 123;
         await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress2, "operation":crowdsale.buyWithCustomerId, "expectedResult":"success", "id":id});
 
-
         const balance = await crowdsaleToken.balanceOf(exampleAddress2);
         investmentPerAccount[exampleAddress2] += etherToSend;
-        assert.equal(web3.fromWei(balance).toNumber(), ( (investmentPerAccount[exampleAddress2]) * (10 ** config.decimals)) / web3.toWei(config.price));
+        assert.equal(web3.fromWei(balance).toNumber(), (investmentPerAccount[exampleAddress2] * (10 ** config.decimals)) / web3.toWei(config.price));
     });
 
 
@@ -222,12 +221,12 @@ contract('Crowdsale', function(accounts) {
         let actualWeiRaised = await crowdsale.weiRaised();
         actualWeiRaised = actualWeiRaised.toNumber();
         let remaining = fundingCap - actualWeiRaised;
-        while(actualWeiRaised < fundingCap) {
+        while (actualWeiRaised < fundingCap) {
             randomAccountIndex = Math.round((Math.random() * (accounts.length-2)) + 1);
             randomInvestment = Math.floor((Math.random() * (config.limitPerAddress-1)) + 1);
             if (investmentPerAccount[accounts[randomAccountIndex]] >= config.limitPerAddress) {
                 continue;
-            } else{
+            } else {
                 let addressLimitedInvestment = config.limitPerAddress - investmentPerAccount[accounts[randomAccountIndex]];
                 let capLimitedInvestment =  web3.fromWei(fundingCap) - web3.fromWei(actualWeiRaised);
                 let effectiveInvestment = Math.min(addressLimitedInvestment, capLimitedInvestment, randomInvestment);
@@ -238,7 +237,6 @@ contract('Crowdsale', function(accounts) {
                 investedAmount = await crowdsale.investedAmountOf(accounts[randomAccountIndex]);
                 assert.equal(web3.fromWei(investedAmount).toNumber(), investmentPerAccount[accounts[randomAccountIndex]]);
             }
-
             actualWeiRaised = await crowdsale.weiRaised();
             actualWeiRaised = actualWeiRaised.toNumber();
         } 

@@ -1,5 +1,7 @@
 pragma solidity ^0.4.14;
 
+import "./Crowdsale.sol";
+
 /**
  * Interface for defining crowdsale ceiling.
  */
@@ -14,9 +16,7 @@ contract CeilingStrategy {
    *
    * Checks that ceiling strategy matches crowdsale parameters.
    */
-  function isSane(address _crowdsale) public constant returns (bool) {
-    return true;
-  }
+  function isSane(Crowdsale _crowdsale) public constant returns (bool);
 
   /**
    * When somebody tries to buy tokens for X wei, calculate how many weis they are allowed to use.

@@ -5,7 +5,7 @@ pragma solidity ^0.4.14;
  * Modified by https://www.coinfabrik.com/
  */
 
-import "./FractionalERC20.sol"
+import "./FractionalERC20.sol";
 import "./ReleasableToken.sol";
 import "./MintableToken.sol";
 import "./UpgradeableToken.sol";

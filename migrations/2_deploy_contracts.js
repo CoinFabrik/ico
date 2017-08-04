@@ -17,10 +17,15 @@ module.exports = function(deployer, network, accounts) {
     const FP_contract = [ FlatPricing, web3.toWei(config.price) ];
     const FC_contract = [ FixedCeiling, web3.toWei(config.chunkedMultipleCap), web3.toWei(config.limitPerAddress) ];
     // TODO: change to use client's MultiSigWallet
-    // let MW_contract = [ MultiSigWallet, [0x485de458fbcac6a7d35227842d652641384cb333], 1 ];
-    let MW_address = "0x931F6E5c89dD5559D3820cFBd1975BA5d92F87E9";
-    deployer.deploy([ CT_contract, FP_contract, FC_contract])
+    // const MW_contract = [ MultiSigWallet, [0x485de458fbcac6a7d35227842d652641384cb333], 1 ];
+    const MW_address = "0x931F6E5c89dD5559D3820cFBd1975BA5d92F87E9";
+    const BFA_contract = [ BonusFinalizeAgent, config.bonusBasePoints, MW_address ];
+    deployer.deploy([ CT_contract, FP_contract, FC_contract, BFA_contract ])
     .then(async function() {
+        console.log('Setting BonusFinalizeAgent as mint agent of CrowdsaleToken...');
+        await tokenInstance.setMintAgent(BonusFinalizeAgent.address, true);
+        console.log('Setting BonusFinalizeAgent as release agent of CrowdsaleToken...');
+        await tokenInstance.setReleaseAgent(BonusFinalizeAgent.address);
         await deployer.deploy(Crowdsale, CrowdsaleToken.address, FlatPricing.address, FixedCeiling.address, MW_address, config.startDate,  config.endDate,  web3.toWei(config.minimumFundingGoal));
     })
     .then(async function() {
@@ -31,10 +36,6 @@ module.exports = function(deployer, network, accounts) {
         .then(async function(tokenInstance) {
             console.log('Setting Crowdsale as mint agent of CrowdsaleToken...');
             await tokenInstance.setMintAgent(Crowdsale.address, true);
-            console.log('Setting BonusFinalizeAgent as mint agent of CrowdsaleToken...');
-            await tokenInstance.setMintAgent(BonusFinalizeAgent.address, true);
-            console.log('Setting BonusFinalizeAgent as release agent of CrowdsaleToken...');
-            await tokenInstance.setReleaseAgent(BonusFinalizeAgent.address);
             // console.log('Transfering ownership of CrowdsaleToken to MultiSigWallet...');
             // tokenInstance.transferOwnership(MW_address);
         });
