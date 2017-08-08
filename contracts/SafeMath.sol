@@ -1,4 +1,4 @@
-pragma solidity ^0.4.14;
+pragma solidity ^0.4.13;
 
 /**
  * Originally from  https://github.com/OpenZeppelin/zeppelin-solidity

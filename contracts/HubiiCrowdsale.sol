@@ -1,4 +1,4 @@
-pragma solidity ^0.4.14;
+pragma solidity ^0.4.13;
 
 import "./Crowdsale.sol";
 import "./CrowdsaleToken.sol";
@@ -22,7 +22,7 @@ contract HubiiCrowdsale is Crowdsale {
         // Do take care when setting though. The solidity compiler may not have any checks on the boundaries of literals.
         // 1/500 is the tokens per wei ratio.
         // 8 is the amount of decimals.
-        // 10 ** 8 is the factor to calculate the amount of decimal tokens per wei ratio.
+        // 10 ** 8 is the factor used to calculate the amount of decimal tokens per wei ratio.
         PricingStrategy p_strategy = PricingStrategy(new FlatPricing((1/500) * (10 ** 8)));
         CeilingStrategy c_strategy = CeilingStrategy(new FixedCeiling(chunked_multiple, limit_per_address));
         FinalizeAgent f_agent = FinalizeAgent(new BonusFinalizeAgent(3000, _teamMultisig));
