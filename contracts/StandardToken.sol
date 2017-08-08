@@ -33,7 +33,7 @@ contract StandardToken is BasicToken, ERC20 {
    * @param _to address The address which you want to transfer to
    * @param _value uint the amout of tokens to be transfered
    */
-  function transferFrom(address _from, address _to, uint _value) returns (bool success) {
+  function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
     uint _allowance = allowed[_from][msg.sender];
 
     // Check is not needed because sub(_allowance, _value) will already throw if this condition is not met
@@ -52,7 +52,7 @@ contract StandardToken is BasicToken, ERC20 {
    * @param _spender The address which will spend the funds.
    * @param _value The amount of tokens to be spent.
    */
-  function approve(address _spender, uint _value) returns (bool success) {
+  function approve(address _spender, uint _value) public returns (bool success) {
 
     // To change the approve amount you first have to reduce the addresses'
     //  allowance to zero by calling `approve(_spender, 0)` if it is not
@@ -71,7 +71,7 @@ contract StandardToken is BasicToken, ERC20 {
    * @param _spender address The address which will spend the funds.
    * @return A uint specifing the amount of tokens still avaible for the spender.
    */
-  function allowance(address _owner, address _spender) constant returns (uint remaining) {
+  function allowance(address _owner, address _spender) public constant returns (uint remaining) {
     return allowed[_owner][_spender];
   }
 
@@ -81,7 +81,7 @@ contract StandardToken is BasicToken, ERC20 {
    * Works around https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
    *
    */
-  function addApproval(address _spender, uint _addedValue)
+  function addApproval(address _spender, uint _addedValue) public
   returns (bool success) {
       uint oldValue = allowed[msg.sender][_spender];
       allowed[msg.sender][_spender] = oldValue.add(_addedValue);
@@ -94,7 +94,7 @@ contract StandardToken is BasicToken, ERC20 {
    *
    * Works around https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
    */
-  function subApproval(address _spender, uint _subtractedValue)
+  function subApproval(address _spender, uint _subtractedValue) public
   returns (bool success) {
 
       uint oldVal = allowed[msg.sender][_spender];

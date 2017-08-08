@@ -27,12 +27,26 @@ contract MintableToken is StandardToken, Ownable {
 
   event MintingAgentChanged(address addr, bool state);
 
+
+  function MintableToken(uint _initialSupply, address _multisig, bool _mintable) internal {
+    // Create initially all balance on the team multisig
+    mintInternal(_multisig, _initialSupply);
+    // Cannot create a token without supply and no minting
+    require(_mintable || _initialSupply != 0);
+    // No more new supply allowed after the token creation
+    mintingFinished = !_mintable;
+  }
+
   /**
    * Create new tokens and allocate them to an address.
    *
    * Only callable by a crowdsale contract (mint agent).
    */
-  function mint(address receiver, uint amount) onlyMintAgent canMint public {
+  function mint(address receiver, uint amount) onlyMintAgent public {
+    mintInternal(receiver, amount);
+  }
+
+  function mintInternal(address receiver, uint amount) canMint private {
     totalSupply = totalSupply.add(amount);
     balances[receiver] = balances[receiver].add(amount);
 
@@ -40,7 +54,7 @@ contract MintableToken is StandardToken, Ownable {
     // This will make the mint transaction appear in EtherScan.io
     // We can remove this after there is a standardized minting event
     // Transfer(0, receiver, amount);
-    
+
     Minted(receiver, amount);
   }
 
