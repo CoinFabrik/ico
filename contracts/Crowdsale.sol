@@ -350,7 +350,7 @@ contract Crowdsale is Haltable {
     // Disallow setting a bad agent
     require(addr.isPricingStrategy());
     pricingStrategy = addr;
-    require(isFinalizerSane());
+    require(isPricingSane());
   }
 
   /**

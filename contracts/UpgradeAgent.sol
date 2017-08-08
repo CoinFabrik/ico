@@ -12,6 +12,7 @@ pragma solidity ^0.4.13;
  */
 contract UpgradeAgent {
 
+  /** This value should be the same as the original token's total supply */
   uint public originalSupply;
 
   /** Interface marker */
@@ -19,6 +20,7 @@ contract UpgradeAgent {
     return true;
   }
 
+  /** This function is called by the old token to inform the new token contract that the address _from is upgrading _value tokens */
   function upgradeFrom(address _from, uint _value) public;
 
 }
