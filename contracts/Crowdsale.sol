@@ -128,6 +128,12 @@ contract Crowdsale is Haltable {
   // Crowdsale end time has been changed
   event EndsAtChanged(uint ends_at);
 
+  // Crowdsale's finalize function has been called
+  event Finalized();
+
+  // A new funding cap has been set
+  event FundingCapSet(uint newFundingCap);
+
   function Crowdsale(address _multisigWallet, uint _start, uint _end, uint _minimumFundingGoal) internal {
     setMultisig(_multisigWallet);
 
@@ -225,6 +231,7 @@ contract Crowdsale is Haltable {
   function setFundingCap(uint newCap) public onlyOwner notFinished {
     weiFundingCap = ceilingStrategy.relaxFundingCap(newCap, weiRaised);
     require(weiFundingCap >= minimumFundingGoal);
+    FundingCapSet(weiFundingCap);
   }
 
   /**
@@ -288,6 +295,7 @@ contract Crowdsale is Haltable {
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
     finalizeAgent.finalizeCrowdsale(this, token);
     finalized = true;
+    Finalized();
   }
 
   /**
