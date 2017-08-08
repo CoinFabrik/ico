@@ -30,6 +30,7 @@ contract HubiiCrowdsale is Crowdsale {
         setCeilingStrategy(c_strategy);
         // Testing values
         token = new CrowdsaleToken(token_name, token_symbol, token_initial_supply, token_decimals, _teamMultisig, token_mintable);
+        token.setMintAgent(address(this), true);
         token.setMintAgent(address(f_agent), true);
         token.setReleaseAgent(address(f_agent));
         setFinalizeAgent(f_agent);

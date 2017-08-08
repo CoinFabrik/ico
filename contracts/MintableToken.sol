@@ -29,10 +29,12 @@ contract MintableToken is StandardToken, Ownable {
 
 
   function MintableToken(uint _initialSupply, address _multisig, bool _mintable) internal {
-    // Create initially all balance on the team multisig
-    mintInternal(_multisig, _initialSupply);
+    require(_multisig != address(0));
     // Cannot create a token without supply and no minting
     require(_mintable || _initialSupply != 0);
+    // Create initially all balance on the team multisig
+    if (_initialSupply > 0)
+        mintInternal(_multisig, _initialSupply);
     // No more new supply allowed after the token creation
     mintingFinished = !_mintable;
   }

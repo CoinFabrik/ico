@@ -50,63 +50,61 @@ contract UpgradeableToken is StandardToken {
    * Do not allow construction without upgrade master set.
    */
   function UpgradeableToken(address _upgradeMaster) {
-    upgradeMaster = _upgradeMaster;
+    setUpgradeMaster(_upgradeMaster);
   }
 
   /**
    * Allow the token holder to upgrade some of their tokens to a new contract.
    */
   function upgrade(uint value) public {
+    UpgradeState state = getUpgradeState();
+    // Ensure it's not called in a bad state
+    require(state == UpgradeState.ReadyToUpgrade || state == UpgradeState.Upgrading);
 
-      UpgradeState state = getUpgradeState();
-      // Ensure it's not called in a bad state
-      require(state == UpgradeState.ReadyToUpgrade || state == UpgradeState.Upgrading);
+    // Validate input value.
+    require(value != 0);
 
-      // Validate input value.
-      require(value != 0);
+    balances[msg.sender] = balances[msg.sender].sub(value);
 
-      balances[msg.sender] = balances[msg.sender].sub(value);
+    // Take tokens out from circulation
+    totalSupply = totalSupply.sub(value);
+    totalUpgraded = totalUpgraded.add(value);
 
-      // Take tokens out from circulation
-      totalSupply = totalSupply.sub(value);
-      totalUpgraded = totalUpgraded.add(value);
-
-      // Upgrade agent reissues the tokens
-      upgradeAgent.upgradeFrom(msg.sender, value);
-      Upgrade(msg.sender, upgradeAgent, value);
+    // Upgrade agent reissues the tokens
+    upgradeAgent.upgradeFrom(msg.sender, value);
+    Upgrade(msg.sender, upgradeAgent, value);
   }
 
   /**
    * Set an upgrade agent that handles
    */
   function setUpgradeAgent(address agent) external {
+    // Check whether the token is in a state that we could think of upgrading
+    require(canUpgrade());
 
-      // Check whether the token is in a state that we could think of upgrading
-      require(canUpgrade());
+    require(agent != 0x0);
+    // Only a master can designate the next agent
+    require(msg.sender == upgradeMaster);
+    // Upgrade has already begun for an agent
+    require(getUpgradeState() != UpgradeState.Upgrading);
 
-      require(agent != 0x0);
-      // Only a master can designate the next agent
-      require(msg.sender == upgradeMaster);
-      // Upgrade has already begun for an agent
-      require(getUpgradeState() != UpgradeState.Upgrading);
+    upgradeAgent = UpgradeAgent(agent);
 
-      upgradeAgent = UpgradeAgent(agent);
+    // Bad interface
+    require(upgradeAgent.isUpgradeAgent());
+    // Make sure that token supplies match in source and target
+    require(upgradeAgent.originalSupply() == totalSupply);
 
-      // Bad interface
-      require(upgradeAgent.isUpgradeAgent());
-      // Make sure that token supplies match in source and target
-      require(upgradeAgent.originalSupply() == totalSupply);
-
-      UpgradeAgentSet(upgradeAgent);
+    UpgradeAgentSet(upgradeAgent);
   }
 
   /**
    * Get the state of the token upgrade.
    */
   function getUpgradeState() public constant returns(UpgradeState) {
-    if(!canUpgrade()) return UpgradeState.NotAllowed;
-    else if(address(upgradeAgent) == 0x00) return UpgradeState.WaitingForAgent;
-    else if(totalUpgraded == 0) return UpgradeState.ReadyToUpgrade;
+    if (!canUpgrade()) return UpgradeState.NotAllowed;
+    else if (address(upgradeAgent) == 0x00) return UpgradeState.WaitingForAgent;
+    else if (totalUpgraded == 0) return UpgradeState.ReadyToUpgrade;
     else return UpgradeState.Upgrading;
   }
 
@@ -115,10 +113,14 @@ contract UpgradeableToken is StandardToken {
    *
    * This allows us to set a new owner for the upgrade mechanism.
    */
-  function setUpgradeMaster(address master) public {
-      require(master != 0x0);
-      require(msg.sender == upgradeMaster);
-      upgradeMaster = master;
+  function changeUpgradeMaster(address new_master) public {
+    require(msg.sender == upgradeMaster);
+    setUpgradeMaster(new_master);
+  }
+
+  function setUpgradeMaster(address new_master) private {
+    require(new_master != 0x0);
+    upgradeMaster = new_master;
   }
 
   /**

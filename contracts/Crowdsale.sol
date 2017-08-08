@@ -27,9 +27,6 @@ import "./MintableToken.sol";
  */
 contract Crowdsale is Haltable {
 
-  /* Max investment count when we are still allowed to change the multisig address */
-  uint constant public MAX_INVESTMENTS_BEFORE_MULTISIG_CHANGE = 5;
-
   using SafeMath for uint;
 
   /* The token we are selling */
@@ -199,15 +196,15 @@ contract Crowdsale is Haltable {
     require(receiver != address(0));
     uint tokenAmount = fullTokens.mul(10**uint(token.decimals()));
     if (tokenAmount == 0)
-        return;
+      return;
     uint weiAmount = weiPrice.mul(tokenAmount); // This can also be 0, in which case we give out tokens for free
     updateInvestorFunds(tokenAmount, weiAmount, receiver , 0);
   }
 
   function updateInvestorFunds(uint tokenAmount, uint weiAmount, address receiver, uint128 customerId) private {
     if (tokenAmountOf[receiver] == 0) {
-       // A new investor
-       investorCount++;
+      // A new investor
+      investorCount++;
     }
     // Update investor
     investedAmountOf[receiver] = investedAmountOf[receiver].add(weiAmount);
@@ -231,10 +228,10 @@ contract Crowdsale is Haltable {
    * Allow anonymous contributions to this crowdsale.
    */
   function investWithSignedAddress(address addr, uint128 customerId, uint8 v, bytes32 r, bytes32 s) public payable {
-     bytes32 hash = sha256(addr);
-     require(ecrecover(hash, v, r, s) == signerAddress);
-     require(customerId != 0);  // UUIDv4 sanity check
-     investInternal(addr, customerId);
+    bytes32 hash = sha256(addr);
+    require(ecrecover(hash, v, r, s) == signerAddress);
+    require(customerId != 0);  // UUIDv4 sanity check
+    investInternal(addr, customerId);
   }
 
   /**
