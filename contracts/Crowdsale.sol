@@ -205,7 +205,7 @@ contract Crowdsale is Haltable {
   }
 
   function updateInvestorFunds(uint tokenAmount, uint weiAmount, address receiver, uint128 customerId) private {
-    if (investedAmountOf[receiver] == 0) {
+    if (tokenAmountOf[receiver] == 0) {
        // A new investor
        investorCount++;
     }
@@ -330,7 +330,7 @@ contract Crowdsale is Haltable {
    * but we trust owners know what they are doing.
    *
    */
-  function setEndsAt(uint time) public onlyOwner {
+  function setEndsAt(uint time) internal notFinished {
     // Don't change the past
     require(now <= time);
 

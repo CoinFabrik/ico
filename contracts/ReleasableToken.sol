@@ -23,39 +23,39 @@ contract ReleasableToken is ERC20, Ownable {
   mapping (address => bool) public transferAgents;
 
   /**
-   * Limit token transfer until the crowdsale is over.
-   *
-   */
-  modifier canTransfer(address _sender) {
-    require(released || transferAgents[_sender]);
-    _;
-  }
-
-  /**
    * Set the contract that can call release and make the token transferable.
    *
-   * Design choice. Allow reset the release agent to fix fat finger mistakes.
+   * Since the owner of this contract is (or should be) the crowdsale,
+   * it can only be called by a corresponding exposed API in the crowdsale contract in case of input error.
    */
   function setReleaseAgent(address addr) onlyOwner inReleaseState(false) public {
-
-    // We don't do interface check here as we might want to a normal wallet address to act as a release agent
+    // We don't do interface check here as we might want to have a normal wallet address to act as a release agent.
     releaseAgent = addr;
   }
 
   /**
-   * Owner can allow a particular address (a crowdsale contract) to transfer tokens despite the lock up period.
+   * Owner can allow a particular address (e.g. a crowdsale contract) to transfer tokens despite the lock up period.
    */
   function setTransferAgent(address addr, bool state) onlyOwner inReleaseState(false) public {
     transferAgents[addr] = state;
   }
 
   /**
-   * One way function to release the tokens to the wild.
+   * One way function to release the tokens into the wild.
    *
-   * Can be called only from the release agent that is the final ICO contract. It is only called if the crowdsale has been success (first milestone reached).
+   * Can be called only from the release agent that should typically be the finalize agent ICO contract.
+   * In the scope of the crowdsale, it is only called if the crowdsale has been a success (first milestone reached).
    */
   function releaseTokenTransfer() public onlyReleaseAgent {
     released = true;
+  }
+
+  /**
+   * Limit token transfer until the crowdsale is over.
+   */
+  modifier canTransfer(address _sender) {
+    require(released || transferAgents[_sender]);
+    _;
   }
 
   /** The function can be called only before or after the tokens have been released */
@@ -70,12 +70,14 @@ contract ReleasableToken is ERC20, Ownable {
     _;
   }
 
-  function transfer(address _to, uint _value) canTransfer(msg.sender) returns (bool success) {
+  /** We restrict transfer by overriding it */
+  function transfer(address _to, uint _value) public canTransfer(msg.sender) returns (bool success) {
     // Call StandardToken.transfer()
    return super.transfer(_to, _value);
   }
 
-  function transferFrom(address _from, address _to, uint _value) canTransfer(_from) returns (bool success) {
+  /** We restrict transferFrom by overriding it */
+  function transferFrom(address _from, address _to, uint _value) public canTransfer(_from) returns (bool success) {
     // Call StandardToken.transferForm()
     return super.transferFrom(_from, _to, _value);
   }
