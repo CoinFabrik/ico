@@ -16,6 +16,8 @@ import "./Ownable.sol";
 contract Haltable is Ownable {
   bool public halted;
 
+  event Halted(bool halted);
+
   modifier stopInEmergency {
     require(!halted);
     _;
@@ -29,11 +31,13 @@ contract Haltable is Ownable {
   // called by the owner on emergency, triggers stopped state
   function halt() external onlyOwner {
     halted = true;
+    Halted(true);
   }
 
   // called by the owner on end of emergency, returns to normal state
   function unhalt() external onlyOwner onlyInEmergency {
     halted = false;
+    Halted(false);
   }
 
 }
