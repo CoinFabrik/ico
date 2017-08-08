@@ -5,13 +5,13 @@ pragma solidity ^0.4.13;
  * Modified by https://www.coinfabrik.com/
  */
 
-import "./ERC20.sol";
+import "./StandardToken.sol";
 import "./Ownable.sol";
 
 /**
  * Define interface for releasing the token transfer after a successful crowdsale.
  */
-contract ReleasableToken is ERC20, Ownable {
+contract ReleasableToken is StandardToken, Ownable {
 
   /* The finalizer contract that allows lifting the transfer limits on this token */
   address public releaseAgent;
