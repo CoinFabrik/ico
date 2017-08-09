@@ -37,16 +37,4 @@ contract HubiiCrowdsale is Crowdsale {
         token.setReleaseAgent(address(f_agent));
         setFinalizeAgent(f_agent);
     }
-
-    function changePricingStrategy(PricingStrategy newPS) public onlyOwner onlyInEmergency {
-        setPricingStrategy(newPS);
-    }
-
-    function changeCeilingStrategy(CeilingStrategy newCS) public onlyOwner onlyInEmergency {
-        setCeilingStrategy(newCS);
-    }
-
-    function changeFinalizeAgent(FinalizeAgent newFA) public onlyOwner onlyInEmergency {
-        setFinalizeAgent(newFA);
-    }
 }
