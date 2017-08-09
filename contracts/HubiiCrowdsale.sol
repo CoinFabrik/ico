@@ -8,6 +8,7 @@ import "./BonusFinalizeAgent.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
 contract HubiiCrowdsale is Crowdsale {
+
     uint private constant chunked_multiple = 25 * (10 ** 18);
     uint private constant limit_per_address = 6 * (10 ** 18);
     uint private constant hubii_minimum_funding = 5;
@@ -24,18 +25,19 @@ contract HubiiCrowdsale is Crowdsale {
         // 1/500 is the tokens per wei ratio.
         // 8 is the amount of decimals.
         // 10 ** 8 is the factor used to calculate the amount of decimal tokens per wei ratio.
-        
         PricingStrategy p_strategy = new FlatPricing(token_inWei);
         CeilingStrategy c_strategy = new FixedCeiling(chunked_multiple, limit_per_address);
-        FinalizeAgent f_agent = new BonusFinalizeAgent(3000, _teamMultisig); 
         setPricingStrategy(p_strategy);
         setCeilingStrategy(c_strategy);
-        // Testing values
-        token = new CrowdsaleToken(token_name, token_symbol, token_initial_supply, token_decimals, _teamMultisig, token_mintable);
+    }
+
+    function finishInitialization() public onlyOwner {
+        token = new CrowdsaleToken(token_name, token_symbol, token_initial_supply, token_decimals, multisigWallet, token_mintable);
         token.setMintAgent(address(this), true);
+        FinalizeAgent f_agent = new BonusFinalizeAgent(this, 3000, multisigWallet);
         token.setMintAgent(address(f_agent), true);
         token.setReleaseAgent(address(f_agent));
-        // setFinalizeAgent(f_agent);
+        setFinalizeAgent(f_agent);
     }
 
     function changePricingStrategy(PricingStrategy newPS) public onlyOwner onlyInEmergency {
