@@ -27,7 +27,7 @@ contract HubiiCrowdsale is Crowdsale {
         
         PricingStrategy p_strategy = new FlatPricing(token_inWei);
         CeilingStrategy c_strategy = new FixedCeiling(chunked_multiple, limit_per_address);
-        FinalizeAgent f_agent = new BonusFinalizeAgent(3000, _teamMultisig); 
+        FinalizeAgent f_agent = new BonusFinalizeAgent(this, 3000, _teamMultisig); 
         setPricingStrategy(p_strategy);
         setCeilingStrategy(c_strategy);
         // Testing values
@@ -35,7 +35,7 @@ contract HubiiCrowdsale is Crowdsale {
         token.setMintAgent(address(this), true);
         token.setMintAgent(address(f_agent), true);
         token.setReleaseAgent(address(f_agent));
-        // setFinalizeAgent(f_agent);
+        setFinalizeAgent(f_agent);
     }
 
     function changePricingStrategy(PricingStrategy newPS) public onlyOwner onlyInEmergency {
