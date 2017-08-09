@@ -198,6 +198,9 @@ contract Crowdsale is Haltable {
     updateInvestorFunds(tokenAmount, weiAmount, receiver , 0);
   }
 
+  /**
+   * Private function to update accounting in the crowdsale.
+   */
   function updateInvestorFunds(uint tokenAmount, uint weiAmount, address receiver, uint128 customerId) private {
     // Update investor
     investedAmountOf[receiver] = investedAmountOf[receiver].add(weiAmount);
@@ -212,6 +215,13 @@ contract Crowdsale is Haltable {
     Invested(receiver, weiAmount, tokenAmount, customerId);
   }
 
+
+  /**
+   * Allow the owner to set a funding cap on the crowdsale.
+   * The new cap should be higher than the minimum funding goal.
+   * 
+   * @param newCap minimum target cap that may be relaxed if it was already broken.
+   */
   function setFundingCap(uint newCap) public onlyOwner notFinished {
     weiFundingCap = ceilingStrategy.relaxFundingCap(newCap, weiRaised);
     require(weiFundingCap >= minimumFundingGoal);
