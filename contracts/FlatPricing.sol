@@ -29,7 +29,7 @@ contract FlatPricing is PricingStrategy {
    */
   function calculatePrice(uint value, uint, uint, address, uint decimals) public constant returns (uint) {
     uint multiplier = 10 ** decimals;
-    return value.mul(multiplier) / oneTokenInWei;
+    return value.mul(multiplier).div(oneTokenInWei);
   }
 
 }

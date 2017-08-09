@@ -21,6 +21,8 @@ contract BonusFinalizeAgent is FinalizeAgent {
 
   using SafeMath for uint;
 
+  Crowdsale public crowdsale;
+
   /** Total percent of tokens minted to the team at the end of the sale as base points
   bonus tokens = tokensSold * bonusBasePoints * 0.0001         */
   uint public bonusBasePoints;
@@ -34,19 +36,20 @@ contract BonusFinalizeAgent is FinalizeAgent {
   /* How many bonus tokens we allocated */
   uint public allocatedBonus;
 
-  function BonusFinalizeAgent(uint _bonusBasePoints, address _teamMultisig) {
-    require(address(_teamMultisig) != 0);
+  function BonusFinalizeAgent(Crowdsale _crowdsale, uint _bonusBasePoints, address _teamMultisig) {
+    require(address(_crowdsale) != 0 && address(_teamMultisig) != 0);
+    crowdsale = _crowdsale;
     teamMultisig = _teamMultisig;
     bonusBasePoints = _bonusBasePoints;
   }
 
   /* Can we run finalize properly */
-  function isSane(Crowdsale crowdsale, CrowdsaleToken token) public constant returns (bool) {
-    return (token.mintAgents(address(this)) && (token.releaseAgent() == address(this)));
+  function isSane(CrowdsaleToken token) public constant returns (bool) {
+    return token.mintAgents(address(this) && token.releaseAgent() == address(this));
   }
 
   /** Called once by crowdsale finalize() if the sale was a success. */
-  function finalizeCrowdsale(Crowdsale crowdsale, CrowdsaleToken token) {
+  function finalizeCrowdsale(CrowdsaleToken token) {
     require(msg.sender == address(crowdsale));
 
     // How many % points of tokens the founders and others get

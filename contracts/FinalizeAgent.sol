@@ -25,9 +25,9 @@ contract FinalizeAgent {
    * This is a safety check function that doesn't allow crowdsale to begin
    * unless the finalizer has been set up properly.
    */
-  function isSane(Crowdsale crowdsale, CrowdsaleToken token) public constant returns (bool);
+  function isSane(CrowdsaleToken token) public constant returns (bool);
 
   /** Called once by crowdsale finalize() if the sale was a success. */
-  function finalizeCrowdsale(Crowdsale crowdsale, CrowdsaleToken token) public;
+  function finalizeCrowdsale(CrowdsaleToken token) public;
 
 }
