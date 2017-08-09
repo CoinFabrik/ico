@@ -77,15 +77,6 @@ contract Crowdsale is Haltable {
   /* Do we need to have a unique contributor id for each customer */
   bool public requireCustomerId;
 
-  /**
-    * Do we verify that contributor has been cleared on the server side (accredited investors only).
-    * This method was first used in FirstBlood crowdsale to ensure all contributors have accepted terms on sale (on the web).
-    */
-  bool public requiredSignedAddress;
-
-  /* Server side address that signed allowed contributors (Ethereum addresses) that can participate in the crowdsale */
-  address public signerAddress;
-
   /** How many ETH each address has invested in this crowdsale */
   mapping (address => uint) public investedAmountOf;
 
@@ -117,7 +108,7 @@ contract Crowdsale is Haltable {
   event Refund(address investor, uint weiAmount);
 
   // The rules about what kind of investments we accept were changed
-  event InvestmentPolicyChanged(bool requireCId, bool requiredSignedAddr, address signerAddr);
+  event InvestmentPolicyChanged(bool requireCId);
 
   // Address early participation whitelist status changed
   event Whitelisted(address addr, bool status);
@@ -232,56 +223,22 @@ contract Crowdsale is Haltable {
   }
 
   /**
-   * Allow anonymous contributions to this crowdsale.
-   */
-  function investWithSignedAddress(address addr, uint128 customerId, uint8 v, bytes32 r, bytes32 s) public payable {
-    bytes32 hash = sha256(addr);
-    require(ecrecover(hash, v, r, s) == signerAddress);
-    require(customerId != 0);  // UUIDv4 sanity check
-    investInternal(addr, customerId);
-  }
-
-  /**
-   * Track who is the customer making the payment so we can send a thank you email.
-   */
-  function investWithCustomerId(address addr, uint128 customerId) public payable {
-    require(!requiredSignedAddress); // Crowdsale allows only server-side signed participants
-    require(customerId != 0);  // UUIDv4 sanity check
-    investInternal(addr, customerId);
-  }
-
-  /**
-   * Allow anonymous contributions to this crowdsale.
-   */
-  function invest(address addr) public payable {
-    require(!requireCustomerId); // Crowdsale needs to track participants for thank you email
-    require(!requiredSignedAddress); // Crowdsale allows only server-side signed participants
-    investInternal(addr, 0);
-  }
-
-  /**
-   * Invest to tokens, recognize the payer and clear his address.
-   *
-   */
-  function buyWithSignedAddress(uint128 customerId, uint8 v, bytes32 r, bytes32 s) public payable {
-    investWithSignedAddress(msg.sender, customerId, v, r, s);
-  }
-
-  /**
    * Invest to tokens, recognize the payer.
    *
    */
   function buyWithCustomerId(uint128 customerId) public payable {
-    investWithCustomerId(msg.sender, customerId);
+    require(customerId != 0);  // UUIDv4 sanity check
+    investInternal(msg.sender, customerId);
   }
 
   /**
-   * The basic entry point to participate the crowdsale process.
+   * The basic entry point to participate in the crowdsale process.
    *
    * Pay for funding, get invested tokens back in the sender address.
    */
   function buy() public payable {
-    invest(msg.sender);
+    require(!requireCustomerId); // Crowdsale needs to track participants for thank you email
+    investInternal(msg.sender, 0);
   }
 
   /**
@@ -301,19 +258,7 @@ contract Crowdsale is Haltable {
    */
   function setRequireCustomerId(bool value) public onlyOwner stopInEmergency {
     requireCustomerId = value;
-    InvestmentPolicyChanged(requireCustomerId, requiredSignedAddress, signerAddress);
-  }
-
-  /**
-   * Set policy if all investors must be cleared on the server side first.
-   *
-   * This is e.g. for the accredited investor clearing.
-   *
-   */
-  function setRequireSignedAddress(bool value, address _signerAddress) public onlyOwner stopInEmergency {
-    requiredSignedAddress = value;
-    signerAddress = _signerAddress;
-    InvestmentPolicyChanged(requireCustomerId, requiredSignedAddress, signerAddress);
+    InvestmentPolicyChanged(requireCustomerId);
   }
 
   /**
@@ -326,13 +271,7 @@ contract Crowdsale is Haltable {
   }
 
   /**
-   * Allow crowdsale owner to close early or extend the crowdsale.
-   *
-   * This is useful e.g. for a manual soft cap implementation:
-   * - after X amount is reached determine manual closing
-   *
-   * This may put the crowdsale to an invalid state,
-   * but we trust owners know what they are doing.
+   * Safe setter for the end time.
    *
    */
   function setEndsAt(uint time) internal notFinished {
