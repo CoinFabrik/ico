@@ -54,7 +54,8 @@ contract BonusFinalizeAgent is FinalizeAgent {
 
     // How many % points of tokens the founders and others get
     uint tokensSold = crowdsale.tokensSold();
-    allocatedBonus = tokensSold.mul(bonusBasePoints).div(basePointsDivisor);
+    uint saleBasePoints = basePointsDivisor.sub(bonusBasePoints);
+    allocatedBonus = tokensSold.mul(bonusBasePoints).div(saleBasePoints);
 
     // Move tokens to the team multisig wallet
     token.mint(teamMultisig, allocatedBonus);
