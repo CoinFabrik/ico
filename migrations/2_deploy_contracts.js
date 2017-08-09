@@ -12,7 +12,7 @@ module.exports = function(deployer, network, accounts) {
     .catch(function(error) {
         console.log(error);
     });
-    deployer.link(HubiiCrowdsale);
+    deployer.link(SafeMath, HubiiCrowdsale);
     // TODO: change to use client's MultiSigWallet
     // const MW_contract = [ MultiSigWallet, [0x485de458fbcac6a7d35227842d652641384cb333], 1 ];
     deployer.deploy(HubiiCrowdsale, MW_address, config.startDate, config.endDate)
