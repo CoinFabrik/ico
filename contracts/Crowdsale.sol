@@ -290,7 +290,7 @@ contract Crowdsale is Haltable {
    * The owner can trigger a call the contract that provides post-crowdsale actions, like releasing the tokens.
    */
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
-    finalizeAgent.finalizeCrowdsale(this, token);
+    finalizeAgent.finalizeCrowdsale(token);
     finalized = true;
     Finalized();
   }
@@ -415,7 +415,7 @@ contract Crowdsale is Haltable {
    * Check if the contract relationship looks good.
    */
   function isFinalizerSane() public constant returns (bool sane) {
-    return finalizeAgent.isSane(this, token);
+    return finalizeAgent.isSane(token);
   }
 
   /**
