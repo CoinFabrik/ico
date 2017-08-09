@@ -50,10 +50,10 @@ contract Crowdsale is Haltable {
   /* the funding cannot exceed this cap; may be set later on during the crowdsale */
   uint public weiFundingCap = 0;
 
-  /* the UNIX timestamp start date of the crowdsale */
+  /* the starting block number of the crowdsale */
   uint public startsAt;
 
-  /* the UNIX timestamp end date of the crowdsale */
+  /* the ending block number of the crowdsale */
   uint public endsAt;
 
   /* the number of tokens already sold through this contract*/
@@ -91,10 +91,10 @@ contract Crowdsale is Haltable {
 
   /** State machine
    *
-   * - Prefunding: We have not passed start time yet
+   * - Prefunding: We have not reached the starting block yet
    * - Funding: Active crowdsale
    * - Success: Minimum funding goal reached
-   * - Failure: Minimum funding goal not reached before ending time
+   * - Failure: Minimum funding goal not reached before the ending block
    * - Finalized: The finalize function has been called and succesfully executed
    * - Refunding: Refunds are loaded on the contract to be reclaimed by investors.
    */
@@ -113,9 +113,6 @@ contract Crowdsale is Haltable {
   // Address early participation whitelist status changed
   event Whitelisted(address addr, bool status);
 
-  // Crowdsale end time has been changed
-  event EndsAtChanged(uint ends_at);
-
   // Crowdsale's finalize function has been called
   event Finalized();
 
@@ -127,7 +124,7 @@ contract Crowdsale is Haltable {
 
     // Don't mess the dates
     require(_start != 0 && _end != 0);
-    require(now < _start && _start < _end);
+    require(block.number < _start && _start < _end);
     startsAt = _start;
     endsAt = _end;
 
@@ -270,18 +267,6 @@ contract Crowdsale is Haltable {
   }
 
   /**
-   * Safe setter for the end time.
-   *
-   */
-  function setEndsAt(uint time) internal notFinished {
-    // Don't change the past
-    require(now <= time);
-
-    endsAt = time;
-    EndsAtChanged(endsAt);
-  }
-
-  /**
    * Allow to (re)set pricing strategy.
    */
   function setPricingStrategy(PricingStrategy addr) internal {
@@ -364,8 +349,8 @@ contract Crowdsale is Haltable {
    */
   function getState() public constant returns (State) {
     if (finalized) return State.Finalized;
-    else if (block.timestamp < startsAt) return State.PreFunding;
-    else if (block.timestamp <= endsAt && !ceilingStrategy.isCrowdsaleFull(weiRaised, weiFundingCap)) return State.Funding;
+    else if (block.number < startsAt) return State.PreFunding;
+    else if (block.number <= endsAt && !ceilingStrategy.isCrowdsaleFull(weiRaised, weiFundingCap)) return State.Funding;
     else if (isMinimumGoalReached()) return State.Success;
     else if (!isMinimumGoalReached() && weiRaised > 0 && loadedRefund >= weiRaised) return State.Refunding;
     else return State.Failure;
