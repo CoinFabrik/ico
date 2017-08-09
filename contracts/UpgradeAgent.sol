@@ -38,8 +38,8 @@ contract UpgradeAgent {
   The UpgradeAgent is the responsible to create the tokens for the user
   in the new contract.
 
-  * @param {address _from} Account to upgrade.
-  * @param {uint _value} Tokens to upgrade.
+  * @param _from Account to upgrade.
+  * @param _value Tokens to upgrade.
 
   */
   function upgradeFrom(address _from, uint _value) public;
