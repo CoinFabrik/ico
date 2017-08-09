@@ -16,6 +16,7 @@ contract HubiiCrowdsale is Crowdsale {
     bool private constant token_mintable = true;
     string private constant token_name = "BurgerKoenig";
     string private constant token_symbol = "BK";
+    uint private constant token_inWei = 500;
     function HubiiCrowdsale(address _teamMultisig, uint _start, uint _end) Crowdsale(_teamMultisig, _start, _end, hubii_minimum_funding.mul(10 ** 18)) public {
         // Due to lack of macros and lack of floating point support
         // we explain the used literals here.
@@ -24,10 +25,9 @@ contract HubiiCrowdsale is Crowdsale {
         // 8 is the amount of decimals.
         // 10 ** 8 is the factor used to calculate the amount of decimal tokens per wei ratio.
         
-        PricingStrategy p_strategy = new FlatPricing((1/500) * (10 ** 8));
+        PricingStrategy p_strategy = new FlatPricing(token_inWei);
         CeilingStrategy c_strategy = new FixedCeiling(chunked_multiple, limit_per_address);
         FinalizeAgent f_agent = new BonusFinalizeAgent(3000, _teamMultisig); 
-        
         setPricingStrategy(p_strategy);
         setCeilingStrategy(c_strategy);
         // Testing values

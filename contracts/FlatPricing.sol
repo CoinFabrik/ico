@@ -15,11 +15,11 @@ contract FlatPricing is PricingStrategy {
 
   using SafeMath for uint;
 
-  /* How many decimal tokens one wei affords */
-  uint public decimalTokensPerWei;
+  /* How many weis one token costs */
+  uint public oneTokenInWei;
 
-  function FlatPricing(uint _decimalTokensPerWei) {
-    decimalTokensPerWei = _decimalTokensPerWei;
+  function FlatPricing(uint _oneTokenInWei) {
+    oneTokenInWei = _oneTokenInWei;
   }
 
   /**
@@ -27,8 +27,9 @@ contract FlatPricing is PricingStrategy {
    *
    * @ param  {uint amount} Buy-in value in wei.
    */
-  function calculatePrice(uint value, uint, uint, address, uint) public constant returns (uint) {
-    return value.mul(decimalTokensPerWei);
+  function calculatePrice(uint value, uint, uint, address, uint decimals) public constant returns (uint) {
+    uint multiplier = 10 ** decimals;
+    return value.mul(multiplier) / oneTokenInWei;
   }
 
 }
