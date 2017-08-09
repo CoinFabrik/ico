@@ -165,6 +165,10 @@ contract Crowdsale is Haltable {
     // Dust transaction if no tokens can be given
     require(tokenAmount != 0);
 
+    if (investedAmountOf[receiver] == 0) {
+      // A new investor
+      investorCount++;
+    }
     updateInvestorFunds(tokenAmount, weiAmount, receiver, customerId);
 
     // Pocket the money
@@ -192,17 +196,12 @@ contract Crowdsale is Haltable {
   function preallocate(address receiver, uint fullTokens, uint weiPrice) public onlyOwner notFinished {
     require(receiver != address(0));
     uint tokenAmount = fullTokens.mul(10**uint(token.decimals()));
-    if (tokenAmount == 0)
-      return;
+    require(tokenAmount != 0);
     uint weiAmount = weiPrice.mul(tokenAmount); // This can also be 0, in which case we give out tokens for free
     updateInvestorFunds(tokenAmount, weiAmount, receiver , 0);
   }
 
   function updateInvestorFunds(uint tokenAmount, uint weiAmount, address receiver, uint128 customerId) private {
-    if (tokenAmountOf[receiver] == 0) {
-      // A new investor
-      investorCount++;
-    }
     // Update investor
     investedAmountOf[receiver] = investedAmountOf[receiver].add(weiAmount);
     tokenAmountOf[receiver] = tokenAmountOf[receiver].add(tokenAmount);
