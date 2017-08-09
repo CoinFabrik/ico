@@ -12,12 +12,6 @@ contract CeilingStrategy {
     return true;
   }
 
-  /** Self check if all references are correctly set.
-   *
-   * Checks that ceiling strategy matches crowdsale parameters.
-   */
-  function isSane(Crowdsale _crowdsale) public constant returns (bool);
-
   /**
    * When somebody tries to buy tokens for X wei, calculate how many weis they are allowed to use.
    *

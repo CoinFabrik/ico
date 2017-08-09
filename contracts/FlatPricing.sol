@@ -22,10 +22,6 @@ contract FlatPricing is PricingStrategy {
     decimalTokensPerWei = _decimalTokensPerWei;
   }
 
-  function isSane(Crowdsale crowdsale) public constant returns (bool) {
-     return address(crowdsale.pricingStrategy()) == address(this);
-  }
-
   /**
    * Calculate the current price for buy in amount.
    *

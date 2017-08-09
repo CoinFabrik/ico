@@ -16,12 +16,6 @@ contract PricingStrategy {
     return true;
   }
 
-  /** Self check if all references are correctly set.
-   *
-   * Checks that pricing strategy matches crowdsale parameters.
-   */
-  function isSane(Crowdsale crowdsale) public constant returns (bool);
-
   /**
    * When somebody tries to buy tokens for X eth, calculate how many tokens they get.
    *

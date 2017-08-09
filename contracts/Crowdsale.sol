@@ -350,7 +350,6 @@ contract Crowdsale is Haltable {
     // Disallow setting a bad agent
     require(addr.isPricingStrategy());
     pricingStrategy = addr;
-    require(isPricingSane());
   }
 
   /**
@@ -360,7 +359,6 @@ contract Crowdsale is Haltable {
     // Disallow setting a bad agent
     require(addr.isCeilingStrategy());
     ceilingStrategy = addr;
-    require(isCeilingSane());
   }
 
   /**
@@ -418,20 +416,6 @@ contract Crowdsale is Haltable {
    */
   function isFinalizerSane() public constant returns (bool sane) {
     return finalizeAgent.isSane(this, token);
-  }
-
-  /**
-   * Check if the contract relationship looks good.
-   */
-  function isPricingSane() public constant returns (bool sane) {
-    return pricingStrategy.isSane(this);
-  }
-
-  /**
-   * Check if the contract relationship looks good.
-   */
-  function isCeilingSane() public constant returns (bool sane) {
-    return ceilingStrategy.isSane(this);
   }
 
   /**

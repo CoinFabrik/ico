@@ -23,9 +23,11 @@ contract HubiiCrowdsale is Crowdsale {
         // 1/500 is the tokens per wei ratio.
         // 8 is the amount of decimals.
         // 10 ** 8 is the factor used to calculate the amount of decimal tokens per wei ratio.
-        PricingStrategy p_strategy = PricingStrategy(new FlatPricing((1/500) * (10 ** 8)));
-        CeilingStrategy c_strategy = CeilingStrategy(new FixedCeiling(chunked_multiple, limit_per_address));
-        FinalizeAgent f_agent = FinalizeAgent(new BonusFinalizeAgent(3000, _teamMultisig));
+        
+        PricingStrategy p_strategy = new FlatPricing((1/500) * (10 ** 8));
+        CeilingStrategy c_strategy = new FixedCeiling(chunked_multiple, limit_per_address);
+        FinalizeAgent f_agent = new BonusFinalizeAgent(3000, _teamMultisig); 
+        
         setPricingStrategy(p_strategy);
         setCeilingStrategy(c_strategy);
         // Testing values
@@ -33,7 +35,7 @@ contract HubiiCrowdsale is Crowdsale {
         token.setMintAgent(address(this), true);
         token.setMintAgent(address(f_agent), true);
         token.setReleaseAgent(address(f_agent));
-        setFinalizeAgent(f_agent);
+        // setFinalizeAgent(f_agent);
     }
 
     function changePricingStrategy(PricingStrategy newPS) public onlyOwner onlyInEmergency {

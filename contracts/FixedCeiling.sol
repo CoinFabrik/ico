@@ -19,10 +19,6 @@ contract FixedCeiling is CeilingStrategy {
         weiLimitPerAddress = limit;
     }
 
-    function isSane(Crowdsale crowdsale) public constant returns (bool) {
-        return address(crowdsale.ceilingStrategy()) == address(this);
-    }
-
     function weiAllowedToReceive(uint tentativeAmount, uint weiRaised, uint weiInvestedBySender, uint weiFundingCap) public constant returns (uint) {
         // First, we limit per address investment
         uint totalOfSender = tentativeAmount.add(weiInvestedBySender);

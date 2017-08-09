@@ -42,7 +42,7 @@ contract BonusFinalizeAgent is FinalizeAgent {
 
   /* Can we run finalize properly */
   function isSane(Crowdsale crowdsale, CrowdsaleToken token) public constant returns (bool) {
-    return crowdsale.token() == token && (token.mintAgents(address(this)) == true) && (token.releaseAgent() == address(this));
+    return (token.mintAgents(address(this)) && (token.releaseAgent() == address(this)));
   }
 
   /** Called once by crowdsale finalize() if the sale was a success. */
