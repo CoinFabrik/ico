@@ -17,11 +17,11 @@ module.exports = {
       gasPrice: 20000000000
     },
     privateTestnet:{
-      host: "localhost",
+      host: "192.168.0.186",
       port: 7999,
       network_id: 666,
       //from: default,
-      gas: 3100000,
+      gas: 20000000,
       gasPrice: 20000000000 
     }
   }
