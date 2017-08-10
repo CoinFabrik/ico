@@ -74,6 +74,9 @@ contract Crowdsale is Haltable {
   /* Has this crowdsale been finalized */
   bool public finalized;
 
+  /* Is this crowdsale being initialized */
+  bool public preparing;
+
   /* Do we need to have a unique contributor id for each customer */
   bool public requireCustomerId;
 
@@ -98,7 +101,7 @@ contract Crowdsale is Haltable {
    * - Finalized: The finalize function has been called and succesfully executed
    * - Refunding: Refunds are loaded on the contract to be reclaimed by investors.
    */
-  enum State{Unknown, PreFunding, Funding, Success, Failure, Finalized, Refunding}
+  enum State{Unknown, Preparing, PreFunding, Funding, Success, Failure, Finalized, Refunding}
 
 
   // A new investment was made
@@ -358,7 +361,8 @@ contract Crowdsale is Haltable {
    * So there is no chance of the variable being stale.
    */
   function getState() public constant returns (State) {
-    if (finalized) return State.Finalized;
+    if (preparing) return State.Preparing;
+    else if (finalized) return State.Finalized;
     else if (block.number < startsAt) return State.PreFunding;
     else if (block.number <= endsAt && !ceilingStrategy.isCrowdsaleFull(weiRaised, weiFundingCap)) return State.Funding;
     else if (isMinimumGoalReached()) return State.Success;
@@ -392,7 +396,7 @@ contract Crowdsale is Haltable {
 
   modifier notFinished() {
     State current_state = getState();
-    require(current_state == State.PreFunding || current_state == State.Funding);
+    require(current_state == State.Preparing || current_state == State.PreFunding || current_state == State.Funding);
     _;
   }
 
