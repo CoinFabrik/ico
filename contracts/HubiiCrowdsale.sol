@@ -10,13 +10,13 @@ import "./BonusFinalizeAgent.sol";
 contract HubiiCrowdsale is Crowdsale {
     uint private constant chunked_multiple = 25 * (10 ** 18);
     uint private constant limit_per_address = 6 * (10 ** 18);
-    uint private constant hubii_minimum_funding = 5;
+    uint private constant hubii_minimum_funding = 5; // in ethers
     uint private constant token_initial_supply = 0;
-    uint8 private constant token_decimals = 8;
+    uint8 private constant token_decimals = 15;
     bool private constant token_mintable = true;
-    string private constant token_name = "BurgerKoenig";
-    string private constant token_symbol = "BK";
-    uint private constant token_inWei = 500;
+    string private constant token_name = "Hubiits";
+    string private constant token_symbol = "HUBI";
+    uint private constant token_inWei = 10 ** 15;
     function HubiiCrowdsale(address _teamMultisig, uint _start, uint _end) Crowdsale(_teamMultisig, _start, _end, hubii_minimum_funding.mul(10 ** 18)) public {
         // Due to lack of macros and lack of floating point support
         // we explain the used literals here.
