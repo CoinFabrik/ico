@@ -4,7 +4,7 @@ const HubiiCrowdsale = artifacts.require('./HubiiCrowdsale.sol');
 
 const config = require('../config.js');
 
-const MW_address = "0x931F6E5c89dD5559D3820cFBd1975BA5d92F87E9";
+// const MW_address = "0x931F6E5c89dD5559D3820cFBd1975BA5d92F87E9";
 
 
 module.exports = function(deployer, network, accounts) {
@@ -13,9 +13,10 @@ module.exports = function(deployer, network, accounts) {
         console.log(error);
     });
     deployer.link(SafeMath, HubiiCrowdsale);
-    // TODO: change to use client's MultiSigWallet
-    // const MW_contract = [ MultiSigWallet, [0x485de458fbcac6a7d35227842d652641384cb333], 1 ];
-    deployer.deploy(HubiiCrowdsale, MW_address, config.startDate, config.endDate)
+    // const MW_contract = [ MultiSigWallet, [], 1 ];
+    deployer.deploy(MultiSigWallet, ["0xf19258256b06324c7516b00bf5c76af001ee1e95"], 1)
+    .then(function(){
+        deployer.deploy(HubiiCrowdsale, MultiSigWallet.address, config.startBlock, config.endBlock)})
     .catch(function(error) {
         console.log(error);
     });
