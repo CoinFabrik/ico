@@ -14,9 +14,9 @@ module.exports = function(deployer, network, accounts) {
     });
     deployer.link(SafeMath, HubiiCrowdsale);
     // const MW_contract = [ MultiSigWallet, [], 1 ];
-    deployer.deploy(MultiSigWallet, ["0xf19258256b06324c7516b00bf5c76af001ee1e95"], 1)
-    .then(function(){
-        deployer.deploy(HubiiCrowdsale, MultiSigWallet.address, config.startBlock, config.endBlock)})
+    deployer.deploy(MultiSigWallet, config.multisig_owners, 1)
+    .then(function() {
+        deployer.deploy(HubiiCrowdsale, MultiSigWallet.address, config.startBlock, config.endBlock);})
     .catch(function(error) {
         console.log(error);
     });
