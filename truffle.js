@@ -1,7 +1,7 @@
 module.exports = {
   networks: {
     ropsten: {
-      host: "localhost",
+      host: "192.168.0.186",
       port: 8545,
       network_id: "3", // Match any network id
       // from: "0x485de458fbcac6a7d35227842d652641384cb333", //// Defaults to the first available account provided by your Ethereum client.
@@ -17,19 +17,19 @@ module.exports = {
       gasPrice: 20000000000
     },
     privateTestnet:{
-      host: "localhost",
+      host: "192.168.0.186",
       port: 7999,
       network_id: 666,
       //from: default,
-      gas: 3100000,
+      gas: 20000000,
       gasPrice: 20000000000 
     }
   },
   gasPrice: 20000000000,
   solc: {
     optimizer: {
-    enabled: true,
-    runs: 0
+      enabled: true,
+      runs: 0
     }
   }
 };

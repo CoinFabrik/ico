@@ -76,7 +76,7 @@ contract UpgradeableToken is StandardToken {
   }
 
   /**
-   * Set an upgrade agent that handles
+   * Set an upgrade agent that handles the upgrade process
    */
   function setUpgradeAgent(address agent) external {
     // Check whether the token is in a state that we could think of upgrading
