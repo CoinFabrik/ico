@@ -4,7 +4,8 @@ pragma solidity ^0.4.13;
  * Originally from https://github.com/TokenMarketNet/ico
  * Modified by https://www.coinfabrik.com/
  */
-
+ 
+import "./FinalizeAgent.sol";
 import "./Crowdsale.sol";
 import "./CrowdsaleToken.sol";
 import "./SafeMath.sol";

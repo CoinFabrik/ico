@@ -1,7 +1,5 @@
 pragma solidity ^0.4.13;
 
-import "./Crowdsale.sol";
-
 /**
  * Interface for defining crowdsale ceiling.
  */
