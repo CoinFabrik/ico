@@ -20,5 +20,6 @@ module.exports = function(deployer, network, accounts) {
         console.log(error);
     });
     deployer.deploy(CrowdsaleToken, config.tokenName, config.tokenSymbol, config.initialSupply, config.decimals, config.MW_address, config.mintable);
-    //TODO: add call to transfer ownership and finishInitialization
+    CrowdsaleToken.at(CrowdsaleToken.address).transferOwnership(HubiiCrowdsale.address);
+    HubiiCrowdsale.at(HubiiCrowdsale.address).finishInitialization(CrowdsaleToken.address);
 };
