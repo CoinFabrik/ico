@@ -5,6 +5,7 @@ pragma solidity ^0.4.13;
  * Modified by https://www.coinfabrik.com/
  */
 
+import "./FinalizeAgent.sol";
 import "./Crowdsale.sol";
 import "./CrowdsaleToken.sol";
 import "./SafeMath.sol";
