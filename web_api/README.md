@@ -7,7 +7,7 @@ The API server expects an HTTP GET request with a JSON body. The JSON must have 
 - `wei_raised`: The amount of wei invested in the crowdsale.
 - `investor_count`: The amount of investors that participated in the crowdsale.
 - `crowdsale_finalized`: This is a flag that is only true once the crowdsale has been finalized which means that the tokens were released for transfer and the team received its 30% share of the total tokens.
-- `wei_per_phase`: Wei needed to complete a phase.
+- `wei_per_phase`: Total wei per phase.
 - `current_phase`: Current phase of the crowdsale.
 - `phase_progress`: Amount of wei invested toward the current phase.
 
