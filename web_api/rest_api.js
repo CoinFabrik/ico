@@ -3,7 +3,7 @@ const config = require("./config.js");
 const Web3 = require("web3");
 const express = require("express");
 const app = express();
-const Url = require("url");
+const body_parser = require("body-parser");
 
 const web3 = new Web3(new Web3.providers.HttpProvider(config.nodeIpPort));
 
@@ -12,6 +12,7 @@ const CS_contract = web3.eth.contract(abi.Crowdsale);
 const crowdsale = CS_contract.at(config.crowdsale.address);
 const ceiling_contract = web3.eth.contract(abi.FixedCeiling);
 
+app.use(body_parser.json());
 app.use(express.static("../web_test"));
 
 // Defined to avoid waiting on database or blockchain node to respond
@@ -20,9 +21,21 @@ app.head("/", function (request, response) {
     response.type("json");
 });
 
+app.get("/", function (request, response) {
+    if (request.body.method != "query_crowdsale") {
+        response.status(200);
+        response.json({"error": "Method " + request.body.method.toString() + " requested is not supported."});
+        return;
+    }
+    get_crowdsale_state().then(function(state) {
+        response.status(200);
+        response.json(state);
+    });
+});
+
 app.listen(8080);
 
-const callbackGenerator = function (resolve, reject) {
+const callback_generator = function (resolve, reject) {
     return function (error, value) {
         if (error) {
             reject(error);
@@ -35,7 +48,7 @@ const callbackGenerator = function (resolve, reject) {
 // Promisify a web3 asynchronous call (this becomes unnecessary as soon as web3 promisifies its API)
 function async_call(method, ...args) {
     return new Promise(function (resolve, reject) {
-        method(...args, callbackGenerator(resolve, reject));
+        method(...args, callback_generator(resolve, reject));
     });
 }
 
@@ -51,20 +64,20 @@ async function get_crowdsale_state(block) {
     const promises = [];
 
     //TODO: bind calls for block number _block_
-    promises.push(init_async(state, "wei_raised", async_call(crowdsale.weiRaised.call)));
-    promises.push(init_async(state, "investor_count", async_call(crowdsale.investorCount.call)));
-    promises.push(init_async(state, "crowdsale_finalized", async_call(crowdsale.finalized.call)));
+    promises.push(init_async(state, "wei_raised", async_call(crowdsale.weiRaised.call, block_number)));
+    promises.push(init_async(state, "investor_count", async_call(crowdsale.investorCount.call, block_number)));
+    promises.push(init_async(state, "crowdsale_finalized", async_call(crowdsale.finalized.call, block_number)));
     
     // Separate case
-    promises.push(async_call(crowdsale.ceilingStrategy.call).then(async function(ceiling_address) {
+    promises.push(async_call(crowdsale.ceilingStrategy.call, block_number).then(async function(ceiling_address) {
         const fixed_ceiling = ceiling_contract.at(ceiling_address);
-        state.chunked_wei_multiple = await async_call(fixed_ceiling.chunkedWeiMultiple.call);
+        state.wei_per_phase = await async_call(fixed_ceiling.chunkedWeiMultiple.call, block_number);
     }));
     console.log(promises);
     await Promise.all(promises).catch(function(error) {console.log("Promise failed: " + error);});
 
-    state.current_phase = (state.wei_raised / state.chunked_wei_multiple + 1) | 0;
-    state.phase_progress = state.wei_raised % state.chunked_wei_multiple;
+    state.current_phase = (state.wei_raised / state.wei_per_phase + 1) | 0;
+    state.phase_progress = state.wei_raised % state.wei_per_phase;
     return state;
 }
 
