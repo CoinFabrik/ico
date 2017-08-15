@@ -1,1 +1,1 @@
-geth --networkid 666 --maxpeers 3 --rpc --rpcaddr 192.168.0.186 --rpcport "7999" --rpccorsdomain "*" --datadir "../.testnet" --port "30303" --nodiscover --rpcapi "admin,db,eth,debug,miner,net,shh,txpool,personal,web3" console
+geth --networkid 666 --maxpeers 3 --rpc --rpcaddr 192.168.0.186 --rpcport "7999" --rpccorsdomain "*" --datadir "../.testnet" --port "30302" --nodiscover --targetgaslimit 7000000 --rpcapi "admin,db,eth,debug,miner,net,shh,txpool,personal,web3" console
