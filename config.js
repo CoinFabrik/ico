@@ -7,6 +7,7 @@ config.tokenSymbol = 'HB'; // TODO: check if this is the correct symbol
 config.startBlock = 15058 + 100
 // We give two week's worth of blocks for the crowdsale to run its course: 55,486
 config.endBlock = config.startBlock + 200
+config.MW_address = "0x931F6E5c89dD5559D3820cFBd1975BA5d92F87E9";
 
 // These are not used anymore
 config.initialSupply = 0; // in ether
@@ -19,5 +20,4 @@ config.minimumFundingGoal = 5; // in ether (CHANGE to USD 4m)
 config.bonusBasePoints = 3000; // equivalent to 30%
 config.chunkedMultipleCap = 10; // in ether (CHANGE to USD 5m)
 config.limitPerAddress = 6; // for testing; in ether
-config.MW_address = "0x931F6E5c89dD5559D3820cFBd1975BA5d92F87E9";
 module.exports = config;

@@ -15,11 +15,11 @@ module.exports = function(deployer, network, accounts) {
     deployer.link(SafeMath, HubiiCrowdsale);
     // TODO: change to use client's MultiSigWallet
     // const MW_contract = [ MultiSigWallet, [0x485de458fbcac6a7d35227842d652641384cb333], 1 ];
-    deployer.deploy(HubiiCrowdsale, config.MW_address, config.startDate, config.endDate)
-    .catch(function(error) {
-        console.log(error);
+    const HC_contract = [ HubiiCrowdsale, config.MW_address, config.startDate, config.endDate ];
+    const CT_contract = [ CrowdsaleToken, config.tokenName, config.tokenSymbol, config.initialSupply, config.decimals, config.MW_address, config.mintable ];
+    deployer.deploy([ HC_contract, CT_contract ]);
+    deployer.then(async function() {
+        await CrowdsaleToken.at(CrowdsaleToken.address).transferOwnership(HubiiCrowdsale.address);
+        await HubiiCrowdsale.at(HubiiCrowdsale.address).finishInitialization(CrowdsaleToken.address);
     });
-    deployer.deploy(CrowdsaleToken, config.tokenName, config.tokenSymbol, config.initialSupply, config.decimals, config.MW_address, config.mintable);
-    CrowdsaleToken.at(CrowdsaleToken.address).transferOwnership(HubiiCrowdsale.address);
-    HubiiCrowdsale.at(HubiiCrowdsale.address).finishInitialization(CrowdsaleToken.address);
 };
