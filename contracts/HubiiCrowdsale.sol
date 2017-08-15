@@ -8,9 +8,9 @@ import "./BonusFinalizeAgent.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
 contract HubiiCrowdsale is Crowdsale {
-    uint private constant chunked_multiple = 25 * (10 ** 18); // in wei
+    uint private constant chunked_multiple = 25000 * (10 ** 18); // in wei
     uint private constant limit_per_address = 6 * (10 ** 18); // in wei
-    uint private constant hubii_minimum_funding = 5 * (10 ** 18); // in wei
+    uint private constant hubii_minimum_funding = 0 * (10 ** 18); // in wei
     uint private constant token_initial_supply = 0;
     uint8 private constant token_decimals = 15;
     bool private constant token_mintable = true;

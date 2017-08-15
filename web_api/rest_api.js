@@ -71,13 +71,13 @@ async function get_crowdsale_state(block) {
     // Separate case
     promises.push(async_call(crowdsale.ceilingStrategy.call, block_number).then(async function(ceiling_address) {
         const fixed_ceiling = ceiling_contract.at(ceiling_address);
-        state.chunked_wei_multiple = await async_call(fixed_ceiling.chunkedWeiMultiple.call, block_number);
+        state.wei_per_phase = await async_call(fixed_ceiling.chunkedWeiMultiple.call, block_number);
     }));
     console.log(promises);
     await Promise.all(promises).catch(function(error) {console.log("Promise failed: " + error);});
 
-    state.current_phase = (state.wei_raised / state.chunked_wei_multiple + 1) | 0;
-    state.phase_progress = state.wei_raised % state.chunked_wei_multiple;
+    state.current_phase = (state.wei_raised / state.wei_per_phase + 1) | 0;
+    state.phase_progress = state.wei_raised % state.wei_per_phase;
     return state;
 }
 
