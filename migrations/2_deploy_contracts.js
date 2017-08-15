@@ -8,6 +8,8 @@ const config = require('../config.js');
 
 
 module.exports = function(deployer, network, accounts) {
+    startBlock = network == "privateTestnet" ? config.tests.startBlock : config.startBlock;
+    endBlock = network == "privateTestnet" ? config.tests.endBlock : config.endBlock;
     deployer.deploy(SafeMath)
     .catch(function(error) {
         console.log(error);
@@ -16,7 +18,7 @@ module.exports = function(deployer, network, accounts) {
     // const MW_contract = [ MultiSigWallet, [], 1 ];
     deployer.deploy(MultiSigWallet, config.multisig_owners, 1)
     .then(function() {
-        deployer.deploy(HubiiCrowdsale, MultiSigWallet.address, config.startBlock, config.endBlock);})
+        deployer.deploy(HubiiCrowdsale, MultiSigWallet.address, startBlock, endBlock);})
     .catch(function(error) {
         console.log(error);
     });
