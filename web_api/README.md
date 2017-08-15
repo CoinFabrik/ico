@@ -2,7 +2,7 @@ The API server depends on web3, express and body-parser being installed globally
 To launch the API server, execute `node rest_api.js`. By default, it listens on the port 8080.
 
 
-The API server expects an HTTP GET request with a JSON body. The JSON object must have a member named `method` of type string. There's only one supported method which is `query_crowdsale`. The server responds to such a request with another JSON object in the body of the message. The response JSON contains the following members:
+The API server expects an HTTP GET request with a JSON body. The JSON must have a member named `method` of type string. There's only one supported method which is `query_crowdsale`. The server responds to such a request with another JSON in the body of the message. The response JSON contains the following members:
 
 - `wei_raised`: The amount of wei invested in the crowdsale.
 - `investor_count`: The amount of investors that participated in the crowdsale.
