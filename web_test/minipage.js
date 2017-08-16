@@ -8,21 +8,21 @@ const ending_block_field = document.getElementById("ending_block_field");
 const crowdsale_cap_field = document.getElementById("crowdsale_cap_field");
 const investor_count_field = document.getElementById("investor_count_field");
 
-function send_request(method, body, on_ready_state) {
+function send_request(method, on_ready_state) {
     const http_req = new XMLHttpRequest();
-    http_req.open(method, "http://localhost:8080/");
+    http_req.open(method, "http://localhost:8080/?method=query_crowdsale");
     http_req.setRequestHeader("Content-Type", "application/json");
     http_req.onreadystatechange = function() {
         if (http_req.readyState == XMLHttpRequest.DONE && http_req.status == 200) {
             on_ready_state(http_req.response);
         }
     }
-    http_req.send(JSON.stringify(body));
+    http_req.send();
 }
 
 
 function refresh_state() {
-    send_request("GET", { "method": "query_crowdsale" },  function(response) {
+    send_request("GET",  function(response) {
         console.log("Unparsed JSON:");
         console.log(response);
         const res = JSON.parse(response);

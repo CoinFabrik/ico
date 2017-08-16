@@ -12,7 +12,7 @@ const CS_contract = web3.eth.contract(abi.Crowdsale);
 const crowdsale = CS_contract.at(config.crowdsale.address);
 const ceiling_contract = web3.eth.contract(abi.FixedCeiling);
 
-app.use(body_parser.json());
+//app.use(body_parser.json());
 app.use(express.static("../web_test"));
 
 // Defined to avoid waiting on database or blockchain node to respond
@@ -22,7 +22,7 @@ app.head("/", function (request, response) {
 });
 
 app.get("/", function (request, response) {
-    if (request.body.method != "query_crowdsale") {
+    if (request.query.method != "query_crowdsale") {
         response.status(200);
         response.json({"error": "Method " + request.body.method.toString() + " requested is not supported."});
         return;

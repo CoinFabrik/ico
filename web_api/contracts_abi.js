@@ -7,7 +7,7 @@ abi.Crowdsale = [
       "outputs": [
         {
           "name": "",
-          "type": "uint256"
+          "type": "uint8"
         }
       ],
       "payable": false,
@@ -27,32 +27,6 @@ abi.Crowdsale = [
       "type": "function"
     },
     {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "addr",
-          "type": "address"
-        }
-      ],
-      "name": "invest",
-      "outputs": [],
-      "payable": true,
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "isPricingSane",
-      "outputs": [
-        {
-          "name": "sane",
-          "type": "bool"
-        }
-      ],
-      "payable": false,
-      "type": "function"
-    },
-    {
       "constant": true,
       "inputs": [],
       "name": "endsAt",
@@ -60,19 +34,6 @@ abi.Crowdsale = [
         {
           "name": "",
           "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "isCeilingSane",
-      "outputs": [
-        {
-          "name": "sane",
-          "type": "bool"
         }
       ],
       "payable": false,
@@ -102,48 +63,6 @@ abi.Crowdsale = [
         }
       ],
       "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "addr",
-          "type": "address"
-        }
-      ],
-      "name": "setFinalizeAgent",
-      "outputs": [],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "addr",
-          "type": "address"
-        },
-        {
-          "name": "customerId",
-          "type": "uint128"
-        },
-        {
-          "name": "v",
-          "type": "uint8"
-        },
-        {
-          "name": "r",
-          "type": "bytes32"
-        },
-        {
-          "name": "s",
-          "type": "bytes32"
-        }
-      ],
-      "name": "investWithSignedAddress",
-      "outputs": [],
-      "payable": true,
       "type": "function"
     },
     {
@@ -259,19 +178,6 @@ abi.Crowdsale = [
       "type": "function"
     },
     {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "_pricingStrategy",
-          "type": "address"
-        }
-      ],
-      "name": "setPricingStrategy",
-      "outputs": [],
-      "payable": false,
-      "type": "function"
-    },
-    {
       "constant": true,
       "inputs": [],
       "name": "tokensSold",
@@ -312,19 +218,6 @@ abi.Crowdsale = [
     {
       "constant": true,
       "inputs": [],
-      "name": "signerAddress",
-      "outputs": [
-        {
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
       "name": "weiRefunded",
       "outputs": [
         {
@@ -339,45 +232,6 @@ abi.Crowdsale = [
       "constant": false,
       "inputs": [],
       "name": "halt",
-      "outputs": [],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "MAX_INVESTMENTS_BEFORE_MULTISIG_CHANGE",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "_ceilingStrategy",
-          "type": "address"
-        }
-      ],
-      "name": "setCeilingStrategy",
-      "outputs": [],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "time",
-          "type": "uint256"
-        }
-      ],
-      "name": "setEndsAt",
       "outputs": [],
       "payable": false,
       "type": "function"
@@ -440,19 +294,6 @@ abi.Crowdsale = [
       "name": "loadRefund",
       "outputs": [],
       "payable": true,
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "val",
-          "type": "uint256"
-        }
-      ],
-      "name": "setOwnerTestValue",
-      "outputs": [],
-      "payable": false,
       "type": "function"
     },
     {
@@ -573,6 +414,19 @@ abi.Crowdsale = [
       "type": "function"
     },
     {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "val",
+          "type": "uint8"
+        }
+      ],
+      "name": "setOwnerTestValue",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
       "constant": true,
       "inputs": [
         {
@@ -601,19 +455,6 @@ abi.Crowdsale = [
     {
       "constant": true,
       "inputs": [],
-      "name": "requiredSignedAddress",
-      "outputs": [
-        {
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
       "name": "investorCount",
       "outputs": [
         {
@@ -621,23 +462,6 @@ abi.Crowdsale = [
           "type": "uint256"
         }
       ],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "value",
-          "type": "bool"
-        },
-        {
-          "name": "_signerAddress",
-          "type": "address"
-        }
-      ],
-      "name": "setRequireSignedAddress",
-      "outputs": [],
       "payable": false,
       "type": "function"
     },
@@ -658,23 +482,6 @@ abi.Crowdsale = [
       "constant": false,
       "inputs": [
         {
-          "name": "addr",
-          "type": "address"
-        },
-        {
-          "name": "customerId",
-          "type": "uint128"
-        }
-      ],
-      "name": "investWithCustomerId",
-      "outputs": [],
-      "payable": true,
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
           "name": "newOwner",
           "type": "address"
         }
@@ -682,44 +489,6 @@ abi.Crowdsale = [
       "name": "transferOwnership",
       "outputs": [],
       "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "addr",
-          "type": "address"
-        }
-      ],
-      "name": "setMultisig",
-      "outputs": [],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "customerId",
-          "type": "uint128"
-        },
-        {
-          "name": "v",
-          "type": "uint8"
-        },
-        {
-          "name": "r",
-          "type": "bytes32"
-        },
-        {
-          "name": "s",
-          "type": "bytes32"
-        }
-      ],
-      "name": "buyWithSignedAddress",
-      "outputs": [],
-      "payable": true,
       "type": "function"
     },
     {
@@ -737,18 +506,6 @@ abi.Crowdsale = [
     },
     {
       "inputs": [
-        {
-          "name": "_token",
-          "type": "address"
-        },
-        {
-          "name": "_pricingStrategy",
-          "type": "address"
-        },
-        {
-          "name": "_ceilingStrategy",
-          "type": "address"
-        },
         {
           "name": "_multisigWallet",
           "type": "address"
@@ -822,18 +579,8 @@ abi.Crowdsale = [
       "inputs": [
         {
           "indexed": false,
-          "name": "requireCustomerId",
+          "name": "requireCId",
           "type": "bool"
-        },
-        {
-          "indexed": false,
-          "name": "requiredSignedAddress",
-          "type": "bool"
-        },
-        {
-          "indexed": false,
-          "name": "signerAddress",
-          "type": "address"
         }
       ],
       "name": "InvestmentPolicyChanged",
@@ -858,14 +605,32 @@ abi.Crowdsale = [
     },
     {
       "anonymous": false,
+      "inputs": [],
+      "name": "Finalized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
       "inputs": [
         {
           "indexed": false,
-          "name": "endsAt",
+          "name": "newFundingCap",
           "type": "uint256"
         }
       ],
-      "name": "EndsAtChanged",
+      "name": "FundingCapSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "halted",
+          "type": "bool"
+        }
+      ],
+      "name": "Halted",
       "type": "event"
     }
   ];
@@ -900,24 +665,6 @@ abi.FixedCeiling = [
       "constant": true,
       "inputs": [],
       "name": "isCeilingStrategy",
-      "outputs": [
-        {
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "_crowdsale",
-          "type": "address"
-        }
-      ],
-      "name": "isSane",
       "outputs": [
         {
           "name": "",
