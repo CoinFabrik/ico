@@ -8,14 +8,14 @@ import "./BonusFinalizeAgent.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
 contract HubiiCrowdsale is Crowdsale {
-    uint private constant chunked_multiple = 25000 * (10 ** 18); // in wei
+    uint private constant chunked_multiple = 18000 * (10 ** 18); // in wei
     uint private constant limit_per_address = 6 * (10 ** 18); // in wei
     uint private constant hubii_minimum_funding = 0 * (10 ** 18); // in wei
     uint private constant token_initial_supply = 0;
     uint8 private constant token_decimals = 15;
     bool private constant token_mintable = true;
     string private constant token_name = "Hubiits";
-    string private constant token_symbol = "HUBI";
+    string private constant token_symbol = "HBT";
     uint private constant token_in_wei = 10 ** 15;
     // The fraction of 10,000 out of the total target tokens that is used to mint bonus tokens. These are allocated to the team's multisig wallet.
     uint private constant bonus_base_points = 3000;
