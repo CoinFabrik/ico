@@ -4,21 +4,21 @@ const refresh_button = document.getElementById("refresh_button");
 const phase_field = document.getElementById("phase_field");
 const investor_count_field = document.getElementById("investor_count_field");
 
-function send_request(method, body, on_ready_state) {
+function send_request(method, on_ready_state) {
     const http_req = new XMLHttpRequest();
-    http_req.open(method, "http://localhost:8080/");
+    http_req.open(method, "http://localhost:8080/?method=query_crowdsale");
     http_req.setRequestHeader("Content-Type", "application/json");
     http_req.onreadystatechange = function() {
         if (http_req.readyState == XMLHttpRequest.DONE && http_req.status == 200) {
             on_ready_state(http_req.response);
         }
     }
-    http_req.send(JSON.stringify(body));
+    http_req.send();
 }
 
 
 function refresh_state() {
-    send_request("GET", { "method": "query_crowdsale" },  function(response) {
+    send_request("GET",  function(response) {
         const res = JSON.parse(response);
         let percent = (res.phase_progress / res.chunked_wei_multiple) * 100;
         progress_bar.style = "width: " + percent.toString() + "%";
