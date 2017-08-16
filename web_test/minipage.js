@@ -2,7 +2,7 @@ const progress_bar = document.getElementById("progress_bar");
 const submit_button = document.getElementById("submit_button");
 const refresh_button = document.getElementById("refresh_button");
 const phase_field = document.getElementById("phase_field");
-const current_block_field = document.getElementById("current_block_field");
+const block_number_field = document.getElementById("block_number_field");
 const starting_block_field = document.getElementById("starting_block_field");
 const ending_block_field = document.getElementById("ending_block_field");
 const crowdsale_cap_field = document.getElementById("crowdsale_cap_field");
@@ -31,7 +31,7 @@ function refresh_state() {
         let percent = (res.phase_progress / res.wei_per_phase) * 100;
         progress_bar.style = "width: " + percent.toString() + "%";
         phase_field.textContent = "Current phase: " + res.current_phase.toString();
-        current_block_field.textContent = res.current_block.toString();
+        block_number_field.textContent = res.current_block.toString();
         starting_block_field.textContent = res.starting_block.toString();
         ending_block_field.textContent = res.ending_block.toString();
         crowdsale_cap_field.textContent = res.crowdsale_cap.toString();
