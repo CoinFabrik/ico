@@ -73,10 +73,9 @@ contract('Crowdsale', function(accounts) {
     .then(function(){
         return HubiiCrowdsale.deployed();})
     .then(function(instance) {
-        crowdsale = instance;
-        return crowdsale.token();})
-    .then(function(tokenAddress) {
-        return CrowdsaleToken.at(tokenAddress);
+        crowdsale = instance;})
+    .then(function() {
+        return CrowdsaleToken.deployed();
     }).then(function(tokenInstance){
         crowdsaleToken = tokenInstance;
     });
