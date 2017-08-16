@@ -20,7 +20,7 @@ function send_request(method, on_ready_state) {
 function refresh_state() {
     send_request("GET",  function(response) {
         const res = JSON.parse(response);
-        let percent = (res.phase_progress / res.chunked_wei_multiple) * 100;
+        let percent = (res.phase_progress / res.wei_per_phase) * 100;
         progress_bar.style = "width: " + percent.toString() + "%";
         phase_field.textContent = "Current phase: " + res.current_phase.toString();
         // TODO: add investor count
