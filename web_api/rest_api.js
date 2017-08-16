@@ -27,7 +27,7 @@ app.get("/", function (request, response) {
         response.json({"error": "Method " + request.body.method.toString() + " requested is not supported."});
         return;
     }
-    get_crowdsale_state().then(function(state) {
+    get_crowdsale_state(web3.eth.blockNumber).then(function(state) {
         response.status(200);
         response.json(state);
     });
@@ -57,16 +57,20 @@ async function init_async(object, prop_key, promise) {
 }
 
 // Eventually we may want to bind calls to a certain block number. (TODO)
-async function get_crowdsale_state(block) {
+async function get_crowdsale_state(block_number) {
     // We return the amount raised, number of investors,
     // progress of the current phase and current phase number.
-    const state = {};
+    const state = { "current_block": block_number };
     const promises = [];
 
     //TODO: bind calls for block number _block_
     promises.push(init_async(state, "wei_raised", async_call(crowdsale.weiRaised.call, block_number)));
     promises.push(init_async(state, "investor_count", async_call(crowdsale.investorCount.call, block_number)));
     promises.push(init_async(state, "crowdsale_finalized", async_call(crowdsale.finalized.call, block_number)));
+    promises.push(init_async(state, "starting_block", async_call(crowdsale.startsAt.call, block_number)));
+    promises.push(init_async(state, "ending_block", async_call(crowdsale.endsAt.call, block_number)));
+    promises.push(init_async(state, "crowdsale_cap", async_call(crowdsale.weiFundingCap.call, block_number)));
+
     
     // Separate case
     promises.push(async_call(crowdsale.ceilingStrategy.call, block_number).then(async function(ceiling_address) {
