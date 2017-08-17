@@ -11,5 +11,6 @@ module.exports = function(deployer, network, accounts) {
             HubiiCrowdsale.at(HubiiCrowdsale.address).setEarlyParticipantWhitelist("0XA4793E13F77BF49DEA75423ECC858829D4262A4B",true);
             HubiiCrowdsale.at(HubiiCrowdsale.address).setEarlyParticipantWhitelist("0X1266BC91E136333D977C5AC56EA9CDA1DEB32C01",true);
             HubiiCrowdsale.at(HubiiCrowdsale.address).setEarlyParticipantWhitelist("0XFDECC1FA040A320D9DC855667118B881B0749334",true);
+            HubiiCrowdsale.at(HubiiCrowdsale.address).setFundingCap(config.fundingCap);
         }); 
 };
