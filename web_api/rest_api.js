@@ -68,6 +68,7 @@ async function get_crowdsale_state(block_number) {
     promises.push(init_async(state, "starting_block", async_call(crowdsale.startsAt.call, block_number)));
     promises.push(init_async(state, "ending_block", async_call(crowdsale.endsAt.call, block_number)));
     promises.push(init_async(state, "crowdsale_cap", async_call(crowdsale.weiFundingCap.call, block_number)));
+    promises.push(init_async(state, "crowdsale_minimum_goal", async_call(crowdsale.minimumFundingGoal.call, block_number)));
 
     
     // Separate case
