@@ -9,6 +9,8 @@ const web3 = new Web3(new Web3.providers.HttpProvider("http://192.168.0.186:7999
 config.startBlock = 4137656 + 28239;
 // We give two week's worth of blocks for the crowdsale to run its course: 55,486
 config.endBlock = config.startBlock + 55486;
+config.MW_address = "0x931F6E5c89dD5559D3820cFBd1975BA5d92F8777";
+config.fundingCap = web3.toWei("17000");
 
 config.multisig_owners = ["0xf19258256b06324c7516b00bf5c76af001ee1e95"];
 
