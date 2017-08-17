@@ -9,8 +9,8 @@ import "./BonusFinalizeAgent.sol";
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
 contract HubiiCrowdsale is Crowdsale {
     uint private constant chunked_multiple = 18000 * (10 ** 18); // in wei
-    uint private constant limit_per_address = 6 * (10 ** 18); // in wei
-    uint private constant hubii_minimum_funding = 0 * (10 ** 18); // in wei
+    uint private constant limit_per_address = 100000 * (10 ** 18); // in wei
+    uint private constant hubii_minimum_funding = 17000 * (10 ** 18); // in wei
     uint private constant token_initial_supply = 0;
     uint8 private constant token_decimals = 15;
     bool private constant token_mintable = true;
@@ -31,5 +31,16 @@ contract HubiiCrowdsale is Crowdsale {
         token.setMintAgent(address(f_agent), true);
         token.setReleaseAgent(address(f_agent));
         setFinalizeAgent(f_agent);
+    }
+
+    // These two setters are present only to correct block numbers if they are off from their target date by more than, say, a day
+    function setStartingBlock(uint startingBlock) public onlyOwner inState(State.PreFunding) {
+        require(startingBlock > block.number && startingBlock < endsAt);
+        startsAt = startingBlock;
+    }
+
+    function setEndingBlock(uint endingBlock) public onlyOwner notFinished {
+        require(endingBlock > block.number && endingBlock > startsAt);
+        endsAt = endingBlock;
     }
 }
