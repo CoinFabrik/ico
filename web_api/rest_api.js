@@ -3,7 +3,6 @@ const config = require("./config.js");
 const Web3 = require("web3");
 const express = require("express");
 const app = express();
-const body_parser = require("body-parser");
 
 const web3 = new Web3(new Web3.providers.HttpProvider(config.nodeIpPort));
 
@@ -12,7 +11,6 @@ const CS_contract = web3.eth.contract(abi.Crowdsale);
 const crowdsale = CS_contract.at(config.crowdsale.address);
 const ceiling_contract = web3.eth.contract(abi.FixedCeiling);
 
-//app.use(body_parser.json());
 app.use(express.static("../web_test"));
 
 // Defined to avoid waiting on database or blockchain node to respond
@@ -24,7 +22,7 @@ app.head("/", function (request, response) {
 app.get("/", function (request, response) {
     if (request.query.method != "query_crowdsale") {
         response.status(200);
-        response.json({"error": "Method " + request.body.method.toString() + " requested is not supported."});
+        response.json({"error": "Method " + request.query.method.toString() + " requested is not supported."});
         return;
     }
     get_crowdsale_state(web3.eth.blockNumber).then(function(state) {
