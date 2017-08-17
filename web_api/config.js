@@ -1,8 +1,8 @@
 const config = {};
 
-config.nodeIpPort = "http://127.0.0.1:20487";
+config.nodeIpPort = "http://127.0.0.1:8545";
 config.crowdsale = {
-    address: "0x07bff081b3978d9f69dc5f7232825bbff3b1666c"
+    address: "0x4c04a0b1b11be487dbe7b465c3c2c22036ff2c0b"
 };
 
 module.exports = config;

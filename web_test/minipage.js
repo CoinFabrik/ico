@@ -1,37 +1,41 @@
 const progress_bar = document.getElementById("progress_bar");
 const submit_button = document.getElementById("submit_button");
 const refresh_button = document.getElementById("refresh_button");
-const name_field = document.getElementById("name_field");
-const email_field = document.getElementById("email_field");
-const id_field = document.getElementById("id_field");
-const call_data_field = document.getElementById("call_data_field");
 const phase_field = document.getElementById("phase_field");
+const block_number_field = document.getElementById("block_number_field");
+const starting_block_field = document.getElementById("starting_block_field");
+const ending_block_field = document.getElementById("ending_block_field");
+const funding_cap_field = document.getElementById("funding_cap_field");
+const investor_count_field = document.getElementById("investor_count_field");
 
-function send_request(method, body, on_ready_state) {
+function send_request(method, on_ready_state) {
     const http_req = new XMLHttpRequest();
-    http_req.open(method, "http://localhost:8080/");
+    http_req.open(method, "http://localhost:8080/?method=query_crowdsale");
     http_req.setRequestHeader("Content-Type", "application/json");
     http_req.onreadystatechange = function() {
         if (http_req.readyState == XMLHttpRequest.DONE && http_req.status == 200) {
             on_ready_state(http_req.response);
         }
     }
-    http_req.send(JSON.stringify(body));
+    http_req.send();
 }
-
-submit_button.addEventListener("click", () => send_request("POST", { "name": name_field.textContent, "email": email_field.textContent, "method": "generate_customer_id" }, function(response) {
-    const res = JSON.parse(response);
-    id_field.textContent = res.customer_id;
-    call_data_field.textContent = res.delegate_call_data;
-}));
 
 
 function refresh_state() {
-    send_request("GET", { "method": "query_crowdsale" },  function(response) {
+    send_request("GET",  function(response) {
+        console.log("Unparsed JSON:");
+        console.log(response);
         const res = JSON.parse(response);
-        let percent = (res.phase_progress / res.chunked_wei_multiple) * 100;
+        console.log("Parsed JSON:");
+        console.log(res);
+        let percent = (res.phase_progress / res.wei_per_phase) * 100;
         progress_bar.style = "width: " + percent.toString() + "%";
         phase_field.textContent = "Current phase: " + res.current_phase.toString();
+        block_number_field.textContent = res.current_block.toString();
+        starting_block_field.textContent = res.starting_block.toString();
+        ending_block_field.textContent = res.ending_block.toString();
+        funding_cap_field.textContent = res.crowdsale_cap.toString();
+        investor_count_field.textContent = res.investor_count.toString();
     });
 }
 
