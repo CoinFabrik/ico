@@ -5,6 +5,7 @@ const express = require("express");
 const app = express();
 
 const web3 = new Web3(new Web3.providers.HttpProvider(config.nodeIpPort));
+const average_block_time = 21;
 
 // Setup contract objects
 const CS_contract = web3.eth.contract(abi.Crowdsale);
@@ -79,6 +80,11 @@ async function get_crowdsale_state(block_number) {
     console.log(promises);
     await Promise.all(promises).catch(function(error) {console.log("Promise failed: " + error);});
 
+    state.start_timestamp_utc = ((new Date()).getTime() / 1000) | 0 + (state.starting_block - state.current_block) * average_block_time;  
+    state.end_timestamp_utc = ((new Date()).getTime() / 1000) | 0 + (state.ending_block - state.starting_block) * average_block_time;
+    state.average_block_time = average_block_time;
+    state.start_eta = new Date(state.start_timestamp_utc).toISOString().replace(/T/, ' ').replace(/\..+/, '');
+    state.end_eta = new Date(state.end_timestamp_utc).toISOString().replace(/T/, ' ').replace(/\..+/, '');
     state.current_phase = (state.wei_raised / state.wei_per_phase + 1) | 0;
     state.phase_progress = state.wei_raised % state.wei_per_phase;
     return state;
