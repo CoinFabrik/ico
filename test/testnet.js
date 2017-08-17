@@ -54,7 +54,7 @@ contract('Crowdsale', function(accounts) {
     const decimals = 15;
     const tokensInWei = 10 ** 15; 
     const chunkedWeiMultiple = 25 * (10 ** 18);
-    const limitPerAddress = web3.fromWei(6 * (10 ** 18));
+    const limitPerAddress = 6;
     const bonusBasePoints = 3000;
 
     const exampleAddress0 = accounts[0];
@@ -67,11 +67,7 @@ contract('Crowdsale', function(accounts) {
     let crowdsaleToken;
     let crowdsale;
     
-    const init_prom = MultiSigWallet.deployed()
-    .then(function(instance){
-        multiSigWallet = instance;})
-    .then(function(){
-        return HubiiCrowdsale.deployed();})
+    const init_prom = HubiiCrowdsale.deployed()
     .then(function(instance) {
         crowdsale = instance;})
     .then(function() {
@@ -145,7 +141,7 @@ contract('Crowdsale', function(accounts) {
         let actualBlock = await web3.eth.getBlock("latest").number;
         let startBlock = await crowdsale.startsAt();
         
-        if (actualBlock < startBlock - 2) {
+        if (actualBlock < startBlock - 5) {
             await mineTransaction({"etherToSend":1, "sender":exampleAddress1, "operation":crowdsale.buy, "expectedResult":"failure"});
         } else {
             console.log("⇩⇩⇩ NOT TESTED BECAUSE OF BEING IN FUNDING STATE⇩⇩⇩");
@@ -169,6 +165,8 @@ contract('Crowdsale', function(accounts) {
 
 
     it_synched('Checks that ether goes where it should after a purchase', async function() {
+        const initialContributionWalletBalance = await web3.eth.getBalance(config.MW_address);
+
         const initialBalance = await web3.eth.getBalance(exampleAddress1);
         let etherToSend = 2;
         let txHash = await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress1, "operation":crowdsale.buy, "expectedResult":"success"});
@@ -179,11 +177,11 @@ contract('Crowdsale', function(accounts) {
         const expected_gas_usage = parseFloat(web3.fromWei(tx_receipt.gasUsed * GAS_PRICE));
         const expected_spent = etherToSend + parseFloat(web3.fromWei(tx_receipt.gasUsed * GAS_PRICE));
         const gas_used = parseFloat(web3.fromWei(tx_receipt.gasUsed * GAS_PRICE));
-        const totalCollected = await crowdsale.weiRaised();
-        assert.equal(web3.fromWei(totalCollected).toNumber(), investmentPerAccount[exampleAddress1] + etherToSend);
-        const balanceContributionWallet = await web3.eth.getBalance(multiSigWallet.address);
-        assert.equal(web3.fromWei(balanceContributionWallet).toNumber(), investmentPerAccount[exampleAddress1] + etherToSend);
         investmentPerAccount[exampleAddress1] += etherToSend;
+        const totalCollected = await crowdsale.weiRaised();
+        assert.isTrue(web3.fromWei(totalCollected).equals(investmentPerAccount[exampleAddress1]));
+        const contributionWalletBalance = await web3.eth.getBalance(config.MW_address);
+        assert.isTrue(web3.fromWei(contributionWalletBalance.sub(initialContributionWalletBalance)).equals(etherToSend));
     });   
 
     it_synched('Checks that customers can buy using its id', async function() {
@@ -261,12 +259,12 @@ contract('Crowdsale', function(accounts) {
         assert.equal(finalWeiRaised.toNumber(), fundingCap);
         assert.isFalse(await crowdsaleToken.released());
         state = await crowdsale.getState();
-        assert.equal(state.toNumber(), 3); // Checks if state is Success
+        assert.equal(state.toNumber(), 4); // Checks if state is Success
 
         await mineTransaction({"operation":crowdsale.finalize, "expectedResult":"success"});
 
         const tokensSold = await crowdsale.tokensSold();
-        const teamFinalBalance = await crowdsaleToken.balanceOf(multiSigWallet.address);
+        const teamFinalBalance = await crowdsaleToken.balanceOf(config.MW_address);
         const expectedMWBalance = tokensSold.times(bonusBasePoints).dividedBy(10000 - bonusBasePoints).floor();
         assert.isTrue(teamFinalBalance.equals(expectedMWBalance));
 
