@@ -38,4 +38,15 @@ contract HubiiCrowdsale is Crowdsale {
         setFinalizeAgent(f_agent);
         preparing = false;
     }
+
+    // These two setters are present only to correct block numbers if they are off from their target date by more than, say, a day
+    function setStartingBlock(uint startingBlock) public onlyOwner inState(State.PreFunding) {
+        require(startingBlock > block.number && startingBlock < endsAt);
+        startsAt = startingBlock;
+    }
+
+    function setEndingBlock(uint endingBlock) public onlyOwner notFinished {
+        require(endingBlock > block.number && endingBlock > startsAt);
+        endsAt = endingBlock;
+    }
 }
