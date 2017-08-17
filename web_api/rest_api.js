@@ -1,4 +1,4 @@
-const abi = require("./contracts_abi.js");
+// const abi = require("./contracts_abi.js");
 const config = require("./config.js");
 const Web3 = require("web3");
 const express = require("express");
@@ -7,9 +7,13 @@ const app = express();
 const web3 = new Web3(new Web3.providers.HttpProvider(config.nodeIpPort));
 
 // Setup contract objects
-const CS_contract = web3.eth.contract(abi.Crowdsale);
+// const CS_contract = web3.eth.contract(abi.Crowdsale);
+// const crowdsale = CS_contract.at(config.crowdsale.address);
+// const ceiling_contract = web3.eth.contract(abi.FixedCeiling);
+
+const CS_contract = web3.eth.contract(require("../build/contracts/HubiiCrowdsale.json").abi);
 const crowdsale = CS_contract.at(config.crowdsale.address);
-const ceiling_contract = web3.eth.contract(abi.FixedCeiling);
+const ceiling_contract = web3.eth.contract(require("../build/contracts/FixedCeiling.json").abi);
 
 app.use(express.static("../web_test"));
 
