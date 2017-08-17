@@ -62,6 +62,11 @@ contract('Crowdsale', function(accounts) {
     const exampleAddress2 = accounts[2];
     const exampleAddress3 = accounts[3];
 
+    // let gasExpenditure = [];
+    // for (var i = 0; i < accounts.length; i++) {
+    //     gasExpenditure[i] = web3.toBigNumber(0);
+    // }
+
     let rpcId = 2000;
 
     let crowdsaleToken;
@@ -69,6 +74,7 @@ contract('Crowdsale', function(accounts) {
     
     const init_prom = HubiiCrowdsale.deployed()
     .then(function(instance) {
+        console.log("ADDRESS DEL CROWDSALE: ", instance.address);
         crowdsale = instance;})
     .then(function() {
         return CrowdsaleToken.deployed();
@@ -120,7 +126,7 @@ contract('Crowdsale', function(accounts) {
                         console.log(error);
                     });
                     rpcId = rpcId + 1;
-                    console.log("Awaited approximately", iteration,  "seconds until mined 🔨",);
+                    console.log("Awaited approximately", iteration,  "seconds until mined 🔨");
                     return txHash;
                 } else {
                     return start(iteration + 1);
@@ -133,6 +139,10 @@ contract('Crowdsale', function(accounts) {
 
    
     it_synched('Checks contract\'s health', async function() {
+        for (var i = 0; i < accounts.length; i++) {
+            let amount = await web3.eth.getBalance(accounts[i]);
+            console.log("Account", i, "has: ", web3.fromWei(amount).toNumber());
+        }
         assert(await crowdsale.isFinalizerSane());
     });
 
@@ -173,7 +183,6 @@ contract('Crowdsale', function(accounts) {
         const finalBalance = await web3.eth.getBalance(exampleAddress1);
         const spent = web3.fromWei(initialBalance.sub(finalBalance)).toNumber();
         tx_receipt = await web3.eth.getTransactionReceipt(txHash);
-
         const expected_gas_usage = parseFloat(web3.fromWei(tx_receipt.gasUsed * GAS_PRICE));
         const expected_spent = etherToSend + parseFloat(web3.fromWei(tx_receipt.gasUsed * GAS_PRICE));
         const gas_used = parseFloat(web3.fromWei(tx_receipt.gasUsed * GAS_PRICE));
@@ -279,5 +288,12 @@ contract('Crowdsale', function(accounts) {
 
         const finalBalance0 = await crowdsaleToken.balanceOf(exampleAddress0);
         assert.isTrue(finalBalance0.equals(tokensToSend));
+        for (var i = 0; i < accounts.length; i++) {
+            console.log("Account", i, "invested: ", investmentPerAccount[accounts[i]]);
+        }
     });
+    // it_synched('Checks that accounts have the corresponding balance', async function() {
+
+
+    // });
 });
