@@ -5,7 +5,7 @@ const phase_field = document.getElementById("phase_field");
 const block_number_field = document.getElementById("block_number_field");
 const starting_block_field = document.getElementById("starting_block_field");
 const ending_block_field = document.getElementById("ending_block_field");
-const crowdsale_cap_field = document.getElementById("crowdsale_cap_field");
+const funding_cap_field = document.getElementById("funding_cap_field");
 const investor_count_field = document.getElementById("investor_count_field");
 
 function send_request(method, on_ready_state) {
@@ -34,7 +34,7 @@ function refresh_state() {
         block_number_field.textContent = res.current_block.toString();
         starting_block_field.textContent = res.starting_block.toString();
         ending_block_field.textContent = res.ending_block.toString();
-        crowdsale_cap_field.textContent = res.crowdsale_cap.toString();
+        funding_cap_field.textContent = res.crowdsale_cap.toString();
         investor_count_field.textContent = res.investor_count.toString();
     });
 }
