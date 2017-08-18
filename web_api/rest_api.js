@@ -65,11 +65,11 @@ async function get_crowdsale_state(block_number) {
     //TODO: bind calls for block number _block_
     promises.push(init_async(state, "wei_raised", async_call(crowdsale.weiRaised.call, block_number)));
     promises.push(init_async(state, "investor_count", async_call(crowdsale.investorCount.call, block_number)));
-    promises.push(init_async(state, "crowdsale_finalized", async_call(crowdsale.finalized.call, block_number)));
+    promises.push(init_async(state, "finalized", async_call(crowdsale.finalized.call, block_number)));
     promises.push(init_async(state, "starting_block", async_call(crowdsale.startsAt.call, block_number)));
     promises.push(init_async(state, "ending_block", async_call(crowdsale.endsAt.call, block_number)));
-    promises.push(init_async(state, "crowdsale_cap", async_call(crowdsale.weiFundingCap.call, block_number)));
-    promises.push(init_async(state, "crowdsale_minimum_goal", async_call(crowdsale.minimumFundingGoal.call, block_number)));
+    promises.push(init_async(state, "cap", async_call(crowdsale.weiFundingCap.call, block_number)));
+    promises.push(init_async(state, "minimum_goal", async_call(crowdsale.minimumFundingGoal.call, block_number)));
 
     
     // Separate case
@@ -80,6 +80,8 @@ async function get_crowdsale_state(block_number) {
     console.log(promises);
     await Promise.all(promises).catch(function(error) {console.log("Promise failed: " + error);});
 
+    state.cap = web3.fromWei(state.cap);
+    state.minimum_goal = web3.fromWei(state.minimum_goal);
     state.start_timestamp_utc = ((new Date()).getTime() / 1000) | 0 + (state.starting_block - state.current_block) * average_block_time;  
     state.end_timestamp_utc = ((new Date()).getTime() / 1000) | 0 + (state.ending_block - state.starting_block) * average_block_time;
     state.average_block_time = average_block_time;

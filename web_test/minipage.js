@@ -39,8 +39,8 @@ function refresh_state() {
         ending_block_field.textContent = res.ending_block.toString();
         start_eta_field.textContent = res.start_eta.toString();
         end_eta_field.textContent = res.end_eta.toString();
-        funding_cap_field.textContent = (parseInt(res.crowdsale_cap, 10) / (10**18)).toString();
-        minimum_goal_field.textContent = (parseInt(res.minimum_goal, 10) / (10**18)).toString();
+        funding_cap_field.textContent = res.cap.toString();
+        minimum_goal_field.textContent = res.minimum_goal.toString();
         investor_count_field.textContent = res.investor_count.toString();
     });
 }
