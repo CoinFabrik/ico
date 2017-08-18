@@ -9,11 +9,18 @@ The API server expects an HTTP GET request with a JSON body. The JSON must have 
 - `ending_block`: The block in which the crowdsale ends.
 - `wei_raised`: The amount of wei invested in the crowdsale.
 - `investor_count`: The amount of investors that participated in the crowdsale.
-- `crowdsale_finalized`: This is a flag that is only true once the crowdsale has been finalized which means that the tokens were released for transfer and the team received its 30% share of the total tokens.
-- `funding_cap`: The funding cap of the crowdsale.
+- `crowdsale_finalized`: A flag that is only true once the crowdsale has been finalized which means that the tokens were released for transfer and the team received its 30% share of the total tokens.
+- `crowdsale_cap`: The funding cap of the crowdsale.
 - `wei_per_phase`: Total wei per phase.
 - `current_phase`: Current phase of the crowdsale.
-- `phase_progress`: Amount of wei invested toward the current phase.
+- `phase_progress`: Amount of wei invested during the current phase.
+- `crowdsale_minimum_goal`: The minimum goal of the crowdsale.
+- `start_timestamp_utc`: The timestamp at which the crowdsale is expected to start (in Unix time). 
+- `end_timestamp_utc`: The timestamp at which the crowdsale is expected to start (in Unix time).
+- `average_block_time`: The average block time used in order to calculate the starting and ending times of the crowdsale.
+- `start_eta_utc`: String containing the expected starting time.
+- `end_eta_utc`: String containing the expected ending time.
+
 
 When an unsupported method is requested to the API server it responds with a JSON in the body with the member `error` set to a human-readable message string.
 
