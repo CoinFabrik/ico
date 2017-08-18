@@ -82,8 +82,8 @@ async function get_crowdsale_state(block_number) {
 
     state.cap = web3.fromWei(state.cap);
     state.minimum_goal = web3.fromWei(state.minimum_goal);
-    state.start_timestamp_utc = ((new Date()).getTime() / 1000) | 0 + (state.starting_block - state.current_block) * average_block_time;  
-    state.end_timestamp_utc = ((new Date()).getTime() / 1000) | 0 + (state.ending_block - state.starting_block) * average_block_time;
+    state.start_timestamp_utc = (new Date()).getTime() + (state.starting_block - state.current_block) * average_block_time * 1000;  
+    state.end_timestamp_utc = (new Date()).getTime()  + (state.ending_block - state.starting_block) * average_block_time * 1000;
     state.average_block_time = average_block_time;
     state.start_eta = new Date(state.start_timestamp_utc).toISOString().replace(/T/, ' ').replace(/\..+/, '');
     state.end_eta = new Date(state.end_timestamp_utc).toISOString().replace(/T/, ' ').replace(/\..+/, '');

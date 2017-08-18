@@ -15,8 +15,8 @@ The API server expects an HTTP GET request with a JSON body. The JSON must have 
 - `current_phase`: Current phase of the crowdsale.
 - `phase_progress`: Amount of wei invested during the current phase.
 - `crowdsale_minimum_goal`: The minimum goal of the crowdsale.
-- `start_timestamp_utc`: The timestamp at which the crowdsale is expected to start (in Unix time). 
-- `end_timestamp_utc`: The timestamp at which the crowdsale is expected to start (in Unix time).
+- `start_timestamp_utc`: The timestamp at which the crowdsale is expected to start (Unix time in miliseconds). 
+- `end_timestamp_utc`: The timestamp at which the crowdsale is expected to start (Unix time in miliseconds).
 - `average_block_time`: The average block time used in order to calculate the starting and ending times of the crowdsale.
 - `start_eta_utc`: String containing the expected starting time.
 - `end_eta_utc`: String containing the expected ending time.
