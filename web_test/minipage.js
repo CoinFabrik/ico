@@ -5,6 +5,8 @@ const phase_field = document.getElementById("phase_field");
 const block_number_field = document.getElementById("block_number_field");
 const starting_block_field = document.getElementById("starting_block_field");
 const ending_block_field = document.getElementById("ending_block_field");
+const start_eta_field = document.getElementById("start_eta_field");
+const end_eta_field = document.getElementById("end_eta_field");
 const funding_cap_field = document.getElementById("funding_cap_field");
 const minimum_goal_field = document.getElementById("minimum_goal_field");
 const investor_count_field = document.getElementById("investor_count_field");
@@ -35,8 +37,10 @@ function refresh_state() {
         block_number_field.textContent = res.current_block.toString();
         starting_block_field.textContent = res.starting_block.toString();
         ending_block_field.textContent = res.ending_block.toString();
-        funding_cap_field.textContent = (res.crowdsale_cap.toNumber() / (10**18)).toString();
-        minimum_goal_field.textContent = (res.minimum_goal.toNumber() / (10**18)).toString();
+        start_eta_field.textContent = res.start_eta.toString();
+        end_eta_field.textContent = res.end_eta.toString();
+        funding_cap_field.textContent = (parseInt(res.crowdsale_cap, 10) / (10**18)).toString();
+        minimum_goal_field.textContent = (parseInt(res.minimum_goal, 10) / (10**18)).toString();
         investor_count_field.textContent = res.investor_count.toString();
     });
 }
