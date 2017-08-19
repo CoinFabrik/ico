@@ -13,13 +13,13 @@ module.exports = function(deployer, network, accounts) {
     deployer.deploy(SafeMath, {gas: 500000});
     deployer.link(SafeMath, HubiiCrowdsale);
     if (network != "liveNet") {
-        deployer.deploy(MultiSigWallet, config.multisig_owners, 1)
+        deployer.deploy(MultiSigWallet, config.multisig_owners, 1, {gas: 2000000})
         .then(function() {
-            deployer.deploy(HubiiCrowdsale, MultiSigWallet.address, startBlock, endBlock);
+            deployer.deploy(HubiiCrowdsale, MultiSigWallet.address, startBlock, endBlock, {gas: 6000000});
         });
     }
     else {
         // !! In production deployment change multisig address to config.MW_address
-        deployer.deploy(HubiiCrowdsale, config.tests.MW_address, startBlock, endBlock);
+        deployer.deploy(HubiiCrowdsale, config.tests.MW_address, startBlock, endBlock, {gas: 6000000});
     }
 };
