@@ -1,5 +1,13 @@
 module.exports = {
   networks: {
+    liveNet: {
+        host: "localhost",
+        port: 8545,
+        network_id: "1",
+        from: "0x54d9249c776c56520a62faecb87a00e105e8c9dc",
+        gas: 6000000,
+        gasPrice: 1000000000
+    },
     ropsten: {
       host: "192.168.0.186",
       port: 8545,

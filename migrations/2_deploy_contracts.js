@@ -8,18 +8,18 @@ const config = require('../config.js');
 
 
 module.exports = function(deployer, network, accounts) {
-    startBlock = network == "privateTestnet" ? config.tests.startBlock : config.startBlock;
-    endBlock = network == "privateTestnet" ? config.tests.endBlock : config.endBlock;
-    deployer.deploy(SafeMath)
-    .catch(function(error) {
-        console.log(error);
-    });
+    const startBlock = network == "privateTestnet" ? config.tests.startBlock : config.startBlock;
+    const endBlock = network == "privateTestnet" ? config.tests.endBlock : config.endBlock;
+    deployer.deploy(SafeMath);
     deployer.link(SafeMath, HubiiCrowdsale);
-    // const MW_contract = [ MultiSigWallet, [], 1 ];
-    deployer.deploy(MultiSigWallet, config.multisig_owners, 1)
-    .then(function() {
-        deployer.deploy(HubiiCrowdsale, MultiSigWallet.address, startBlock, endBlock);})
-    .catch(function(error) {
-        console.log(error);
-    });
+    if (network != "liveNet") {
+        deployer.deploy(MultiSigWallet, config.multisig_owners, 1)
+        .then(function() {
+            deployer.deploy(HubiiCrowdsale, MultiSigWallet.address, startBlock, endBlock);
+        });
+    }
+    else {
+        // !! In production deployment change multisig address to config.MW_address
+        deployer.deploy(HubiiCrowdsale, config.tests.MW_address, startBlock, endBlock);
+    }
 };
