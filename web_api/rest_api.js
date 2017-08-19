@@ -23,7 +23,7 @@ app.head("/", function (request, response) {
 app.get("/", function (request, response) {
     if (request.query.method != "query_crowdsale") {
         response.status(200);
-        response.json({"error": "Method " + request.query.method.toString() + " requested is not supported."});
+        response.json({"error": "Method requested is not supported."});
         return;
     }
     get_crowdsale_state(web3.eth.blockNumber).then(function(state) {
