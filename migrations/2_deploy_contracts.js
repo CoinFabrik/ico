@@ -10,7 +10,7 @@ const config = require('../config.js');
 module.exports = function(deployer, network, accounts) {
     const startBlock = network == "privateTestnet" ? config.tests.startBlock : config.startBlock;
     const endBlock = network == "privateTestnet" ? config.tests.endBlock : config.endBlock;
-    deployer.deploy(SafeMath);
+    deployer.deploy(SafeMath, {gas: 500000});
     deployer.link(SafeMath, HubiiCrowdsale);
     if (network != "liveNet") {
         deployer.deploy(MultiSigWallet, config.multisig_owners, 1)
