@@ -26,9 +26,15 @@ function send_request(method, on_ready_state) {
 
 function refresh_state() {
     send_request("GET",  function(response) {
+        // For debugging purposes
         console.log("Unparsed JSON:");
         console.log(response);
+        if (response.error) {
+            console.log('The server responded with an error: "' + response.error + '"');
+            return;
+        }
         const res = JSON.parse(response);
+        // For debugging purposes
         console.log("Parsed JSON:");
         console.log(res);
         let percent = (res.phase_progress / res.wei_per_phase) * 100;
