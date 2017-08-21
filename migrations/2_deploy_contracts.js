@@ -19,7 +19,7 @@ module.exports = function(deployer, network, accounts) {
         });
     }
     else {
-        // !! In production deployment change multisig address to config.MW_address
-        deployer.deploy(HubiiCrowdsale, config.tests.MW_address, startBlock, endBlock, {gas: 5400000});
+        // !! In production deployment we use config.MW_address as the address of the multisig wallet
+        deployer.deploy(HubiiCrowdsale, config.MW_address, startBlock, endBlock, {gas: 5400000});
     }
 };
