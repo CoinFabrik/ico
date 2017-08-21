@@ -15,11 +15,11 @@ module.exports = function(deployer, network, accounts) {
     if (network != "liveNet") {
         deployer.deploy(MultiSigWallet, config.multisig_owners, 1, {gas: 2000000})
         .then(function() {
-            deployer.deploy(HubiiCrowdsale, MultiSigWallet.address, startBlock, endBlock, {gas: 6000000});
+            deployer.deploy(HubiiCrowdsale, MultiSigWallet.address, startBlock, endBlock, {gas: 5400000});
         });
     }
     else {
         // !! In production deployment change multisig address to config.MW_address
-        deployer.deploy(HubiiCrowdsale, config.tests.MW_address, startBlock, endBlock, {gas: 6000000});
+        deployer.deploy(HubiiCrowdsale, config.tests.MW_address, startBlock, endBlock, {gas: 5400000});
     }
 };
