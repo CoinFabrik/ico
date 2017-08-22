@@ -7,13 +7,13 @@ The API server expects an HTTP GET request with a query string encoded `method` 
 - `current_block`: The latest block number observed by the node.
 - `starting_block`: The block in which the crowdsale starts.
 - `ending_block`: The block in which the crowdsale ends.
-- `wei_raised`: The amount of wei invested in the crowdsale.
+- `ether_raised`: The amount of ether invested in the crowdsale.
 - `investor_count`: The amount of investors that participated in the crowdsale.
 - `crowdsale_finalized`: A flag that is only true once the crowdsale has been finalized which means that the tokens were released for transfer and the team received its 30% share of the total tokens.
 - `crowdsale_cap`: The funding cap of the crowdsale in ethers.
-- `wei_per_phase`: Total wei per phase.
+- `ether_per_phase`: Total ether per phase.
 - `current_phase`: Current phase of the crowdsale.
-- `phase_progress`: Amount of wei invested during the current phase.
+- `phase_progress`: Amount of ether invested during the current phase.
 - `crowdsale_minimum_goal`: The minimum goal of the crowdsale in ethers.
 - `start_timestamp_utc`: The timestamp at which the crowdsale is expected to start (Unix time in miliseconds). 
 - `end_timestamp_utc`: The timestamp at which the crowdsale is expected to start (Unix time in miliseconds).
