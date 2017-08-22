@@ -37,7 +37,7 @@ function refresh_state() {
         // For debugging purposes
         console.log("Parsed JSON:");
         console.log(res);
-        let percent = (res.phase_progress / res.wei_per_phase) * 100;
+        let percent = (res.phase_progress / res.ether_per_phase) * 100;
         progress_bar.style = "width: " + percent.toString() + "%";
         phase_field.textContent = "Current phase: " + res.current_phase.toString();
         block_number_field.textContent = res.current_block.toString();
