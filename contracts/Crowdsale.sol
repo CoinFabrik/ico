@@ -6,12 +6,11 @@ pragma solidity ^0.4.13;
  */
 
 import "./Haltable.sol";
-import "./CrowdsaleToken.sol";
+import "./SafeMath.sol";
 import "./PricingStrategy.sol";
 import "./FinalizeAgent.sol";
-import "./SafeMath.sol";
 import "./CeilingStrategy.sol";
-import "./MintableToken.sol";
+import "./CrowdsaleToken.sol";
 
 /**
  * Abstract base contract for token sales.
