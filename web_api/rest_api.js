@@ -13,7 +13,8 @@ const CS_contract = web3.eth.contract(abi.Crowdsale);
 const crowdsale = CS_contract.at(config.crowdsale.address);
 const ceiling_contract = web3.eth.contract(abi.FixedCeiling);
 
-app.use(cors());
+const cors_options = { origin: [ "https://hubii.network", "https://www.hubii.network" ] };
+app.use(cors(cors_options));
 // app.options("*", cors());
 app.use(express.static("../web_test"));
 
