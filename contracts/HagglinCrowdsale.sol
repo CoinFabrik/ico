@@ -7,14 +7,14 @@ import "./FixedCeiling.sol";
 import "./BonusFinalizeAgent.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
-contract HubiiCrowdsale is Crowdsale {
+contract HagglinCrowdsale is Crowdsale {
     uint private constant chunked_multiple = 18000 * (10 ** 18); // in wei
     uint private constant limit_per_address = 100000 * (10 ** 18); // in wei
-    uint private constant hubii_minimum_funding = 17000 * (10 ** 18); // in wei
+    uint private constant hagglin_minimum_funding = 17000 * (10 ** 18); // in wei
     uint private constant token_in_wei = 5 * (10 ** 14);
     uint private constant token_initial_supply = (10 ** 9) * token_in_wei;
     uint8 private constant token_decimals = 14;
-    function HubiiCrowdsale(address _teamMultisig, uint _start, uint _end) Crowdsale(_teamMultisig, _start, _end, hubii_minimum_funding) public {
+    function HagglinCrowdsale(address _teamMultisig, uint _start, uint _end) Crowdsale(_teamMultisig, _start, _end, hagglin_minimum_funding) public {
         PricingStrategy p_strategy = new FlatPricing(token_in_wei);
         CeilingStrategy c_strategy = new FixedCeiling(chunked_multiple, limit_per_address);
         // Set to dummy finalize agent that only releases the token transfer.
