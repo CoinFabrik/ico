@@ -10,7 +10,7 @@ import "./SafeMath.sol";
 import "./PricingStrategy.sol";
 import "./FinalizeAgent.sol";
 import "./CeilingStrategy.sol";
-import "./CrowdsaleToken.sol";
+import "./HagglinToken.sol";
 
 /**
  * Abstract base contract for token sales.
@@ -29,7 +29,7 @@ contract Crowdsale is Haltable {
   using SafeMath for uint;
 
   /* The token we are selling */
-  CrowdsaleToken public token;
+  HagglinToken public token;
 
   /* How we are going to price our offering */
   PricingStrategy public pricingStrategy;

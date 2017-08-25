@@ -4,7 +4,7 @@ pragma solidity ^0.4.13;
  * Originally from https://github.com/TokenMarketNet/ico
  */
 
- import "./CrowdsaleToken.sol";
+ import "./HagglinToken.sol";
 
 /**
  * Finalize agent defines what happens at the end of a succesful crowdsale.
@@ -24,9 +24,9 @@ contract FinalizeAgent {
    * This is a safety check function that doesn't allow crowdsale to begin
    * unless the finalizer has been set up properly.
    */
-  function isSane(CrowdsaleToken token) public constant returns (bool);
+  function isSane(HagglinToken token) public constant returns (bool);
 
   /** Called once by crowdsale finalize() if the sale was a success. */
-  function finalizeCrowdsale(CrowdsaleToken token) public;
+  function finalizeCrowdsale(HagglinToken token) public;
 
 }
