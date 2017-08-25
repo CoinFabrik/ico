@@ -371,7 +371,7 @@ contract Crowdsale is Haltable {
   }
 
   function assignTokens(address receiver, uint tokenAmount) private {
-    token.mint(receiver, tokenAmount);
+    token.transfer(receiver, tokenAmount);
   }
 
   /** Interface marker. */
