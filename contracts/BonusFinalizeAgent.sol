@@ -7,7 +7,7 @@ pragma solidity ^0.4.13;
  
 import "./FinalizeAgent.sol";
 import "./Crowdsale.sol";
-import "./CrowdsaleToken.sol";
+import "./HagglinToken.sol";
 import "./SafeMath.sol";
 
 /**
@@ -45,12 +45,12 @@ contract BonusFinalizeAgent is FinalizeAgent {
   }
 
   /* Can we run finalize properly */
-  function isSane(CrowdsaleToken token) public constant returns (bool) {
+  function isSane(HagglinToken token) public constant returns (bool) {
     return token.mintAgents(address(this)) && token.releaseAgent() == address(this);
   }
 
   /** Called once by crowdsale finalize() if the sale was a success. */
-  function finalizeCrowdsale(CrowdsaleToken token) {
+  function finalizeCrowdsale(HagglinToken token) {
     require(msg.sender == address(crowdsale));
 
     // How many % points of tokens the founders and others get

@@ -10,7 +10,7 @@ import "./SafeMath.sol";
 import "./PricingStrategy.sol";
 import "./FinalizeAgent.sol";
 import "./CeilingStrategy.sol";
-import "./CrowdsaleToken.sol";
+import "./HagglinToken.sol";
 
 /**
  * Abstract base contract for token sales.
@@ -23,13 +23,14 @@ import "./CrowdsaleToken.sol";
  * - different pricing strategies
  * - different investment policies (require server side customer id, allow only whitelisted addresses)
  *
+ * Concrete implementations should provide a valid public constructor and assignToken function.
  */
 contract Crowdsale is Haltable {
 
   using SafeMath for uint;
 
   /* The token we are selling */
-  CrowdsaleToken public token;
+  HagglinToken public token;
 
   /* How we are going to price our offering */
   PricingStrategy public pricingStrategy;
@@ -130,6 +131,11 @@ contract Crowdsale is Haltable {
     // Minimum funding goal can be zero
     minimumFundingGoal = _minimumFundingGoal;
   }
+
+  /**
+   * Concrete implementations of the crowdsale should decide how the tokens are assigned (e.g. through minting or transfer)
+   */
+  function assignTokens(address receiver, uint tokenAmount) internal;
 
   /**
    * Don't expect to just send in money and get tokens.
@@ -368,10 +374,6 @@ contract Crowdsale is Haltable {
   /** This is for manual testing of multisig wallet interaction */
   function setOwnerTestValue(uint8 val) public onlyOwner stopInEmergency {
     ownerTestValue = val;
-  }
-
-  function assignTokens(address receiver, uint tokenAmount) private {
-    token.mint(receiver, tokenAmount);
   }
 
   /** Interface marker. */

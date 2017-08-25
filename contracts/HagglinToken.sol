@@ -21,13 +21,10 @@ import "./UpgradeableToken.sol";
  * - The token can be capped (supply set in the constructor) or uncapped (crowdsale contract can mint new tokens)
  *
  */
-contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, FractionalERC20 {
+contract HagglinToken is ReleasableToken, MintableToken, UpgradeableToken, FractionalERC20 {
 
-  event UpdatedTokenInformation(string newName, string newSymbol);
-
-  string public name;
-
-  string public symbol;
+  string constant public name = "Ribbits";
+  string constant public symbol = "RBT";
 
   /**
    * Construct the token.
@@ -40,10 +37,8 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Fra
    * @param _decimals Number of decimal places
    * @param _mintable Are new tokens created over the crowdsale or do we distribute only the initial supply? Note that when the token becomes transferable the minting always ends.
    */
-  function CrowdsaleToken(string _name, string _symbol, uint _initialSupply, uint8 _decimals, address _multisig, bool _mintable)
-    UpgradeableToken(_multisig) MintableToken(_initialSupply, _multisig, _mintable) {
-    name = _name;
-    symbol = _symbol;
+  function HagglinToken(string _name, string _symbol, uint _initialSupply, uint8 _decimals, address _multisig)
+    UpgradeableToken(_multisig) MintableToken(_initialSupply, msg.sender, false) {
     decimals = _decimals;
   }
 
@@ -57,19 +52,10 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Fra
 
   /**
    * Allow upgrade agent functionality to kick in only if the crowdsale was a success.
+   * TODO: Are there any other conditions when giving out dividends? Perhaps we should stop all movements.
    */
   function canUpgrade() public constant returns(bool) {
     return released && super.canUpgrade();
-  }
-
-  /**
-   * Owner can update token information here
-   */
-  function setTokenInformation(string _name, string _symbol) onlyOwner {
-    name = _name;
-    symbol = _symbol;
-
-    UpdatedTokenInformation(name, symbol);
   }
 
 }
