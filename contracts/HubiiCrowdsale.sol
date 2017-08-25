@@ -28,6 +28,9 @@ contract HubiiCrowdsale is Crowdsale {
         token.setReleaseAgent(address(f_agent));
         // setFinalizeAgent(f_agent);
     }
+  function assignTokens(address receiver, uint tokenAmount) internal {
+    token.transfer(receiver, tokenAmount);
+  }
 
     // These two setters are present only to correct block numbers if they are off from their target date by more than, say, a day
     function setStartingBlock(uint startingBlock) public onlyOwner inState(State.PreFunding) {
