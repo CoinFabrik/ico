@@ -201,8 +201,6 @@ contract HoldableToken is ERC20Basic {
     // require(_value <= _allowance);
     // SafeMath uses assert instead of require though, beware when using an analysis tool
 
-    balances[_to] = balances[_to].add(_value);
-    balances[_from] = balances[_from].sub(_value);
     allowed[_from][msg.sender] = _allowance.sub(_value);
 
     result = internalTransfer(_from, _to, _value);
