@@ -1,7 +1,7 @@
 pragma solidity ^0.4.13;
 
 /**
- * Originally from https://github.com/OpenZeppelin/zeppelin-solidity
+ * Originally from https://github.com/Op  enZeppelin/zeppelin-solidity
  * Modified by https://www.coinfabrik.com/
  */
 
@@ -12,15 +12,16 @@ import './SafeMath.sol';
  * @title Holdable Token
  * @dev Implementation of the simplified interface in ERC20Basic that provides an incentive to hold tokens for a time after the crowdsale ends. 
  */
-contract HoldableToken is ERC20Basic {
+contract HoldableToken is ERC20 {
   using SafeMath for uint;
 
   uint private constant payments = 14;
 
+  uint[] heldTokensPerPayday;
   uint blocksBetweenPayments;
   uint endBlock;
-  uint[] heldTokensPerPayday;
   Crowdsale crowdsale;
+  RevenueStrategy revenueStrategy;
 
   struct Contributor {
     uint primaryTokensBalance;
@@ -32,9 +33,14 @@ contract HoldableToken is ERC20Basic {
   mapping (address => mapping (address => uint)) allowed;
 
   //TODO: add configuration parameters like crowdsale
-  function HoldableToken(Crowdsale _crowdsale) internal {
+  function HoldableToken( uint _blocksBetweenPayments, uint, _endBlock, Crowdsale _crowdsale, RevenueStrategy _revenueStrategy ) internal {
     heldTokensPerPayday.push(0);
+    blocksBetweenPayments = _blocksBetweenPayments;
+    endBlock = _endBlock;
     crowdsale = _crowdsale;
+    revenueStrategy = _revenueStrategy;
+
+    internalTransfer(address(this), crowdsale, amountOnSale());
   }
 
 
@@ -42,6 +48,7 @@ contract HoldableToken is ERC20Basic {
   * @dev transfer token for a specified address
   * @param destination The address to transfer to.
   * @param value The amount to be transferred.
+  * @return true on  success
   */
   function transfer(address destination, uint value) public returns (bool success) {
     result = internalTransfer(msg.sender);
@@ -60,7 +67,10 @@ contract HoldableToken is ERC20Basic {
     balance = revenue.add(contributors[account].secondaryTokensBalance).add(contributors[account].primaryTokensBalance);
     return balance;
   }
-
+  /**
+  * @dev Updates the amount of primary tokens held until each payday
+  * @param the current payday
+  */
   function updatePaydayAmounts(uint curPayday) private {
     if (heldTokensPerPayday.length() > curPayday)
       return;
@@ -71,6 +81,8 @@ contract HoldableToken is ERC20Basic {
   }
 
   function revenuePerPayday() internal return (uint);
+
+  function amountOnSale() internal return (uint);
 
   function pendingRevenue(address account) internal constant returns(uint) {
     uint curPayday = currentPayday();
@@ -85,7 +97,7 @@ contract HoldableToken is ERC20Basic {
       // The magnitude of the revenue per payday should be chosen to guarantee the safety of all operations.
       // E.g. if the revenue is taken out of an initial pool of 10^23 units, all operations are safe since
       // 10^23 * 10^23 = 10^46 < 10^77 ~= 2^256
-      uint pay = contributors[account].primaryTokensBalance.mul(revenuePerPayday()).div(heldTokens);
+      uint pay = contributors[account].primaryTokensBalance.mul(revenueStrategy.revenuePerPayday()).div(heldTokens);
       revenue = pay.add(revenue);
     }
     return revenue;
@@ -106,14 +118,20 @@ contract HoldableToken is ERC20Basic {
       contributors[crowdsale].secondaryTokensBalance = contributors[crowdsale].secondaryTokensBalance.sub(value);
       contributors[destination].primaryTokensBalance = contributors[destination].primaryTokensBalance.add(value);
       heldTokensPerPayday[0] = heldTokensPerPayday[0].add(value);
+    } else if (source == address(this)) {
+      contributors[address(this)].secondaryBalance = contributors[address(this)].secondaryBalance.sub(value);
+      contributors[destination].secondaryBalance = contributors[destination].secondaryBalance.add(value);
     } else {
-      secondaryBalance = contributors[source].secondaryTokensBalance.add(pendingRevenue(source));
+      revenue = pendingRevenue(source);
+      internalTransfer(address(this), source, revenue);
+      secondaryBalance = contributors[source].secondaryTokensBalance;
+
       if (secondaryBalance < value) {
         spentInitialTokens = value.sub(secondaryBalance);
         contributors[source].secondaryTokensBalance = 0;
         contributors[source].primaryTokensBalance = contributors[source].primaryTokensBalance.sub(spentInitialTokens);
-
         uint curPayday = currentPayday();
+
         updatePaydayAmounts(curPayday);
 
         heldTokensPerPayday[curPayday] = heldTokensPerPayday[curPayday].sub(spentInitialTokens);
@@ -133,8 +151,8 @@ contract HoldableToken is ERC20Basic {
    * @param _spender address The address which will spend the funds.
    * @return A uint specifing the amount of tokens still avaible for the spender.
    */
-  function allowance(address _owner, address _spender) public constant returns (uint remaining) {
-    return allowed[_owner][_spender];
+  function allowance(address owner, address spender) public constant returns (uint remaining) {
+    return allowed[owner][spender];
   }
 
   /**
@@ -143,17 +161,17 @@ contract HoldableToken is ERC20Basic {
    * @param _value The amount of tokens to be spent.
    */
 
-  function approve(address _spender, uint _value) public returns (bool success) {
+  function approve(address spender, uint value) public returns (bool success) {
 
     // To change the approve amount you first have to reduce the addresses'
-    //  allowance to zero by calling `approve(_spender, 0)` if it is not
+    //  allowance to zero by calling `approve(spender, 0)` if it is not
     //  already 0 to mitigate the race condition described here:
     //  https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
 
-    require (_value == 0 || allowed[msg.sender][_spender] == 0);
+    require (value == 0 || allowed[msg.sender][spender] == 0);
 
-    allowed[msg.sender][_spender] = _value;
-    Approval(msg.sender, _spender, _value);
+    allowed[msg.sender][spender] = value;
+    Approval(msg.sender, spender, value);
     return true;
   }
 
@@ -164,10 +182,10 @@ contract HoldableToken is ERC20Basic {
   * Works around https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
   *
   */
-  function addApproval(address _spender, uint _addedValue) public returns (bool success) {
-    uint oldValue = allowed[msg.sender][_spender];
-    allowed[msg.sender][_spender] = oldValue.add(_addedValue);
-    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+  function addApproval(address spender, uint addedValue) public returns (bool success) {
+    uint oldValue = allowed[msg.sender][spender];
+    allowed[msg.sender][spender] = oldValue.add(addedValue);
+    Approval(msg.sender, spender, allowed[msg.sender][spender]);
     return true;
   }
 
@@ -176,15 +194,15 @@ contract HoldableToken is ERC20Basic {
    *
    * Works around https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
    */
-  function subApproval(address _spender, uint _subtractedValue) public returns (bool success) {
-    uint oldVal = allowed[msg.sender][_spender];
+  function subApproval(address spender, uint subtractedValue) public returns (bool success) {
+    uint oldVal = allowed[msg.sender][spender];
 
-    if (_subtractedValue > oldVal) {
-    allowed[msg.sender][_spender] = 0;
+    if (subtractedValue > oldVal) {
+    allowed[msg.sender][spender] = 0;
     } else {
-    allowed[msg.sender][_spender] = oldVal.sub(_subtractedValue);
+    allowed[msg.sender][spender] = oldVal.sub(subtractedValue);
     }
-    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    Approval(msg.sender, spender, allowed[msg.sender][spender]);
     return true;
   }
 
@@ -194,18 +212,18 @@ contract HoldableToken is ERC20Basic {
    * @param _to address The address which you want to transfer to
    * @param _value uint the amout of tokens to be transfered
    */
-  function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
-    uint _allowance = allowed[_from][msg.sender];
+  function transferFrom(address from, address to, uint value) public returns (bool success) {
+    uint allowance = allowed[from][msg.sender];
 
-    // Check is not needed because sub(_allowance, _value) will already throw if this condition is not met
-    // require(_value <= _allowance);
+    // Check is not needed because sub(allowance, value) will already throw if this condition is not met
+    // require(value <= allowance);
     // SafeMath uses assert instead of require though, beware when using an analysis tool
 
-    allowed[_from][msg.sender] = _allowance.sub(_value);
+    allowed[from][msg.sender] = allowance.sub(value);
 
-    result = internalTransfer(_from, _to, _value);
+    result = internalTransfer(from, to, value);
 
-    Transfer(_from, _to, _value);
+    Transfer(from, to, value);
     return result;
   }
 

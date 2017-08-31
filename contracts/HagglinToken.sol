@@ -38,7 +38,7 @@ contract HagglinToken is ReleasableToken, MintableToken, UpgradeableToken, Fract
    * @param _mintable Are new tokens created over the crowdsale or do we distribute only the initial supply? Note that when the token becomes transferable the minting always ends.
    */
   function HagglinToken(string _name, string _symbol, uint _initialSupply, uint8 _decimals, address _multisig)
-    UpgradeableToken(_multisig) MintableToken(_initialSupply, msg.sender, false) {
+    UpgradeableToken(_multisig) MintableToken(_initialSupply, msg.sender, false) HoldableToken(blocksBetweenPayments, end, crowdsale){
     decimals = _decimals;
   }
 

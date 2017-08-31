@@ -11,7 +11,7 @@ import "./Ownable.sol";
 /**
  * Define interface for releasing the token transfer after a successful crowdsale.
  */
-contract ReleasableToken is StandardToken, Ownable {
+contract ReleasableToken is HoldableToken, Ownable {
 
   /* The finalizer contract that allows lifting the transfer limits on this token */
   address public releaseAgent;
