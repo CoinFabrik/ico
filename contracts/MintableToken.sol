@@ -5,9 +5,9 @@ pragma solidity ^0.4.13;
  * Modified by https://www.coinfabrik.com/
  */
 
-import "./Ownable.sol";
+import './Ownable.sol';
 import './StandardToken.sol';
-import "./SafeMath.sol";
+import './SafeMath.sol';
 
 /**
  * A token that can increase its supply by another contract.

@@ -16,7 +16,7 @@ import "./Ownable.sol";
 contract Haltable is Ownable {
   bool public halted;
 
-  event Halted(bool halted);
+  event Halted(bool isHalted);
 
   modifier stopInEmergency {
     require(!halted);

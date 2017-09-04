@@ -5,8 +5,8 @@ pragma solidity ^0.4.13;
  * Modified by https://www.coinfabrik.com/
  */
 
-import "./StandardToken.sol";
-import "./Ownable.sol";
+import './Ownable.sol';
+import './HoldableToken.sol';
 
 /**
  * Define interface for releasing the token transfer after a successful crowdsale.

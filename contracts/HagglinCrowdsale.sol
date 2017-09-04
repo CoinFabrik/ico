@@ -1,10 +1,11 @@
 pragma solidity ^0.4.13;
 
-import "./Crowdsale.sol";
-import "./HagglinToken.sol";
-import "./FlatPricing.sol";
-import "./FixedCeiling.sol";
-import "./BonusFinalizeAgent.sol";
+import './Crowdsale.sol';
+import './HagglinToken.sol';
+import './FlatPricing.sol';
+import './FixedCeiling.sol';
+import './StandardFinalizeAgent.sol';
+import './RevenueStrategy.sol';
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
 contract HagglinCrowdsale is Crowdsale {
@@ -17,16 +18,15 @@ contract HagglinCrowdsale is Crowdsale {
   function HagglinCrowdsale(address _teamMultisig, uint _start, uint _end) Crowdsale(_teamMultisig, _start, _end, hagglin_minimum_funding) public {
     PricingStrategy p_strategy = new FlatPricing(token_in_wei);
     CeilingStrategy c_strategy = new FixedCeiling(chunked_multiple, limit_per_address);
+    RevenueStrategy r_strategy = new RevenueStrategy();
     // Set to dummy finalize agent that only releases the token transfer.
-    // FinalizeAgent f_agent = new BonusFinalizeAgent(this, bonus_base_points, _teamMultisig);
+    FinalizeAgent f_agent = new StandardFinalizeAgent(this);
     setPricingStrategy(p_strategy);
     setCeilingStrategy(c_strategy);
     // Testing values
-    token = new HagglinToken(token_name, token_symbol, token_initial_supply, token_decimals, _teamMultisig);
-    token.setMintAgent(address(this), true);
-    token.setMintAgent(address(f_agent), true);
+    token = new HagglinToken(token_initial_supply, token_decimals, _teamMultisig, _end, this, r_strategy);
     token.setReleaseAgent(address(f_agent));
-    // setFinalizeAgent(f_agent);
+    setFinalizeAgent(f_agent);
   }
     
   function assignTokens(address receiver, uint tokenAmount) internal {

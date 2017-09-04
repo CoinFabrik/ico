@@ -5,10 +5,11 @@ pragma solidity ^0.4.13;
  * Modified by https://www.coinfabrik.com/
  */
 
-import "./FractionalERC20.sol";
-import "./ReleasableToken.sol";
-import "./MintableToken.sol";
-import "./UpgradeableToken.sol";
+import './FractionalERC20.sol';
+import './ReleasableToken.sol';
+import './MintableToken.sol';
+import './UpgradeableToken.sol';
+import './RevenueStrategy.sol';
 
 /**
  * A crowdsale token.
@@ -25,21 +26,21 @@ contract HagglinToken is ReleasableToken, MintableToken, UpgradeableToken, Fract
 
   string constant public name = "Ribbits";
   string constant public symbol = "RBT";
+  uint blocksBetweenPayments =  25200; //considering an average block time of 25s, the number of blocks that are created in a week.
+  uint end;
 
   /**
    * Construct the token.
    *
    * This token must be created through a team multisig wallet, so that it is owned by that wallet.
    *
-   * @param _name Token name
-   * @param _symbol Token symbol - typically it's all caps
    * @param _initialSupply How many tokens we start with
    * @param _decimals Number of decimal places
-   * @param _mintable Are new tokens created over the crowdsale or do we distribute only the initial supply? Note that when the token becomes transferable the minting always ends.
+   * @param _multisig Hagglin's multisig
+   * @param _end End of the crowdsale
    */
-  function HagglinToken(string _name, string _symbol, uint _initialSupply, uint8 _decimals, address _multisig)
-    UpgradeableToken(_multisig) MintableToken(_initialSupply, msg.sender, false) HoldableToken(blocksBetweenPayments, end, crowdsale){
-    decimals = _decimals;
+  function HagglinToken(uint _initialSupply, uint8 _decimals, address _multisig, uint _end, Crowdsale _crowdsale, RevenueStrategy _revenueStrategy)
+    UpgradeableToken(_multisig) MintableToken(_initialSupply, msg.sender, false) HoldableToken(blocksBetweenPayments, _end, _crowdsale, _revenueStrategy){
   }
 
   /**
