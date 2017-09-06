@@ -9,7 +9,6 @@ import './FractionalERC20.sol';
 import './ReleasableToken.sol';
 import './MintableToken.sol';
 import './UpgradeableToken.sol';
-import './RevenueStrategy.sol';
 
 /**
  * A crowdsale token.
@@ -39,8 +38,8 @@ contract HagglinToken is ReleasableToken, MintableToken, UpgradeableToken, Fract
    * @param _multisig Hagglin's multisig
    * @param _end End of the crowdsale
    */
-  function HagglinToken(uint _initialSupply, uint8 _decimals, address _multisig, uint _end, Crowdsale _crowdsale, RevenueStrategy _revenueStrategy)
-    UpgradeableToken(_multisig) MintableToken(_initialSupply, msg.sender, false) HoldableToken(blocksBetweenPayments, _end, _crowdsale, _revenueStrategy){
+  function HagglinToken(uint _initialSupply, uint8 _decimals, address _multisig, uint _end, Crowdsale _crowdsale)
+    UpgradeableToken(_multisig) MintableToken(_initialSupply, msg.sender, false) HoldableToken(blocksBetweenPayments, _end, _crowdsale) {
   }
 
   /**
