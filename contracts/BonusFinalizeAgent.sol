@@ -6,7 +6,7 @@ pragma solidity ^0.4.13;
  */
  
 import "./FinalizeAgent.sol";
-import "./Crowdsale.sol";
+import "./GenericCrowdsale.sol";
 import "./CrowdsaleToken.sol";
 import "./SafeMath.sol";
 
@@ -22,7 +22,7 @@ contract BonusFinalizeAgent is FinalizeAgent {
 
   using SafeMath for uint;
 
-  Crowdsale public crowdsale;
+  GenericCrowdsale public crowdsale;
 
   /** Total percent of tokens minted to the team at the end of the sale as base points
   bonus tokens = tokensSold * bonusBasePoints * 0.0001         */
