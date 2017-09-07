@@ -37,7 +37,7 @@ contract BonusFinalizeAgent is FinalizeAgent {
   /* How many bonus tokens we allocated */
   uint public allocatedBonus;
 
-  function BonusFinalizeAgent(Crowdsale _crowdsale, uint _bonusBasePoints, address _teamMultisig) {
+  function BonusFinalizeAgent(GenericCrowdsale _crowdsale, uint _bonusBasePoints, address _teamMultisig) {
     require(address(_crowdsale) != 0 && address(_teamMultisig) != 0);
     crowdsale = _crowdsale;
     teamMultisig = _teamMultisig;
