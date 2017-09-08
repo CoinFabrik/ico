@@ -7,8 +7,7 @@ const MultiSigWallet = artifacts.require('./MultiSigWallet.sol');
 // const BonusFinalizeAgent = artifacts.require('./BonusFinalizeAgent.sol');
 const CrowdsaleToken = artifacts.require('./CrowdsaleToken.sol');
 // const FixedCeiling = artifacts.require('./FixedCeiling.sol');
-// const Crowdsale = artifacts.require('./Crowdsale.sol');
-const HubiiCrowdsale = artifacts.require('./HubiiCrowdsale.sol');
+const Crowdsale = artifacts.require('./Crowdsale.sol');
 const iterationLimit = 120;
 
 function delay_promise(delay) {
@@ -71,7 +70,7 @@ contract('Crowdsale', function(accounts) {
     .then(function(instance){
         multiSigWallet = instance;})
     .then(function(){
-        return HubiiCrowdsale.deployed();})
+        return Crowdsale.deployed();})
     .then(function(instance) {
         console.log("CROWDSALE ADDRESS: ", instance.address);
         crowdsale = instance;

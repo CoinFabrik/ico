@@ -1,6 +1,6 @@
 const SafeMath = artifacts.require('./SafeMath.sol');
 const MultiSigWallet = artifacts.require('./MultiSigWallet.sol');
-const HubiiCrowdsale = artifacts.require('./HubiiCrowdsale.sol');
+const HubiiCrowdsale = artifacts.require('./Crowdsale.sol');
 
 const config = require('../config.js');
 
@@ -10,16 +10,16 @@ const config = require('../config.js');
 module.exports = function(deployer, network, accounts) {
     const startBlock = network == "privateTestnet" ? config.tests.startBlock : config.startBlock;
     const endBlock = network == "privateTestnet" ? config.tests.endBlock : config.endBlock;
-    deployer.deploy(SafeMath, {gas: 500000});
-    deployer.link(SafeMath, HubiiCrowdsale);
+    deployer.deploy(SafeMath);
+    deployer.link(SafeMath, Crowdsale);
     if (network != "liveNet") {
         deployer.deploy(MultiSigWallet, config.multisig_owners, 1, {gas: 2000000})
         .then(function() {
-            deployer.deploy(HubiiCrowdsale, MultiSigWallet.address, startBlock, endBlock, {gas: 5400000});
+            deployer.deploy(Crowdsale, MultiSigWallet.address, startBlock, endBlock, {gas: 5400000});
         });
     }
     else {
         // !! In production deployment we use config.MW_address as the address of the multisig wallet
-        deployer.deploy(HubiiCrowdsale, config.MW_address, startBlock, endBlock, {gas: 5400000});
+        deployer.deploy(Crowdsale, config.MW_address, startBlock, endBlock, {gas: 5400000});
     }
 };

@@ -1,10 +1,10 @@
 const MultiSigWallet = artifacts.require('./MultiSigWallet.sol');
-const HubiiCrowdsale = artifacts.require('./HubiiCrowdsale.sol');
+const Crowdsale = artifacts.require('./Crowdsale.sol');
 const config = require('../config.js');
 
 module.exports = function(deployer, network, accounts) {
         deployer.then(function() {
-            crowdsale = HubiiCrowdsale.at(HubiiCrowdsale.address);
+            const crowdsale = Crowdsale.at(Crowdsale.address);
             crowdsale.setEarlyParticipantWhitelist("0xC5BAA5EEB01C01900D7DB0F9FF63B39985AB8390", true);
             crowdsale.setEarlyParticipantWhitelist("0x79E7AF1FD59654580D41186F7E0E72134F1EACC4", true);
             crowdsale.setEarlyParticipantWhitelist("0x81549686EF24E8BCE44A8CF8F41C52E4A140911B", true);
