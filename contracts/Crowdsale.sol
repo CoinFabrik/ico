@@ -9,7 +9,7 @@ import "./BonusFinalizeAgent.sol";
 contract Crowdsale is GenericCrowdsale {
     uint private constant chunked_multiple = 18000 * (10 ** 18); // in wei
     uint private constant limit_per_address = 100000 * (10 ** 18); // in wei
-    uint private constant hubii_minimum_funding = 17000 * (10 ** 18); // in wei
+    uint private constant minimum_funding = 17000 * (10 ** 18); // in wei
     uint private constant token_initial_supply = 0;
     uint8 private constant token_decimals = 15;
     bool private constant token_mintable = true;
@@ -18,7 +18,7 @@ contract Crowdsale is GenericCrowdsale {
     uint private constant token_in_wei = 10 ** 15;
     // The fraction of 10,000 out of the total target tokens that is used to mint bonus tokens. These are allocated to the team's multisig wallet.
     uint private constant bonus_base_points = 3000;
-    function Crowdsale(address _teamMultisig, uint _start, uint _end) Crowdsale(_teamMultisig, _start, _end, hubii_minimum_funding) public {
+    function Crowdsale(address _teamMultisig, uint _start, uint _end) GenericCrowdsale(_teamMultisig, _start, _end, minimum_funding) public {
         CeilingStrategy c_strategy = new FixedCeiling(chunked_multiple, limit_per_address);
         FinalizeAgent f_agent = new BonusFinalizeAgent(this, bonus_base_points, _teamMultisig); 
         setCeilingStrategy(c_strategy);

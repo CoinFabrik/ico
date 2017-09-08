@@ -151,7 +151,9 @@ contract GenericCrowdsale is Haltable {
     }
 
     uint weiAmount = ceilingStrategy.weiAllowedToReceive(msg.value, weiRaised, investedAmountOf[receiver], weiFundingCap);
-    uint tokenAmount = calculatePrice(weiAmount, msg.sender);
+    uint tokenAmount;
+    uint excedent;
+    (tokenAmount, excedent) = calculatePrice(weiAmount, msg.sender);
     
     // Dust transaction if no tokens can be given
     require(tokenAmount != 0);
