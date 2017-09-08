@@ -7,9 +7,9 @@ import "./BonusFinalizeAgent.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
 contract Crowdsale is CappedCrowdsale {
-  uint private constant chunked_multiple = 18000 * (10 ** 18); // in wei
+  uint private constant chunked_multiple = 10000 * (10 ** 18); // in wei
   uint private constant limit_per_address = 100000 * (10 ** 18); // in wei
-  uint private constant minimum_funding = 17000 * (10 ** 18); // in wei
+  uint private constant minimum_funding = 0 * (10 ** 18); // in wei
 
   uint private constant token_initial_supply = 0;
   uint8 private constant token_decimals = 16;
@@ -54,7 +54,7 @@ contract Crowdsale is CappedCrowdsale {
   function calculatePrice(uint weiAmount, address customer) public constant returns (uint) {
     uint investedAmount = investedAmountOf[customer].add(weiAmount);
     uint decimalTokensPerWei;
-    if(investedAmount <= 20 * (10**18)){
+    if (investedAmount <= 20 * (10**18)) {
       decimalTokensPerWei = decimalTokensPerWei2Eth;
     } else if (investedAmount <= 50 * (10**18)) {
       decimalTokensPerWei = decimalTokensPerWei20Eth;
