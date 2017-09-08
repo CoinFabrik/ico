@@ -1,6 +1,6 @@
 pragma solidity ^0.4.13;
 
-import "./GenericCrowdsale.sol";
+import "./CappedCrowdsale.sol";
 import "./CrowdsaleToken.sol";
 import "./FixedCeiling.sol";
 import "./BonusFinalizeAgent.sol";
