@@ -31,7 +31,7 @@ contract Crowdsale is GenericCrowdsale {
     }
 
     //TODO: implement token assignation (e.g. through minting or transfer)
-    function assignTokens(uint weiAmount, address customer) internal returns (uint tokenAmount, uint excedent);
+    function assignTokens(address receiver, uint tokenAmount) internal;
 
     // These two setters are present only to correct block numbers if they are off from their target date by more than, say, a day
     // Uncomment only if necessary
