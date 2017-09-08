@@ -6,7 +6,7 @@ import "./FixedCeiling.sol";
 import "./BonusFinalizeAgent.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
-contract Crowdsale is GenericCrowdsale {
+contract Crowdsale is CappedCrowdsale {
   uint private constant chunked_multiple = 18000 * (10 ** 18); // in wei
   uint private constant limit_per_address = 100000 * (10 ** 18); // in wei
   uint private constant minimum_funding = 17000 * (10 ** 18); // in wei

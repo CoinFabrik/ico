@@ -29,9 +29,6 @@ contract GenericCrowdsale is Haltable {
   /* The token we are selling */
   CrowdsaleToken public token;
 
-  /* How we are going to limit our offering */
-  CeilingStrategy public ceilingStrategy;
-
   /* Post-success callback */
   FinalizeAgent public finalizeAgent;
 
@@ -40,9 +37,6 @@ contract GenericCrowdsale is Haltable {
 
   /* if the funding goal is not reached, investors may withdraw their funds */
   uint public minimumFundingGoal;
-
-  /* the funding cannot exceed this cap; may be set later on during the crowdsale */
-  uint public weiFundingCap = 0;
 
   /* the starting block number of the crowdsale */
   uint public startsAt;
@@ -66,10 +60,10 @@ contract GenericCrowdsale is Haltable {
   uint public weiRefunded = 0;
 
   /* Has this crowdsale been finalized */
-  bool public finalized;
+  bool public finalized = false;
 
   /* Do we need to have a unique contributor id for each customer */
-  bool public requireCustomerId;
+  bool public requireCustomerId = false;
 
   /** How many ETH each address has invested in this crowdsale */
   mapping (address => uint) public investedAmountOf;
@@ -110,20 +104,18 @@ contract GenericCrowdsale is Haltable {
   // Crowdsale's finalize function has been called
   event Finalized();
 
-  // A new funding cap has been set
-  event FundingCapSet(uint newFundingCap);
 
-  function GenericCrowdsale(address _multisigWallet, uint _start, uint _end, uint _minimumFundingGoal) internal {
-    setMultisig(_multisigWallet);
+  function GenericCrowdsale(address team_multisig, uint start, uint end, uint min_goal) internal {
+    setMultisig(team_multisig);
 
     // Don't mess the dates
-    require(_start != 0 && _end != 0);
-    require(block.number < _start && _start < _end);
-    startsAt = _start;
-    endsAt = _end;
+    require(start != 0 && end != 0);
+    require(block.number < start && start < end);
+    startsAt = start;
+    endsAt = end;
 
     // Minimum funding goal can be zero
-    minimumFundingGoal = _minimumFundingGoal;
+    minimumFundingGoal = min_goal;
   }
 
   /**
@@ -150,10 +142,8 @@ contract GenericCrowdsale is Haltable {
       require(earlyParticipantWhitelist[receiver]);
     }
 
-    uint weiAmount = ceilingStrategy.weiAllowedToReceive(msg.value, weiRaised, investedAmountOf[receiver], weiFundingCap);
-    uint tokenAmount;
-    uint excedent;
-    (tokenAmount, excedent) = calculatePrice(weiAmount, msg.sender);
+    uint weiAmount = weiAllowedToReceive(msg.value, receiver);
+    uint tokenAmount = calculatePrice(weiAmount, msg.sender);
     
     // Dust transaction if no tokens can be given
     require(tokenAmount != 0);
@@ -175,10 +165,15 @@ contract GenericCrowdsale is Haltable {
   }
 
   /** 
+   *  Calculate the size of the investment that we can accept from this address.
+   */
+  function weiAllowedToReceive(uint weiAmount, address customer) internal constant returns (uint weiAllowed);
+
+  /** 
    *  Calculate the amount of tokens that correspond to the received amount.
    *  When there's an excedent due to rounding error, it should be returned to allow refunding.
    */
-  function calculatePrice(uint weiAmount, address customer) internal returns (uint tokens, uint excedent);
+  function calculatePrice(uint weiAmount, address customer) internal constant returns (uint tokenAmount);
 
   /**
    * Preallocate tokens for the early investors.
@@ -218,21 +213,11 @@ contract GenericCrowdsale is Haltable {
   }
 
 
-  /**
-   * Allow the owner to set a funding cap on the crowdsale.
-   * The new cap should be higher than the minimum funding goal.
-   * 
-   * @param newCap minimum target cap that may be relaxed if it was already broken.
-   */
-  function setFundingCap(uint newCap) public onlyOwner notFinished {
-    weiFundingCap = ceilingStrategy.relaxFundingCap(newCap, weiRaised);
-    require(weiFundingCap >= minimumFundingGoal);
-    FundingCapSet(weiFundingCap);
-  }
 
   /**
-   * Invest to tokens, recognize the payer.
-   *
+   * Investing function that recognizes the payer.
+   * 
+   * @param customerId UUIDv4 that identifies this contributor
    */
   function buyWithCustomerId(uint128 customerId) public payable {
     require(customerId != 0);  // UUIDv4 sanity check
@@ -253,9 +238,11 @@ contract GenericCrowdsale is Haltable {
    * Finalize a succcesful crowdsale.
    *
    * The owner can trigger a call the contract that provides post-crowdsale actions, like releasing the tokens.
+   * Note that by default tokens are not in a released state.
    */
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
-    finalizeAgent.finalizeCrowdsale(token);
+    if (address(finalizeAgent) != 0)
+      finalizeAgent.finalizeCrowdsale(token);
     finalized = true;
     Finalized();
   }
@@ -271,7 +258,6 @@ contract GenericCrowdsale is Haltable {
 
   /**
    * Allow addresses to do early participation.
-   *
    */
   function setEarlyParticipantWhitelist(address addr, bool status) public onlyOwner notFinished stopInEmergency {
     earlyParticipantWhitelist[addr] = status;
@@ -279,20 +265,11 @@ contract GenericCrowdsale is Haltable {
   }
 
   /**
-   * Allow to (re)set ceiling strategy.
-   */
-  function setCeilingStrategy(CeilingStrategy addr) internal {
-    // Disallow setting a bad agent
-    require(addr.isCeilingStrategy());
-    ceilingStrategy = addr;
-  }
-
-  /**
    * Allow to (re)set finalize agent.
    */
   function setFinalizeAgent(FinalizeAgent addr) internal {
     // Disallow setting a bad agent
-    require(addr.isFinalizeAgent());
+    require(address(addr) == 0 || addr.isFinalizeAgent());
     finalizeAgent = addr;
     require(isFinalizerSane());
   }
@@ -337,11 +314,13 @@ contract GenericCrowdsale is Haltable {
     return weiRaised >= minimumFundingGoal;
   }
 
+  function isCrowdsaleFull() internal constant returns (bool full);
+
   /**
    * Check if the contract relationship looks good.
    */
   function isFinalizerSane() public constant returns (bool sane) {
-    return finalizeAgent.isSane(token);
+    return address(finalizeAgent) == 0 || finalizeAgent.isSane(token);
   }
 
   /**
@@ -353,7 +332,7 @@ contract GenericCrowdsale is Haltable {
   function getState() public constant returns (State) {
     if (finalized) return State.Finalized;
     else if (block.number < startsAt) return State.PreFunding;
-    else if (block.number <= endsAt && !ceilingStrategy.isCrowdsaleFull(weiRaised, weiFundingCap)) return State.Funding;
+    else if (block.number <= endsAt && !isCrowdsaleFull()) return State.Funding;
     else if (isMinimumGoalReached()) return State.Success;
     else if (!isMinimumGoalReached() && weiRaised > 0 && loadedRefund >= weiRaised) return State.Refunding;
     else return State.Failure;
