@@ -23,16 +23,21 @@ contract Crowdsale is CappedCrowdsale {
   uint private constant decimalTokensPerWei2Eth = 25;
   uint private constant decimalTokensPerWei20Eth = 26;
   uint private constant decimalTokensPerWei50Eth = 27;
+
+  mapping (address => bool) public discountedInvestors;
+
+
   function Crowdsale(address team_multisig, uint start, uint end) GenericCrowdsale(team_multisig, start, end, minimum_funding) public {
-    CeilingStrategy c_strategy = new FixedCeiling(chunked_multiple, limit_per_address);
+    // CeilingStrategy c_strategy = new FixedCeiling(chunked_multiple, limit_per_address);
     FinalizeAgent f_agent = new BonusFinalizeAgent(this, bonus_base_points, team_multisig); 
-    setCeilingStrategy(c_strategy);
+    // setCeilingStrategy(c_strategy);
     // Testing values
     token = new CrowdsaleToken(token_name, token_symbol, token_initial_supply, token_decimals, team_multisig, token_mintable);
     token.setMintAgent(address(this), true);
     token.setMintAgent(address(f_agent), true);
     token.setReleaseAgent(address(f_agent));
     setFinalizeAgent(f_agent);
+    setFundingCap(999999999999999);
   }
 
   function assignTokens(address receiver, uint tokenAmount) internal {
@@ -51,10 +56,15 @@ contract Crowdsale is CappedCrowdsale {
   //     endsAt = endingBlock;
   // }
 
-  function calculatePrice(uint weiAmount, address customer) public constant returns (uint) {
+  modifier notLessThan2Eth() {
+    require(investedAmountOf[msg.sender].add(msg.value) >= 2 * (10**18));   
+    _;
+  }
+
+  function calculatePrice(uint weiAmount, address customer) internal constant returns (uint) {
     uint investedAmount = investedAmountOf[customer].add(weiAmount);
     uint decimalTokensPerWei;
-    if (investedAmount <= 20 * (10**18)) {
+    if (investedAmount <= 20 * (10**18) && !discountedInvestors[customer]) {
       decimalTokensPerWei = decimalTokensPerWei2Eth;
     } else if (investedAmount <= 50 * (10**18)) {
       decimalTokensPerWei = decimalTokensPerWei20Eth;
@@ -63,5 +73,25 @@ contract Crowdsale is CappedCrowdsale {
     }
     uint decimalTokens = weiAmount.mul(decimalTokensPerWei);
     return decimalTokens;
+  }
+
+  function buy() public payable notLessThan2Eth {
+    super.buy();
+  }
+
+  function setDiscountedInvestor(address addr, bool status) public onlyOwner notFinished stopInEmergency {
+    discountedInvestors[addr] = status;
+  } 
+
+  function weiAllowedToReceive(uint tentativeAmount, address receiver) internal constant returns (uint) {
+      // Then, we check the funding cap
+      if (weiFundingCap == 0) return tentativeAmount;
+      uint total = tentativeAmount.add(weiRaised);
+      if (total < weiFundingCap) return tentativeAmount;
+      else return weiFundingCap.sub(weiRaised);
+  }
+
+  function isCrowdsaleFull() internal constant returns (bool) {
+      return weiFundingCap > 0 && weiRaised >= weiFundingCap;
   }
 }

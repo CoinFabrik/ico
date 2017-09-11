@@ -18,8 +18,10 @@ contract CappedCrowdsale is GenericCrowdsale {
    * 
    * @param newCap minimum target cap that may be relaxed if it was already broken.
    */
-  function setFundingCap(uint newCap) public onlyOwner notFinished {
-    weiFundingCap = relaxFundingCap(newCap, weiRaised);
+
+
+  function setFundingCap(uint newCap) internal onlyOwner notFinished {
+    weiFundingCap = newCap;
     require(weiFundingCap >= minimumFundingGoal);
     FundingCapSet(weiFundingCap);
   }
