@@ -7,17 +7,14 @@ import "./BonusFinalizeAgent.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
 contract Crowdsale is CappedCrowdsale {
-  uint private constant chunked_multiple = 10000 * (10 ** 18); // in wei
-  uint private constant limit_per_address = 100000 * (10 ** 18); // in wei
   uint private constant minimum_funding = 0 * (10 ** 18); // in wei
 
   uint private constant token_initial_supply = 0;
   uint8 private constant token_decimals = 16;
   bool private constant token_mintable = true;
-  string private constant token_name = "BurgerKoenig";
-  string private constant token_symbol = "BK";
+  string private constant token_name = "Ribbits";
+  string private constant token_symbol = "RNT";
 
-  uint private constant bonus_base_points = 0;
   uint private constant fundingCap = uint(100000000 * (10 ** 18)) / 2700;
 
 
@@ -41,18 +38,18 @@ contract Crowdsale is CappedCrowdsale {
 
   // These two setters are present only to correct block numbers if they are off from their target date by more than, say, a day
   // Uncomment only if necessary
-  // function setStartingBlock(uint startingBlock) public onlyOwner inState(State.PreFunding) {
-  //     require(startingBlock > block.number && startingBlock < endsAt);
-  //     startsAt = startingBlock;
-  // }
+  function setStartingBlock(uint startingBlock) public onlyOwner inState(State.PreFunding) {
+      require(startingBlock > block.number && startingBlock < endsAt);
+      startsAt = startingBlock;
+  }
 
-  // function setEndingBlock(uint endingBlock) public onlyOwner notFinished {
-  //     require(endingBlock > block.number && endingBlock > startsAt);
-  //     endsAt = endingBlock;
-  // }
+  function setEndingBlock(uint endingBlock) public onlyOwner notFinished {
+      require(endingBlock > block.number && endingBlock > startsAt);
+      endsAt = endingBlock;
+  }
 
   modifier notLessThan2Eth() {
-    require(investedAmountOf[msg.sender].add(msg.value) >= 2 * (10**18));   
+    require(investedAmountOf[msg.sender].add(msg.value) >= 2 * (10**18));
     _;
   }
 
@@ -76,7 +73,7 @@ contract Crowdsale is CappedCrowdsale {
 
   function setDiscountedInvestor(address addr, bool status) public onlyOwner notFinished stopInEmergency {
     discountedInvestors[addr] = status;
-  } 
+  }
 
   function weiAllowedToReceive(uint tentativeAmount, address) internal constant returns (uint) {
       // Then, we check the funding cap
