@@ -142,8 +142,8 @@ contract GenericCrowdsale is Haltable {
       require(earlyParticipantWhitelist[receiver]);
     }
 
-    uint weiAmount = weiAllowedToReceive(msg.value, receiver);
-    uint tokenAmount = calculatePrice(weiAmount, msg.sender);
+    uint weiAllowedAmount = weiAllowedToReceive(msg.value, receiver);
+    uint tokenAmount = calculatePrice(weiAllowedAmount, msg.sender);
     
     // Dust transaction if no tokens can be given
     require(tokenAmount != 0);
@@ -152,13 +152,13 @@ contract GenericCrowdsale is Haltable {
       // A new investor
       investorCount++;
     }
-    updateInvestorFunds(tokenAmount, weiAmount, receiver, customerId);
+    updateInvestorFunds(tokenAmount, weiAllowedAmount, receiver, customerId);
 
     // Pocket the money
-    multisigWallet.transfer(weiAmount);
+    multisigWallet.transfer(weiAllowedAmount);
 
     // Return excess of money
-    uint weiToReturn = msg.value.sub(weiAmount);
+    uint weiToReturn = msg.value.sub(weiAllowedAmount);
     if (weiToReturn > 0) {
       msg.sender.transfer(weiToReturn);
     }
