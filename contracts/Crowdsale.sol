@@ -18,6 +18,7 @@ contract Crowdsale is CappedCrowdsale {
   string private constant token_symbol = "BK";
 
   uint private constant bonus_base_points = 0;
+  uint private constant fundingCap = uint(100000000 * (10 ** 18)) / 2700;
 
 
   uint private constant decimalTokensPerWei2Eth = 25;
@@ -28,16 +29,10 @@ contract Crowdsale is CappedCrowdsale {
 
 
   function Crowdsale(address team_multisig, uint start, uint end) GenericCrowdsale(team_multisig, start, end, minimum_funding) public {
-    // CeilingStrategy c_strategy = new FixedCeiling(chunked_multiple, limit_per_address);
-    FinalizeAgent f_agent = new BonusFinalizeAgent(this, bonus_base_points, team_multisig); 
-    // setCeilingStrategy(c_strategy);
     // Testing values
     token = new CrowdsaleToken(token_name, token_symbol, token_initial_supply, token_decimals, team_multisig, token_mintable);
     token.setMintAgent(address(this), true);
-    token.setMintAgent(address(f_agent), true);
-    token.setReleaseAgent(address(f_agent));
-    setFinalizeAgent(f_agent);
-    setFundingCap(999999999999999);
+    setFundingCap(fundingCap);
   }
 
   function assignTokens(address receiver, uint tokenAmount) internal {
@@ -83,7 +78,7 @@ contract Crowdsale is CappedCrowdsale {
     discountedInvestors[addr] = status;
   } 
 
-  function weiAllowedToReceive(uint tentativeAmount, address receiver) internal constant returns (uint) {
+  function weiAllowedToReceive(uint tentativeAmount, address) internal constant returns (uint) {
       // Then, we check the funding cap
       if (weiFundingCap == 0) return tentativeAmount;
       uint total = tentativeAmount.add(weiRaised);

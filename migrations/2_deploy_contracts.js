@@ -13,7 +13,7 @@ module.exports = function(deployer, network, accounts) {
     deployer.deploy(SafeMath);
     deployer.link(SafeMath, Crowdsale);
     if (network != "liveNet") {
-        deployer.deploy(MultiSigWallet, config.multisig_owners, 1, {gas: 2000000})
+        deployer.deploy(MultiSigWallet, config.tests.multisig_owners, 1, {gas: 2000000})
         .then(function() {
             deployer.deploy(Crowdsale, MultiSigWallet.address, startBlock, endBlock, {gas: 5400000});
         });
