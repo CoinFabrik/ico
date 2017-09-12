@@ -8,18 +8,16 @@ const config = require('../config.js');
 
 
 module.exports = function(deployer, network, accounts) {
-    const startBlock = network == "privateTestnet" ? config.tests.startBlock : config.startBlock;
-    const endBlock = network == "privateTestnet" ? config.tests.endBlock : config.endBlock;
     deployer.deploy(SafeMath);
     deployer.link(SafeMath, Crowdsale);
     if (network != "liveNet") {
         deployer.deploy(MultiSigWallet, config.tests.multisig_owners, 1, {gas: 2000000})
         .then(function() {
-            deployer.deploy(Crowdsale, MultiSigWallet.address, startBlock, endBlock, {gas: 5400000});
+            deployer.deploy(Crowdsale, MultiSigWallet.address, config.tests.startBlock, config.tests.endBlock, {gas: 5400000});
         });
     }
     else {
         // !! In production deployment we use config.MW_address as the address of the multisig wallet
-        deployer.deploy(Crowdsale, config.MW_address, startBlock, endBlock, {gas: 5400000});
+        deployer.deploy(Crowdsale, config.MW_address, config.startBlock, config.endBlock, {gas: 5400000});
     }
 };
