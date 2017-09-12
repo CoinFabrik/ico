@@ -10,6 +10,8 @@ const CrowdsaleToken = artifacts.require('./CrowdsaleToken.sol');
 const Crowdsale = artifacts.require('./Crowdsale.sol');
 const iterationLimit = 120;
 
+console.log("THIS IS ALMOST NOT FINISHED DDDDDDDDDDDDDDDDDDDDDDDDDD");
+
 function delay_promise(delay) {
     return new Promise(function(resolve, reject) {
         setTimeout(function() { resolve(); }, delay);
@@ -25,6 +27,7 @@ const callbackGenerator = function (resolve, reject) {
         }
     };
 };
+console.log("THIS IS ALMOST NOT FINISHED DDDDDDDDDDDDDDDDDDDDDDDDDD22222222222222222222222222");
 
 // Promisify a web3 asynchronous call (this becomes unnecessary as soon as web3 promisifies its API)
 function async_call(method, ...args) {
@@ -84,6 +87,7 @@ contract('Crowdsale', function(accounts) {
     });
 
     let promise_chain = init_prom;
+
 
     // Error logging handled by mocha/chai
     const it_synched = function(message, test_f) {
@@ -168,6 +172,7 @@ contract('Crowdsale', function(accounts) {
             let investorCount = await crowdsale.investorCount();
             assert.isTrue(investorCount.equals(1));
         });
+
     });
 
 
@@ -179,6 +184,7 @@ contract('Crowdsale', function(accounts) {
         const balanceContributionWallet = await web3.eth.getBalance(multiSigWallet.address);
         assert.isTrue(web3.fromWei(balanceContributionWallet).equals(investmentPerAccount[exampleAddress1].plus(etherToSend)));
         investmentPerAccount[exampleAddress1] = investmentPerAccount[exampleAddress1].plus(etherToSend);
+
 
     });   
 
@@ -194,6 +200,7 @@ contract('Crowdsale', function(accounts) {
         assert.isTrue(initialBalance.equals(spent.plus(finalBalance)));
         const totalCollected = await crowdsale.weiRaised();        
         assert.isTrue(web3.fromWei(totalCollected).equals(investmentPerAccount[exampleAddress1]));        
+
     });    
 
     it_synched("Pauses and resumes the contribution", async function() {
@@ -224,28 +231,35 @@ contract('Crowdsale', function(accounts) {
     it_synched("Whitelists an address and checks it's paid correctly" , async function() {  
         await mineTransaction({"operation":crowdsale.setDiscountedInvestor, "receiver":exampleAddress2, "whitelisted":true, "expectedResult":"success"});
         let etherToSend = 20 - investmentPerAccount[exampleAddress2] - 1;
-        const tokenInitialBalance = await crowdsaleToken.balanceOf(exampleAddress2);
-        let txHash = await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress2, "operation":crowdsale.buy, "expectedResult":"success"});
+        let tokenInitialBalance = await crowdsaleToken.balanceOf(exampleAddress2);
+        await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress2, "operation":crowdsale.buy, "expectedResult":"success"});
         const tokenFinalBalance = await crowdsaleToken.balanceOf(exampleAddress2);
         let acquired_tokens =  web3.toBigNumber(web3.toWei(etherToSend)).times(tokensPerWei20eth);
         assert.isTrue(tokenInitialBalance.plus(acquired_tokens).equals(tokenFinalBalance));
 
-        let etherToSend = 50 - investmentPerAccount[exampleAddress2] + 1;
-        const tokenInitialBalance = await crowdsaleToken.balanceOf(exampleAddress2);
-        let txHash = await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress2, "operation":crowdsale.buy, "expectedResult":"success"});
-        const tokenFinalBalance = await crowdsaleToken.balanceOf(exampleAddress2);
-        let acquired_tokens =  web3.toBigNumber(web3.toWei(etherToSend)).times(tokensPerWei50eth);
-        assert.isTrue(tokenInitialBalance.plus(acquired_tokens).equals(tokenFinalBalance));
+        etherToSend = 50 - investmentPerAccount[exampleAddress2] + 1;
+        const tokenInitialBalance2 = await crowdsaleToken.balanceOf(exampleAddress2);
+        await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress2, "operation":crowdsale.buy, "expectedResult":"success"});
+        const tokenFinalBalance2 = await crowdsaleToken.balanceOf(exampleAddress2);
+        acquired_tokens =  web3.toBigNumber(web3.toWei(etherToSend)).times(tokensPerWei50eth);
+        assert.isTrue(tokenInitialBalance2.plus(acquired_tokens).equals(tokenFinalBalance2));
     });
 
 
-    it_synched("Checks payment mechanism when 20 eth are overcomed by counting previous investment", async function() {
-        let etherToSend = 20 - investmentPerAccount[exampleAddress2] + 2;
-        const tokenInitialBalance = await crowdsaleToken.balanceOf(exampleAddress2);
-        let txHash = await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress2, "operation":crowdsale.buy, "expectedResult":"success"}); 
-        const tokenFinalBalance = await crowdsaleToken.balanceOf(exampleAddress2);
+    it_synched("Checks payment mechanism when 20 and 50 eth are overcomed by counting previous investments", async function() {
+        let etherToSend = 20 - investmentPerAccount[exampleAddress3] + 2;
+        const tokenInitialBalance = await crowdsaleToken.balanceOf(exampleAddress3);
+        await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress3, "operation":crowdsale.buy, "expectedResult":"success"}); 
+        const tokenFinalBalance = await crowdsaleToken.balanceOf(exampleAddress3);
         let acquired_tokens =  web3.toBigNumber(web3.toWei(etherToSend)).times(tokensPerWei20eth);
         assert.isTrue(tokenInitialBalance.plus(acquired_tokens).equals(tokenFinalBalance));
+
+        etherToSend = 50 - investmentPerAccount[exampleAddress3] + 2;
+        const tokenInitialBalance2 = await crowdsaleToken.balanceOf(exampleAddress3);
+        await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress3, "operation":crowdsale.buy, "expectedResult":"success"}); 
+        const tokenFinalBalance2 = await crowdsaleToken.balanceOf(exampleAddress3);
+        acquired_tokens =  web3.toBigNumber(web3.toWei(etherToSend)).times(tokensPerWei50eth);
+        assert.isTrue(tokenInitialBalance2.plus(acquired_tokens).equals(tokenFinalBalance2));
     });
 
 
