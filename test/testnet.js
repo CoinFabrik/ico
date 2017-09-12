@@ -239,7 +239,7 @@ contract('Crowdsale', function(accounts) {
     });
 
 
-    it_synched("Checks payment mechanism when 20 eth are overcomed by counting previous investment", async function() {
+    it_synched("Checks payment mechanism when 20 eth are reached by counting previous investments", async function() {
         let etherToSend = 20 - investmentPerAccount[exampleAddress2] + 2;
         const tokenInitialBalance = await crowdsaleToken.balanceOf(exampleAddress2);
         let txHash = await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress2, "operation":crowdsale.buy, "expectedResult":"success"}); 
