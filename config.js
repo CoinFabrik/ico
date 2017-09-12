@@ -14,7 +14,7 @@ const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7999"));
 config.startBlock = 4187037 + 11263;
 // We give two week's worth of blocks for the crowdsale to run its course: 55,819 at 21.67 seconds per block on average
 config.endBlock = config.startBlock + 55819;
-config.MW_address = "0x800E1Dcc20D95e60fF8B3106e6EaA1cB73D5D16f";
+config.MW_address = "0xe190E5cb7E5E5BE452Dc3C3B34033C7213D3B4df";
 // This is our multisig wallet in mainnet that we use for testing.
 config.tests.multisig_owners = "0x8ffc991fc4c4fc53329ad296c1afe41470cffbb3";
 config.fundingCap = web3.toWei("180000");
