@@ -2,8 +2,6 @@ pragma solidity ^0.4.15;
 
 import "./CappedCrowdsale.sol";
 import "./CrowdsaleToken.sol";
-import "./FixedCeiling.sol";
-import "./BonusFinalizeAgent.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
 contract Crowdsale is CappedCrowdsale {
