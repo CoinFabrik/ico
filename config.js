@@ -16,7 +16,7 @@ config.startBlock = 4187037 + 11263;
 config.endBlock = config.startBlock + 55819;
 config.MW_address = "0x800E1Dcc20D95e60fF8B3106e6EaA1cB73D5D16f";
 // This is our multisig wallet in mainnet that we use for testing.
-config.tests.MW_address = "0x8ffc991fc4c4fc53329ad296c1afe41470cffbb3";
+config.tests.multisig_owners = "0x8ffc991fc4c4fc53329ad296c1afe41470cffbb3";
 config.fundingCap = web3.toWei("180000");
 
 config.multisig_owners = ["0xf19258256b06324c7516b00bf5c76af001ee1e95"];
