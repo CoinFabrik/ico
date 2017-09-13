@@ -13,11 +13,11 @@ module.exports = function(deployer, network, accounts) {
     if (network != "liveNet") {
         deployer.deploy(MultiSigWallet, config.tests.multisig_owners, 1, {gas: 2000000})
         .then(function() {
-            deployer.deploy(Crowdsale, MultiSigWallet.address, config.tests.startBlock, config.tests.endBlock, {gas: 5400000});
+            deployer.deploy(Crowdsale, MultiSigWallet.address, config.tests.startBlock, config.tests.endBlock, {gas: 4200000});
         });
     }
     else {
         // !! In production deployment we use config.MW_address as the address of the multisig wallet
-        deployer.deploy(Crowdsale, config.MW_address, config.startBlock, config.endBlock, {gas: 5400000});
+        deployer.deploy(Crowdsale, config.MW_address, config.startBlock, config.endBlock, {gas: 4200000});
     }
 };
