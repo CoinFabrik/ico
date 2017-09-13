@@ -29,7 +29,7 @@ function async_call(method, ...args) {
 }
 
 async function block_await(targetBlock) {
-    const actualBlock = await web3.eth.getBlock("latest").number;
+    const actualBlock = await web3.eth.blockNumber;
     if (actualBlock < targetBlock) {
         return delay_promise(1000).then(block_await(targetBlock));
     } else {
@@ -140,7 +140,7 @@ contract('Crowdsale', function(accounts) {
    
     it_synched("Checks that nobody can buy before the sale starts", async function() {
         let state = await crowdsale.getState();
-        let actualBlock = await web3.eth.getBlock("latest").number;
+        let actualBlock = await web3.eth.blockNumber;
         let startBlock = await crowdsale.startsAt();
         let etherToSend = 2;        
         if (actualBlock < startBlock - 2) {
@@ -153,7 +153,7 @@ contract('Crowdsale', function(accounts) {
     it_synched("Waits until the start of the ICO, buys, and checks that tokens belong to new owner", async function() {
         let startBlock = await crowdsale.startsAt();
         await block_await(startBlock).then(async function() {
-            const block = await web3.eth.getBlock("latest").number;
+            const block = await web3.eth.blockNumber;
             let etherToSend = 3;
             await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress1, "operation":crowdsale.buy, "expectedResult":"success"});
             const balance = await crowdsaleToken.balanceOf(exampleAddress1);

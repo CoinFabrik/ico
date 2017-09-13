@@ -17,7 +17,7 @@ function config_f(web3) {
   config.multisig_owners = ["0xf19258256b06324c7516b00bf5c76af001ee1e95"];
 
 
-  config.tests.startBlock = web3.eth.getBlock("latest").number + 10;
+  config.tests.startBlock = web3.eth.blockNumber + 10;
   config.tests.endBlock = config.tests.startBlock + 70;
   config.tests.multisig_owners = ["0x8ffc991fc4c4fc53329ad296c1afe41470cffbb3"];
   return config;
