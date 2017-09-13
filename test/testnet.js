@@ -45,13 +45,10 @@ contract('Crowdsale', function(accounts) {
 
     const GAS = 300000;
     const GAS_PRICE = 20000000000;
-    const decimals = 16;
 
     const tokensPerWei2eth = web3.toBigNumber(25);
     const tokensPerWei20eth = web3.toBigNumber(26);
     const tokensPerWei50eth = web3.toBigNumber(27);
-
-    const chunkedWeiMultiple = 10000 * (10 ** 18);
 
     const exampleAddress0 = accounts[0];
     const exampleAddress1 = accounts[1];
