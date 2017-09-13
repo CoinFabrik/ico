@@ -29,7 +29,7 @@ function async_call(method, ...args) {
 }
 
 async function block_await(targetBlock) {
-    const actualBlock = await web3.eth.blockNumber;
+    const actualBlock = web3.eth.blockNumber;
     if (actualBlock < targetBlock) {
         return delay_promise(1000).then(block_await(targetBlock));
     } else {
@@ -112,7 +112,7 @@ contract('Crowdsale', function(accounts) {
         async function start(iteration) {
             if (iteration < iterationLimit) {//check "once per second"
                 await delay_promise(1000);
-                const transaction = await web3.eth.getTransaction(txHash);
+                const transaction = web3.eth.getTransaction(txHash);
                 if (transaction["blockNumber"] != null) {
                     await async_call(web3.currentProvider.sendAsync, { method: "debug_traceTransaction", params: [txHash, {}], jsonrpc: "2.0", id: rpcId}).then(function (response) {
                         let lastOperationIndex = response["result"]["structLogs"].length-1;
@@ -139,10 +139,10 @@ contract('Crowdsale', function(accounts) {
 
    
     it_synched("Checks that nobody can buy before the sale starts", async function() {
-        let state = await crowdsale.getState();
-        let actualBlock = await web3.eth.blockNumber;
-        let startBlock = await crowdsale.startsAt();
-        let etherToSend = 2;        
+        const actualBlock = web3.eth.blockNumber;
+        const startBlock = await crowdsale.startsAt();
+        let etherToSend = 2;
+        // We only test this if the block number is early enough.
         if (actualBlock < startBlock - 2) {
             await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress1, "operation":crowdsale.buy, "expectedResult":"failure"});
         } else {
@@ -153,7 +153,7 @@ contract('Crowdsale', function(accounts) {
     it_synched("Waits until the start of the ICO, buys, and checks that tokens belong to new owner", async function() {
         let startBlock = await crowdsale.startsAt();
         await block_await(startBlock).then(async function() {
-            const block = await web3.eth.blockNumber;
+            const block = web3.eth.blockNumber;
             let etherToSend = 3;
             await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress1, "operation":crowdsale.buy, "expectedResult":"success"});
             const balance = await crowdsaleToken.balanceOf(exampleAddress1);
@@ -174,7 +174,7 @@ contract('Crowdsale', function(accounts) {
         await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress1, "operation":crowdsale.buy, "expectedResult":"success"});
         const totalCollected = await crowdsale.weiRaised();
         assert.isTrue(web3.fromWei(totalCollected).equals(investmentPerAccount[exampleAddress1].plus(etherToSend)));
-        const balanceContributionWallet = await web3.eth.getBalance(multiSigWallet.address);
+        const balanceContributionWallet = web3.eth.getBalance(multiSigWallet.address);
         assert.isTrue(web3.fromWei(balanceContributionWallet).equals(investmentPerAccount[exampleAddress1].plus(etherToSend)));
         investmentPerAccount[exampleAddress1] = investmentPerAccount[exampleAddress1].plus(etherToSend);
 
@@ -183,11 +183,11 @@ contract('Crowdsale', function(accounts) {
 
     it_synched("Checks contributions of less than 2 eth are rejected and only gas is paid", async function() {
         let etherToSend = 1;
-        const initialBalance = await web3.eth.getBalance(exampleAddress3);
+        const initialBalance = web3.eth.getBalance(exampleAddress3);
         let txHash = await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress3, "operation":crowdsale.buy, "expectedResult":"failure"});        
-        const finalBalance = await web3.eth.getBalance(exampleAddress3);
+        const finalBalance = web3.eth.getBalance(exampleAddress3);
         const spent = initialBalance.sub(finalBalance);        
-        let tx_receipt = await web3.eth.getTransactionReceipt(txHash);        
+        let tx_receipt = web3.eth.getTransactionReceipt(txHash);        
         const expected_spent = tx_receipt.gasUsed * GAS_PRICE;        
         assert.isTrue(spent.equals(expected_spent));
         assert.isTrue(initialBalance.equals(spent.plus(finalBalance)));
