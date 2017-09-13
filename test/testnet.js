@@ -1,4 +1,4 @@
-const config = require('../config.js');
+const config = require('../config.js')(web3);
 const assertFail = require('./helpers/assertFail');
 
 const SafeMath = artifacts.require('./SafeMath.sol');
@@ -65,7 +65,8 @@ contract('Crowdsale', function(accounts) {
 
     let crowdsaleToken;
     let crowdsale;
-    
+    let mulisigwallet;
+
     const init_prom = MultiSigWallet.deployed()
     .then(function(instance){
         multiSigWallet = instance;})
@@ -204,7 +205,7 @@ contract('Crowdsale', function(accounts) {
 
     it_synched('Pauses and resumes the contribution', async function() {
         let etherToSend = 1;
-        await mineTransaction({"operation":crowdsale.halt, "expectedResult":"success"}); 
+        await mineTransaction({"operation":crowdsale.halt, "expectedResult":"success"});
         assert.isTrue(await crowdsale.halted());
         await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress2, "operation":crowdsale.buy, "expectedResult":"failure"});
 

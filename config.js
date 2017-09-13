@@ -19,6 +19,7 @@ function config_f(web3) {
   config.tests.startBlock = web3.eth.blockNumber + 10;
   config.tests.endBlock = config.tests.startBlock + 70;
   config.tests.multisig_owners = ["0x8ffc991fc4c4fc53329ad296c1afe41470cffbb3"];
+  return config;
 }
 
 module.exports = config_f;
