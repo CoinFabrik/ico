@@ -2,7 +2,7 @@ const SafeMath = artifacts.require('./SafeMath.sol');
 const MultiSigWallet = artifacts.require('./MultiSigWallet.sol');
 const Crowdsale = artifacts.require('./Crowdsale.sol');
 
-const config = require('../config.js');
+const config = require('../config.js')(web3);
 
 // const MW_address = "0x931F6E5c89dD5559D3820cFBd1975BA5d92F87E9";
 

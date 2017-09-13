@@ -1,4 +1,3 @@
-const config = require('../config.js');
 const assertFail = require('./helpers/assertFail');
 
 const SafeMath = artifacts.require('./SafeMath.sol');
@@ -10,10 +9,8 @@ const CrowdsaleToken = artifacts.require('./CrowdsaleToken.sol');
 const Crowdsale = artifacts.require('./Crowdsale.sol');
 const iterationLimit = 120;
 
-console.log("THIS IS ALMOST NOT FINISHED DDDDDDDDDDDDDDDDDDDDDDDDDD");
-
 function delay_promise(delay) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         setTimeout(function() { resolve(); }, delay);
     });
 }
@@ -27,7 +24,6 @@ const callbackGenerator = function (resolve, reject) {
         }
     };
 };
-console.log("THIS IS ALMOST NOT FINISHED DDDDDDDDDDDDDDDDDDDDDDDDDD22222222222222222222222222");
 
 // Promisify a web3 asynchronous call (this becomes unnecessary as soon as web3 promisifies its API)
 function async_call(method, ...args) {
@@ -111,7 +107,7 @@ contract('Crowdsale', function(accounts) {
         } else if (operation == crowdsaleToken.transfer) {
             txHash = await operation.sendTransaction(receiver, tokensToSend, {from: sender});
         } else if (operation == crowdsale.setDiscountedInvestor) {
-            txHash = await operation.sendTransaction(receiver, whitelisted, {from: exampleAddress0});
+            txHash = await operation.sendTransaction(receiver, whitelisted);
         } else {
             throw "Operation not supported";
         }
@@ -265,6 +261,12 @@ contract('Crowdsale', function(accounts) {
 
     it_synched("Check transfers failure before tokens are released", async function() {
         await mineTransaction({"operation":crowdsaleToken.transfer, "sender":exampleAddress1, "tokensToSend":1, "receiver":exampleAddress2, "expectedResult":"failure"});
+    });
+
+    it_synched("Checks that tokens cannot be released for transfers", async function() {
+        await mineTransaction({"operation":crowdsale.finalize, "expectedResult":"success"});
+        await mineTransaction({"operation":crowdsaleToken.transfer, "sender":exampleAddress1, "tokensToSend":1, "receiver":exampleAddress2, "expectedResult":"failure"});
+
     });
 
     // it_synched("Checks state after all tokens have been sold to multiple accounts", async function() {
