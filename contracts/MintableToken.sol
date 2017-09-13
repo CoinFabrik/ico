@@ -52,10 +52,9 @@ contract MintableToken is StandardToken, Ownable {
     totalSupply = totalSupply.add(amount);
     balances[receiver] = balances[receiver].add(amount);
 
-    // Removed because this may be confused with anonymous transfers in the upcoming fork.
     // This will make the mint transaction appear in EtherScan.io
     // We can remove this after there is a standardized minting event
-    // Transfer(0, receiver, amount);
+    Transfer(0, receiver, amount);
 
     Minted(receiver, amount);
   }
