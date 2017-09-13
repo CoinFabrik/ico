@@ -30,12 +30,12 @@ contract Crowdsale is CappedCrowdsale {
     setFundingCap(fundingCap);
   }
 
+  // We assign tokens through the minting mechanism.
   function assignTokens(address receiver, uint tokenAmount) internal {
     token.mint(receiver, tokenAmount);
   }
 
   // These two setters are present only to correct block numbers if they are off from their target date by more than, say, a day
-  // Uncomment only if necessary
   function setStartingBlock(uint startingBlock) public onlyOwner inState(State.PreFunding) {
       require(startingBlock > block.number && startingBlock < endsAt);
       startsAt = startingBlock;
@@ -51,6 +51,7 @@ contract Crowdsale is CappedCrowdsale {
     _;
   }
 
+  // Here we calculate the amount of tokens that corresponds to each price point.
   function calculatePrice(uint weiAmount, address customer) internal constant returns (uint) {
     uint investedAmount = investedAmountOf[customer].add(weiAmount);
     uint decimalTokensPerWei;
@@ -65,14 +66,17 @@ contract Crowdsale is CappedCrowdsale {
     return decimalTokens;
   }
 
+  // We restrict investments to those with a minimum of 2 ETH
   function buy() public payable notLessThan2Eth {
     super.buy();
   }
 
+  // The owner is supposed to whitelist investors for the discounted price at lower price points
   function setDiscountedInvestor(address addr, bool status) public onlyOwner notFinished stopInEmergency {
     discountedInvestors[addr] = status;
   }
 
+  // We set an upper bound for the sold tokens by limiting ether raised
   function weiAllowedToReceive(uint tentativeAmount, address) internal constant returns (uint) {
       // Then, we check the funding cap
       if (weiFundingCap == 0) return tentativeAmount;
