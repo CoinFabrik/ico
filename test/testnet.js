@@ -1,11 +1,7 @@
-const assertFail = require('./helpers/assertFail');
-
+const config = require('../config.js')(web3);
 const SafeMath = artifacts.require('./SafeMath.sol');
 const MultiSigWallet = artifacts.require('./MultiSigWallet.sol');
-// const FlatPricing = artifacts.require('./FlatPricing.sol');
-// const BonusFinalizeAgent = artifacts.require('./BonusFinalizeAgent.sol');
 const CrowdsaleToken = artifacts.require('./CrowdsaleToken.sol');
-// const FixedCeiling = artifacts.require('./FixedCeiling.sol');
 const Crowdsale = artifacts.require('./Crowdsale.sol');
 const iterationLimit = 120;
 
@@ -66,7 +62,8 @@ contract('Crowdsale', function(accounts) {
 
     let crowdsaleToken;
     let crowdsale;
-    
+    let mulisigwallet;
+
     const init_prom = MultiSigWallet.deployed()
     .then(function(instance){
         multiSigWallet = instance;})
@@ -201,7 +198,7 @@ contract('Crowdsale', function(accounts) {
 
     it_synched("Pauses and resumes the contribution", async function() {
         let etherToSend = 2;
-        await mineTransaction({"operation":crowdsale.halt, "expectedResult":"success"}); 
+        await mineTransaction({"operation":crowdsale.halt, "expectedResult":"success"});
         assert.isTrue(await crowdsale.halted());
         await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress2, "operation":crowdsale.buy, "expectedResult":"failure"});
 
@@ -215,7 +212,7 @@ contract('Crowdsale', function(accounts) {
         assert.isTrue(web3.fromWei(collectedBefore).lessThan(web3.fromWei(collectedAfter)));
     });
 
-    it_synched("Checks contribution of non-whitelisted address is and less than 20 eth is paid adadequately", async function() {
+    it_synched("Checks contribution of non-whitelisted address and less than 20 eth is paid adequately", async function() {
         let etherToSend = 20 - investmentPerAccount[exampleAddress2] - 1;
         const tokenInitialBalance = await crowdsaleToken.balanceOf(exampleAddress2);
         let txHash = await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress2, "operation":crowdsale.buy, "expectedResult":"success"}); 
