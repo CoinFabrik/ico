@@ -2,9 +2,9 @@ function config_f(web3) {
   const config = {};
   config.tests = {};
 
-  // 13/9/2017 17:32 UTC block number: 4,270,244
-  // 14/9/2017 ~21:00 UTC block number offset: 3,840 at 25.5 seconds per block on average
-  config.startBlock = 4270244 + 3840;
+  // 14/9/2017 18:05 UTC block number: 4,273,910
+  // 15/9/2017 ~3:00 UTC block number offset: ~1260 at 24.82 seconds per block on average
+  config.startBlock = 4273910 + 1260;
   // We give 46 days worth of blocks for the crowdsale to run its course: 155,858 at 25.5 seconds per block on average
   config.endBlock = config.startBlock + 155858;
   config.MW_address = "0xe190E5cb7E5E5BE452Dc3C3B34033C7213D3B4df";
