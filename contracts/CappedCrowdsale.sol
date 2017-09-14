@@ -18,9 +18,18 @@ contract CappedCrowdsale is GenericCrowdsale {
    * 
    * @param newCap minimum target cap that may be relaxed if it was already broken.
    */
-  function setFundingCap(uint newCap) public onlyOwner notFinished {
-    weiFundingCap = relaxFundingCap(newCap, weiRaised);
-    require(weiFundingCap >= minimumFundingGoal);
+  function setFundingCap(uint newCap) internal onlyOwner notFinished {
+    require(newCap >= minimumFundingGoal);
+    weiFundingCap = newCap;
     FundingCapSet(weiFundingCap);
+  }
+
+  // We set an upper bound for the sold tokens by limiting ether raised
+  function weiAllowedToReceive(uint tentativeAmount, address) internal constant returns (uint) {
+    // Then, we check the funding cap
+    if (weiFundingCap == 0) return tentativeAmount;
+    uint total = tentativeAmount.add(weiRaised);
+    if (total < weiFundingCap) return tentativeAmount;
+    else return weiFundingCap.sub(weiRaised);
   }
 }
