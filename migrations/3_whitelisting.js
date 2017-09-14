@@ -3,9 +3,9 @@ const Crowdsale = artifacts.require('./Crowdsale.sol');
 const config = require('../config.js')(web3);
 
 module.exports = function(deployer, network, accounts) {
-    deployer.then(function() {
+  deployer.then(function() {
             
-    	const crowdsale = Crowdsale.at(Crowdsale.address);
+  	const crowdsale = Crowdsale.at(Crowdsale.address);
 
 		crowdsale.setDiscountedInvestor("0x0Bb75bEf057da63a0ae4B25fe9aDaFd35cd92B87", true);
 		crowdsale.setDiscountedInvestor("0x300532b6404d0c171d3ffEb23f75e9393C73bE9B", true);

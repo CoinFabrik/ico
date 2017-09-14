@@ -71,6 +71,11 @@ contract Crowdsale is CappedCrowdsale {
     super.buy();
   }
 
+  // Override the fallback function to allow simple transfers
+  function() payable {
+    buy();
+  }
+
   // The owner is supposed to whitelist investors for the discounted price at lower price points
   function setDiscountedInvestor(address addr, bool status) public onlyOwner notFinished stopInEmergency {
     discountedInvestors[addr] = status;
