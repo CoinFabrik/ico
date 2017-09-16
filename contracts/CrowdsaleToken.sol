@@ -34,17 +34,17 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Fra
    *
    * This token must be created through a team multisig wallet, so that it is owned by that wallet.
    *
-   * @param _name Token name
-   * @param _symbol Token symbol - typically it's all caps
-   * @param _initialSupply How many tokens we start with
-   * @param _decimals Number of decimal places
-   * @param _mintable Are new tokens created over the crowdsale or do we distribute only the initial supply? Note that when the token becomes transferable the minting always ends.
+   * @param token_name Token name string
+   * @param token_symbol Token symbol - typically it's all caps
+   * @param initial_supply How many tokens we start with
+   * @param token_decimals Number of decimal places
+   * @param mintable Are new tokens created over the crowdsale or do we distribute only the initial supply? Note that when the token becomes transferable the minting always ends.
    */
-  function CrowdsaleToken(string _name, string _symbol, uint _initialSupply, uint8 _decimals, address _multisig, bool _mintable)
-    UpgradeableToken(_multisig) MintableToken(_initialSupply, _multisig, _mintable) {
-    name = _name;
-    symbol = _symbol;
-    decimals = _decimals;
+  function CrowdsaleToken(string token_name, string token_symbol, uint initial_supply, uint8 token_decimals, address team_multisig, bool mintable)
+    UpgradeableToken(team_multisig) MintableToken(initial_supply, team_multisig, mintable) {
+    name = token_name;
+    symbol = token_symbol;
+    decimals = token_decimals;
   }
 
   /**
@@ -65,9 +65,9 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Fra
   /**
    * Owner can update token information here
    */
-  function setTokenInformation(string _name, string _symbol) onlyOwner {
-    name = _name;
-    symbol = _symbol;
+  function setTokenInformation(string token_name, string token_symbol) onlyOwner {
+    name = token_name;
+    symbol = token_symbol;
 
     UpdatedTokenInformation(name, symbol);
   }

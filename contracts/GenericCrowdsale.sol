@@ -17,7 +17,6 @@ import "./CrowdsaleToken.sol";
  * Handles
  * - start and end dates
  * - accepting investments
- * - minimum funding goal and refund
  * - various statistics during the crowdfund
  * - different investment policies (require server side customer id, allow only whitelisted addresses)
  *
@@ -35,9 +34,6 @@ contract GenericCrowdsale is Haltable {
   /* ether will be transferred to this address */
   address public multisigWallet;
 
-  /* if the funding goal is not reached, investors may withdraw their funds */
-  uint public minimumFundingGoal;
-
   /* the starting block number of the crowdsale */
   uint public startsAt;
 
@@ -52,12 +48,6 @@ contract GenericCrowdsale is Haltable {
 
   /* How many distinct addresses have invested */
   uint public investorCount = 0;
-
-  /* How many wei we have returned back to the contract after a failed crowdfund. */
-  uint public loadedRefund = 0;
-
-  /* How many wei we have given back to investors.*/
-  uint public weiRefunded = 0;
 
   /* Has this crowdsale been finalized */
   bool public finalized = false;
@@ -81,19 +71,14 @@ contract GenericCrowdsale is Haltable {
    *
    * - Prefunding: We have not reached the starting block yet
    * - Funding: Active crowdsale
-   * - Success: Minimum funding goal reached
-   * - Failure: Minimum funding goal not reached before the ending block
+   * - Success: Crowdsale ended
    * - Finalized: The finalize function has been called and succesfully executed
-   * - Refunding: Refunds are loaded on the contract to be reclaimed by investors.
    */
-  enum State{Unknown, PreFunding, Funding, Success, Failure, Finalized, Refunding}
+  enum State{Unknown, PreFunding, Funding, Success, Failure, Finalized}
 
 
   // A new investment was made
   event Invested(address investor, uint weiAmount, uint tokenAmount, uint128 customerId);
-
-  // Refund was processed for a contributor
-  event Refund(address investor, uint weiAmount);
 
   // The rules about what kind of investments we accept were changed
   event InvestmentPolicyChanged(bool requireCId);
@@ -105,7 +90,7 @@ contract GenericCrowdsale is Haltable {
   event Finalized();
 
 
-  function GenericCrowdsale(address team_multisig, uint start, uint end, uint min_goal) internal {
+  function GenericCrowdsale(address team_multisig, uint start, uint end) internal {
     setMultisig(team_multisig);
 
     // Don't mess the dates
@@ -113,9 +98,6 @@ contract GenericCrowdsale is Haltable {
     require(block.number < start && start < end);
     startsAt = start;
     endsAt = end;
-
-    // Minimum funding goal can be zero
-    minimumFundingGoal = min_goal;
   }
 
   /**
@@ -158,9 +140,12 @@ contract GenericCrowdsale is Haltable {
     multisigWallet.transfer(weiAmount);
 
     // Return excess of money
-    uint weiToReturn = msg.value.sub(weiAmount);
-    if (weiToReturn > 0) {
-      msg.sender.transfer(weiToReturn);
+    returnExcedent(msg.value.sub(weiAmount), msg.sender);
+  }
+
+  function returnExcedent(uint excedent, address agent) internal {
+    if (excedent > 0) {
+      agent.transfer(weiToReturn);
     }
   }
 
@@ -171,7 +156,10 @@ contract GenericCrowdsale is Haltable {
 
   /** 
    *  Calculate the amount of tokens that correspond to the received amount.
-   *  When there's an excedent due to rounding error, it should be returned to allow refunding.
+   *
+   *  Note: When there's an excedent due to rounding error, it should be returned to allow refunding.
+   *  This is currently worked around using an appropriate amount of decimals in the FractionalERC20 standard.
+   *  The workaround is good enough for most use cases, hence the simplified function signature.
    */
   function calculatePrice(uint weiAmount, address customer) internal constant returns (uint tokenAmount);
 
@@ -283,31 +271,6 @@ contract GenericCrowdsale is Haltable {
   }
 
   /**
-   * Allow load refunds back on the contract for the refunding.
-   *
-   * The team can transfer the funds back on the smart contract in the case that the minimum goal was not reached.
-   */
-  function loadRefund() public payable inState(State.Failure) stopInEmergency {
-    require(msg.value >= weiRaised);
-    require(weiRefunded == 0);
-    uint excedent = msg.value.sub(weiRaised);
-    loadedRefund = loadedRefund.add(msg.value.sub(excedent));
-    investedAmountOf[msg.sender].add(excedent);
-  }
-
-  /**
-   * Investors can claim refund.
-   */
-  function refund() public inState(State.Refunding) stopInEmergency {
-    uint weiValue = investedAmountOf[msg.sender];
-    require(weiValue != 0);
-    investedAmountOf[msg.sender] = 0;
-    weiRefunded = weiRefunded.add(weiValue);
-    Refund(msg.sender, weiValue);
-    msg.sender.transfer(weiValue);
-  }
-
-  /**
    * @return true if the crowdsale has raised enough money to be a success
    */
   function isMinimumGoalReached() public constant returns (bool reached) {
@@ -333,9 +296,7 @@ contract GenericCrowdsale is Haltable {
     if (finalized) return State.Finalized;
     else if (block.number < startsAt) return State.PreFunding;
     else if (block.number <= endsAt && !isCrowdsaleFull()) return State.Funding;
-    else if (isMinimumGoalReached()) return State.Success;
-    else if (!isMinimumGoalReached() && weiRaised > 0 && loadedRefund >= weiRaised) return State.Refunding;
-    else return State.Failure;
+    else return State.Success;
   }
 
   /** This is for manual testing of multisig wallet interaction */

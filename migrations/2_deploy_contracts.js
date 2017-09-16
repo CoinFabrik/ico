@@ -14,12 +14,12 @@ module.exports = function(deployer, network, accounts) {
     deployer.link(SafeMath, Crowdsale);
     if (network != "liveNet") {
         deployer.deploy(MultiSigWallet, config.multisig_owners, 1, {gas: 2000000})
-        .then(function() {
-            deployer.deploy(Crowdsale, MultiSigWallet.address, startBlock, endBlock, {gas: 5400000});
+        .then(async function() {
+            await deployer.deploy(Crowdsale, MultiSigWallet.address, startBlock, endBlock, {gas: 4000000});
         });
     }
     else {
         // !! In production deployment we use config.MW_address as the address of the multisig wallet
-        deployer.deploy(Crowdsale, config.MW_address, startBlock, endBlock, {gas: 5400000});
+        deployer.deploy(Crowdsale, config.MW_address, startBlock, endBlock, {gas: 4000000});
     }
 };
