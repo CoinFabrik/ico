@@ -30,7 +30,7 @@ contract Crowdsale is CappedCrowdsale {
   function assignTokens(address receiver, uint tokenAmount) internal;
 
   //TODO: implement token amount calculation
-  function calculatePrice(uint weiAmount, address agent) constant internal returns (uint);
+  function calculateTokenAmount(uint weiAmount, address agent) constant internal returns (uint);
 
   // These two setters are present only to correct block numbers if they are off from their target date by more than, say, a day
   // Uncomment only if necessary
