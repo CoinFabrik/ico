@@ -7,8 +7,6 @@ pragma solidity ^0.4.15;
 
 import "./Haltable.sol";
 import "./SafeMath.sol";
-import "./FinalizeAgent.sol";
-import "./CeilingStrategy.sol";
 import "./CrowdsaleToken.sol";
 
 /**

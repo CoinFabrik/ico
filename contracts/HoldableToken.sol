@@ -127,7 +127,7 @@ contract HoldableToken is ERC20Basic {
   }
 
   /**
-   * @dev Updates the balance of an account by transferring to it tokens from the loyalty program if it they correspond.
+   * @dev Updates the balance of an account by transferring to it tokens from the loyalty program if it corresponds.
    * @param curPayday The current payday
    */
   function updateBalance(address account) private {

@@ -6,7 +6,7 @@ pragma solidity ^0.4.15;
  * Modified by https://www.coinfabrik.com/
  */
 
-import "./StandardToken.sol";
+import "./StandardHoldableToken.sol";
 import "./UpgradeAgent.sol";
 import "./SafeMath.sol";
 
@@ -14,7 +14,7 @@ import "./SafeMath.sol";
  * A token upgrade mechanism where users can opt-in amount of tokens to the next smart contract revision.
  *
  */
-contract UpgradeableToken is StandardToken {
+contract UpgradeableToken is StandardHoldableToken {
 
   /** Contract / person who can set the upgrade path. This can be the same as team multisig wallet, as what it is with its default value. */
   address public upgradeMaster;

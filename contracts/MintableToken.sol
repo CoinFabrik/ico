@@ -6,7 +6,7 @@ pragma solidity ^0.4.15;
  */
 
 import './Ownable.sol';
-import './StandardToken.sol';
+import './StandardHoldableToken.sol';
 import './SafeMath.sol';
 
 /**
@@ -16,7 +16,7 @@ import './SafeMath.sol';
  * Only mint agents, contracts whitelisted by owner, can mint new tokens.
  *
  */
-contract MintableToken is StandardToken, Ownable {
+contract MintableToken is StandardHoldableToken, Ownable {
 
   using SafeMath for uint;
 

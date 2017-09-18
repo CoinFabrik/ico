@@ -6,12 +6,12 @@ pragma solidity ^0.4.15;
  */
 
 import './Ownable.sol';
-import './HoldableToken.sol';
+import './StandardHoldableToken.sol';
 
 /**
  * Define interface for releasing the token transfer after a successful crowdsale.
  */
-contract ReleasableToken is HoldableToken, Ownable {
+contract ReleasableToken is StandardHoldableToken, Ownable {
 
   /* The finalizer contract that allows lifting the transfer limits on this token */
   address public releaseAgent;
@@ -72,13 +72,13 @@ contract ReleasableToken is HoldableToken, Ownable {
 
   /** We restrict transfer by overriding it */
   function transfer(address _to, uint _value) public canTransfer(msg.sender) returns (bool success) {
-    // Call StandardToken.transfer()
+    // Call StandardHoldableToken.transfer()
    return super.transfer(_to, _value);
   }
 
   /** We restrict transferFrom by overriding it */
   function transferFrom(address _from, address _to, uint _value) public canTransfer(_from) returns (bool success) {
-    // Call StandardToken.transferForm()
+    // Call StandardHoldableToken.transferForm()
     return super.transferFrom(_from, _to, _value);
   }
 
