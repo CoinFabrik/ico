@@ -1,4 +1,4 @@
-const config = require('../config.js');
+const config = require('../config.js')(web3);
 const assertFail = require('./helpers/assertFail');
 
 const SafeMath = artifacts.require('./SafeMath.sol');
@@ -7,8 +7,7 @@ const MultiSigWallet = artifacts.require('./MultiSigWallet.sol');
 // const BonusFinalizeAgent = artifacts.require('./BonusFinalizeAgent.sol');
 const CrowdsaleToken = artifacts.require('./CrowdsaleToken.sol');
 // const FixedCeiling = artifacts.require('./FixedCeiling.sol');
-// const Crowdsale = artifacts.require('./Crowdsale.sol');
-const HagglinCrowdsale = artifacts.require('./HagglinCrowdsale.sol');
+const Crowdsale = artifacts.require('./Crowdsale.sol');
 const iterationLimit = 120;
 
 function delay_promise(delay) {
@@ -66,12 +65,13 @@ contract('Crowdsale', function(accounts) {
 
     let crowdsaleToken;
     let crowdsale;
-    
+    let mulisigwallet;
+
     const init_prom = MultiSigWallet.deployed()
     .then(function(instance){
         multiSigWallet = instance;})
     .then(function(){
-        return HagglinCrowdsale.deployed();})
+        return Crowdsale.deployed();})
     .then(function(instance) {
         console.log("CROWDSALE ADDRESS: ", instance.address);
         crowdsale = instance;
@@ -205,7 +205,7 @@ contract('Crowdsale', function(accounts) {
 
     it_synched('Pauses and resumes the contribution', async function() {
         let etherToSend = 1;
-        await mineTransaction({"operation":crowdsale.halt, "expectedResult":"success"}); 
+        await mineTransaction({"operation":crowdsale.halt, "expectedResult":"success"});
         assert.isTrue(await crowdsale.halted());
         await mineTransaction({"etherToSend":etherToSend, "sender":exampleAddress2, "operation":crowdsale.buy, "expectedResult":"failure"});
 

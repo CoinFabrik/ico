@@ -25,11 +25,11 @@ contract HoldableToken is ERC20Basic {
 
   mapping(address => Contributor) public contributors;
 
-  function HoldableToken(uint _blocksBetweenPayments, uint _end, address _crowdsale) internal {
+  function HoldableToken(uint blocks_between_payments, uint _end) internal {
     heldTokensPerPayday.push(0);
-    blocksBetweenPayments = _blocksBetweenPayments;
+    blocksBetweenPayments = blocks_between_payments;
     end = _end;
-    crowdsale = _crowdsale;
+    crowdsale = msg.sender;
   }
 
 
