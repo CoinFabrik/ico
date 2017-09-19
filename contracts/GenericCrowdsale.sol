@@ -26,9 +26,6 @@ contract GenericCrowdsale is Haltable {
   /* The token we are selling */
   CrowdsaleToken public token;
 
-  /* Post-success callback */
-  FinalizeAgent public finalizeAgent;
-
   /* ether will be transferred to this address */
   address public multisigWallet;
 
@@ -53,13 +50,22 @@ contract GenericCrowdsale is Haltable {
   /* Do we need to have a unique contributor id for each customer */
   bool public requireCustomerId = false;
 
+  /**
+   * Do we verify that contributor has been cleared on the server side (accredited investors only).
+   * This method was first used in the FirstBlood crowdsale to ensure all contributors had accepted terms of sale (on the web).
+   */
+  bool public requiredSignedAddress = false;
+
+  /** Server side address that signed allowed contributors (Ethereum addresses) that can participate the crowdsale */
+  address public signerAddress;
+
   /** How many ETH each address has invested in this crowdsale */
   mapping (address => uint) public investedAmountOf;
 
   /** How many tokens this crowdsale has credited for each investor address */
   mapping (address => uint) public tokenAmountOf;
 
-  /** Addresses that are allowed to invest even before ICO offical opens. For testing, for ICO partners, etc. */
+  /** Addresses that are allowed to invest even before ICO officially opens. For testing, for ICO partners, etc. */
   mapping (address => bool) public earlyParticipantWhitelist;
 
   /** This is for manual testing of the interaction with the owner's wallet. You can set it to any value and inspect this in a blockchain explorer to see that crowdsale interaction works. */
@@ -72,14 +78,14 @@ contract GenericCrowdsale is Haltable {
    * - Success: Crowdsale ended
    * - Finalized: The finalize function has been called and succesfully executed
    */
-  enum State{Unknown, PreFunding, Funding, Success, Failure, Finalized}
+  enum State{Unknown, PreFunding, Funding, Success, Finalized}
 
 
   // A new investment was made
   event Invested(address investor, uint weiAmount, uint tokenAmount, uint128 customerId);
 
   // The rules about what kind of investments we accept were changed
-  event InvestmentPolicyChanged(bool requireCId);
+  event InvestmentPolicyChanged(bool requireCId, bool requiredSignedAddress, address signerAddress);
 
   // Address early participation whitelist status changed
   event Whitelisted(address addr, bool status);
@@ -99,10 +105,12 @@ contract GenericCrowdsale is Haltable {
   }
 
   /**
-   * Don't expect to just send in money and get tokens.
+   * Default fallback behaviour is to call buy.
+   * Ideally, no contract calls this crowdsale without supporting ERC20.
+   * However, some sort of refunding function may be desired to cover such situations.
    */
   function() payable {
-    require(false);
+    buy();
   }
 
   /**
@@ -123,7 +131,7 @@ contract GenericCrowdsale is Haltable {
     }
 
     uint weiAmount = weiAllowedToReceive(msg.value, receiver);
-    uint tokenAmount = calculatePrice(weiAmount, msg.sender);
+    uint tokenAmount = calculateTokenAmount(weiAmount, msg.sender);
     
     // Dust transaction if no tokens can be given
     require(tokenAmount != 0);
@@ -140,26 +148,6 @@ contract GenericCrowdsale is Haltable {
     // Return excess of money
     returnExcedent(msg.value.sub(weiAmount), msg.sender);
   }
-
-  function returnExcedent(uint excedent, address agent) internal {
-    if (excedent > 0) {
-      agent.transfer(weiToReturn);
-    }
-  }
-
-  /** 
-   *  Calculate the size of the investment that we can accept from this address.
-   */
-  function weiAllowedToReceive(uint weiAmount, address customer) internal constant returns (uint weiAllowed);
-
-  /** 
-   *  Calculate the amount of tokens that correspond to the received amount.
-   *
-   *  Note: When there's an excedent due to rounding error, it should be returned to allow refunding.
-   *  This is currently worked around using an appropriate amount of decimals in the FractionalERC20 standard.
-   *  The workaround is good enough for most use cases, hence the simplified function signature.
-   */
-  function calculatePrice(uint weiAmount, address customer) internal constant returns (uint tokenAmount);
 
   /**
    * Preallocate tokens for the early investors.
@@ -198,6 +186,16 @@ contract GenericCrowdsale is Haltable {
     Invested(receiver, weiAmount, tokenAmount, customerId);
   }
 
+  /**
+   * Investing function that recognizes the payer and verifies he is allowed to invest.
+   *
+   * @param customerId UUIDv4 that identifies this contributor
+   */
+  function buyWithSignedAddress(uint128 customerId, uint8 v, bytes32 r, bytes32 s) public payable validCustomerId(customerId) {
+    bytes32 hash = sha256(addr);
+    require(ecrecover(hash, v, r, s) == signerAddress);
+    investInternal(msg.sender, customerId);
+  }
 
 
   /**
@@ -205,8 +203,7 @@ contract GenericCrowdsale is Haltable {
    * 
    * @param customerId UUIDv4 that identifies this contributor
    */
-  function buyWithCustomerId(uint128 customerId) public payable {
-    require(customerId != 0);  // UUIDv4 sanity check
+  function buyWithCustomerId(uint128 customerId) public payable validCustomerId(customerId) unsignedBuyAllowed {
     investInternal(msg.sender, customerId);
   }
 
@@ -215,7 +212,7 @@ contract GenericCrowdsale is Haltable {
    *
    * Pay for funding, get invested tokens back in the sender address.
    */
-  function buy() public payable {
+  function buy() public payable unsignedBuyAllowed {
     require(!requireCustomerId); // Crowdsale needs to track participants for thank you email
     investInternal(msg.sender, 0);
   }
@@ -227,8 +224,6 @@ contract GenericCrowdsale is Haltable {
    * Note that by default tokens are not in a released state.
    */
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
-    if (address(finalizeAgent) != 0)
-      finalizeAgent.finalizeCrowdsale(token);
     finalized = true;
     Finalized();
   }
@@ -237,9 +232,21 @@ contract GenericCrowdsale is Haltable {
    * Set policy do we need to have server-side customer ids for the investments.
    *
    */
-  function setRequireCustomerId(bool value) public onlyOwner stopInEmergency {
+  function setRequireCustomerId(bool value) public onlyOwner {
     requireCustomerId = value;
-    InvestmentPolicyChanged(requireCustomerId);
+    InvestmentPolicyChanged(requireCustomerId, requiredSignedAddress, signerAddress);
+  }
+
+  /**
+   * Set policy if all investors must be cleared on the server side first.
+   *
+   * This is e.g. for the accredited investor clearing.
+   *
+   */
+  function setRequireSignedAddress(bool value, address signer) public onlyOwner {
+    requiredSignedAddress = value;
+    signerAddress = signer;
+    InvestmentPolicyChanged(requireCustomerId, requiredSignedAddress, signerAddress);
   }
 
   /**
@@ -251,37 +258,11 @@ contract GenericCrowdsale is Haltable {
   }
 
   /**
-   * Allow to (re)set finalize agent.
-   */
-  function setFinalizeAgent(FinalizeAgent addr) internal {
-    // Disallow setting a bad agent
-    require(address(addr) == 0 || addr.isFinalizeAgent());
-    finalizeAgent = addr;
-    require(isFinalizerSane());
-  }
-
-  /**
    * Internal setter for the multisig wallet
    */
   function setMultisig(address addr) internal {
     require(addr != 0);
     multisigWallet = addr;
-  }
-
-  /**
-   * @return true if the crowdsale has raised enough money to be a success
-   */
-  function isMinimumGoalReached() public constant returns (bool reached) {
-    return weiRaised >= minimumFundingGoal;
-  }
-
-  function isCrowdsaleFull() internal constant returns (bool full);
-
-  /**
-   * Check if the contract relationship looks good.
-   */
-  function isFinalizerSane() public constant returns (bool sane) {
-    return address(finalizeAgent) == 0 || finalizeAgent.isSane(token);
   }
 
   /**
@@ -302,27 +283,68 @@ contract GenericCrowdsale is Haltable {
     ownerTestValue = val;
   }
 
-  /** Interface for the concrete instance to interact with the token contract in a customizable way */
-  function assignTokens(address receiver, uint tokenAmount) internal;
-
   /** Interface marker. */
   function isCrowdsale() public constant returns (bool) {
     return true;
   }
 
+  /** Internal functions that exist to provide inversion of control should they be overriden */
+
+  /** Interface for the concrete instance to interact with the token contract in a customizable way */
+  function assignTokens(address receiver, uint tokenAmount) internal;
+
+  /**
+   *  Determine if the goal was already reached in the current crowdsale
+   */
+  function isCrowdsaleFull() internal constant returns (bool full);
+
+  /**
+   * Returns any excess wei received
+   * 
+   * This function can be overriden to provide a different refunding method.
+   */
+  function returnExcedent(uint excedent, address agent) internal {
+    if (excedent > 0) {
+      agent.transfer(weiToReturn);
+    }
+  }
+
+  /** 
+   *  Calculate the size of the investment that we can accept from this address.
+   */
+  function weiAllowedToReceive(uint weiAmount, address customer) internal constant returns (uint weiAllowed);
+
+  /** 
+   *  Calculate the amount of tokens that correspond to the received amount.
+   *
+   *  Note: When there's an excedent due to rounding error, it should be returned to allow refunding.
+   *  This is worked around in the current design using an appropriate amount of decimals in the FractionalERC20 standard.
+   *  The workaround is good enough for most use cases, hence the simplified function signature.
+   */
+  function calculateTokenAmount(uint weiAmount, address customer) internal constant returns (uint tokenAmount);
+
   //
   // Modifiers
   //
 
-  /** Modifier allowing execution only if the crowdsale is currently running.  */
   modifier inState(State state) {
     require(getState() == state);
     _;
   }
 
+  modifier unsignedBuyAllowed() {
+    require(!requiredSignedAddress);
+  }
+
+  /** Modifier allowing execution only if the crowdsale is currently running.  */
   modifier notFinished() {
     State current_state = getState();
     require(current_state == State.PreFunding || current_state == State.Funding);
+    _;
+  }
+
+  modifier validCustomerId(uint128 customerId) {
+    require(customerId != 0);  // UUIDv4 sanity check
     _;
   }
 
