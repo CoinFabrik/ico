@@ -7,7 +7,6 @@ pragma solidity ^0.4.15;
 
 import './FractionalERC20.sol';
 import './ReleasableToken.sol';
-import './MintableToken.sol';
 import './UpgradeableToken.sol';
 
 /**
@@ -21,7 +20,7 @@ import './UpgradeableToken.sol';
  * - The token can be capped (supply set in the constructor) or uncapped (crowdsale contract can mint new tokens)
  *
  */
-contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, FractionalERC20 {
+contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
 
   /**
    * Construct the token.
@@ -33,14 +32,20 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Fra
    * @param initial_supply How many tokens we start with
    * @param token_decimals Number of decimal places
    * @param team_multisig Team's multisig
-   * @param mintable Are new tokens created over the crowdsale or do we distribute only the initial supply? Note that when the token becomes transferable the minting always ends.
    * @param blocks_between_payments Amount of blocks between each revenue payment
    * @param _end End of the crowdsale
    * @param _crowdsale Crowdsale's address
    */
 
-  function CrowdsaleToken(string token_name, string token_symbol, uint initial_supply, uint8 token_decimals, address team_multisig, bool mintable, uint blocks_between_payments, uint _end, address _crowdsale)
-    UpgradeableToken(team_multisig) MintableToken(initial_supply, team_multisig, mintable) HoldableToken(blocks_between_payments, _end, _crowdsale) {
+
+  function CrowdsaleToken(string token_name, string token_symbol, uint initial_supply, uint8 token_decimals, address team_multisig, uint blocks_between_payments, uint _end, address _crowdsale)
+    UpgradeableToken(team_multisig) HoldableToken(blocks_between_payments, _end, _crowdsale) {
+    uint revenueTokens = initial_supply.mul(3).div(10);
+    uint nonrevenueTokens = initial_supply.sub(revenue);
+    contributors[crowdsale].secondaryBalance = nonrevenueTokens;
+    contributors[address(this)].secondaryBalance = revenueTokens;
+
+
     name = token_name;
     symbol = token_symbol;
     decimals = token_decimals;
@@ -50,7 +55,9 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Fra
    * When token is released to be transferable, prohibit new token creation.
    */
   function releaseTokenTransfer() public onlyReleaseAgent {
-    mintingFinished = true;
+    crowdsaleExcess = contributors[crowdsale].secondaryBalance;
+    internalTransfer(crowdsale, address(this), crowdsaleExcess);
+    purchasable = false;
     super.releaseTokenTransfer();
   }
 

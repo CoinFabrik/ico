@@ -9,14 +9,13 @@ contract Crowdsale is GenericCrowdsale {
   string constant private token_symbol = "RBT";
   uint private constant token_initial_supply = 0;
   uint8 private constant token_decimals = 16;
-  bool private constant token_mintable = false;
 
   uint private constant blocks_between_payments =  25200;
   uint private constant token_in_wei = 5 * (10 ** 14);
 
 
   function Crowdsale(address team_multisig, uint start, uint end) GenericCrowdsale(team_multisig, start, end) public {
-      token = new CrowdsaleToken(token_name, token_symbol, token_initial_supply, token_decimals, team_multisig, token_mintable, blocks_between_payments, end);
+      token = new CrowdsaleToken(token_name, token_symbol, token_initial_supply, token_decimals, team_multisig, blocks_between_payments, end);
   }
 
   function assignTokens(address receiver, uint tokenAmount) internal {

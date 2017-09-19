@@ -81,13 +81,13 @@ contract StandardHoldableToken is ERC20, HoldableToken {
    * @param value uint the amout of tokens to be transfered
    */
   function transferFrom(address from, address to, uint value) public returns (bool success) {
-    uint allowance = allowed[from][msg.sender];
+    uint currentAllowance = allowed[from][msg.sender];
 
-    // Check is not needed because sub(allowance, value) will already throw if this condition is not met
-    // require(value <= allowance);
+    // Check is not needed because sub(currentAllowance, value) will already throw if this condition is not met
+    // require(value <= currentAllowance);
     // SafeMath uses assert instead of require though, beware when using an analysis tool
 
-    allowed[from][msg.sender] = allowance.sub(value);
+    allowed[from][msg.sender] = currentAllowance.sub(value);
 
     bool result = internalTransfer(from, to, value);
 

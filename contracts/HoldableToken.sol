@@ -16,6 +16,7 @@ contract HoldableToken is ERC20Basic {
   uint public blocksBetweenPayments;
   uint public end;
   address public crowdsale;
+  bool puchasable = true;
 
   struct Contributor {
     uint primaryBalance;
@@ -68,6 +69,7 @@ contract HoldableToken is ERC20Basic {
     uint heldTokens = 0;
 
     for (uint i = contributors[account].nextPayday; i <= curPayday; i++) {
+      //If i equals 0, then the overflow will make the guard false
       uint index = i-1;
       heldTokens = index < heldTokensPerPayday.length ? heldTokensPerPayday[index] : heldTokens;
       // TODO: add interface for revenuePerPayday so it is calculated by derived contract.
@@ -99,7 +101,7 @@ contract HoldableToken is ERC20Basic {
     // From this point on we know that the source account has enough tokens for the transfer.
 
     // Special case: the source is the crowdsale distributing tokens that may be held by loyal supporters
-    if (source == address(crowdsale) && (end == 0 || block.number <= end)) {
+    if ((source == crowdsale) && (puchasable)) {
       contributors[crowdsale].secondaryBalance = contributors[crowdsale].secondaryBalance.sub(value);
       contributors[destination].primaryBalance = contributors[destination].primaryBalance.add(value);
       heldTokensPerPayday[0] = heldTokensPerPayday[0].add(value);
@@ -128,14 +130,14 @@ contract HoldableToken is ERC20Basic {
 
   /**
    * @dev Updates the balance of an account by transferring to it tokens from the loyalty program if it corresponds.
-   * @param curPayday The current payday
+   * @param account Balance of this address will be updated 
    */
   function updateBalance(address account) private {
     uint revenue = pendingRevenue(account);
     // If the token holder has pending revenue we transfer the corresponding tokens to his account
     if (revenue > 0) {
       internalTransfer(address(this), account, revenue);
-      contributors[account].nextPayday = curPayday.add(1);
+      contributors[account].nextPayday = currentPayday().add(1);
       Transfer(address(this), account, revenue);
     }
   }
