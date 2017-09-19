@@ -7,12 +7,13 @@ pragma solidity ^0.4.15;
 
 import './ERC20Basic.sol';
 import './SafeMath.sol';
+import './Burnable.sol';
 
 /**
  * @title Basic token
  * @dev Basic version of StandardToken, with no allowances. 
  */
-contract BasicToken is ERC20Basic {
+contract BasicToken is ERC20Basic, Burnable {
   using SafeMath for uint;
 
   mapping(address => uint) balances;
@@ -29,10 +30,10 @@ contract BasicToken is ERC20Basic {
    */
 
   /**
-  * @dev transfer token for a specified address
-  * @param _to The address to transfer to.
-  * @param _value The amount to be transferred.
-  */
+   * @dev transfer token for a specified address
+   * @param _to The address to transfer to.
+   * @param _value The amount to be transferred.
+   */
   function transfer(address _to, uint _value) public returns (bool success) {
     balances[msg.sender] = balances[msg.sender].sub(_value);
     balances[_to] = balances[_to].add(_value);
@@ -41,12 +42,21 @@ contract BasicToken is ERC20Basic {
   }
 
   /**
-  * @dev Gets the balance of the specified address.
-  * @param _owner The address to query the the balance of. 
-  * @return An uint representing the amount owned by the passed address.
-  */
+   * @dev Gets the balance of the specified address.
+   * @param _owner The address to query the the balance of. 
+   * @return An uint representing the amount owned by the passed address.
+   */
   function balanceOf(address _owner) public constant returns (uint balance) {
     return balances[_owner];
+  }
+
+  /**
+   * @dev Provides an internal function for destroying tokens. Useful for upgrades.
+   */
+  function burnTokens(address account, uint value) internal {
+    balances[account] = balances[account].sub(value);
+    totalSupply = totalSupply.sub(value);
+    Burned(account, value);
   }
   
 }

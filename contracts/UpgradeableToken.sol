@@ -6,7 +6,8 @@ pragma solidity ^0.4.15;
  * Modified by https://www.coinfabrik.com/
  */
 
-import "./StandardToken.sol";
+import "./ERC20Basic.sol";
+import "./Burnable.sol";
 import "./UpgradeAgent.sol";
 import "./SafeMath.sol";
 
@@ -14,7 +15,7 @@ import "./SafeMath.sol";
  * A token upgrade mechanism where users can opt-in amount of tokens to the next smart contract revision.
  *
  */
-contract UpgradeableToken is StandardToken {
+contract UpgradeableToken is ERC20Basic, Burnable {
 
   /** Contract / person who can set the upgrade path. This can be the same as team multisig wallet, as what it is with its default value. */
   address public upgradeMaster;
@@ -64,10 +65,9 @@ contract UpgradeableToken is StandardToken {
     // Validate input value.
     require(value != 0);
 
-    balances[msg.sender] = balances[msg.sender].sub(value);
+    burnTokens(msg.sender, value);
 
     // Take tokens out from circulation
-    totalSupply = totalSupply.sub(value);
     totalUpgraded = totalUpgraded.add(value);
 
     // Upgrade agent reissues the tokens
