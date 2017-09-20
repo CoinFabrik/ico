@@ -16,6 +16,7 @@ import "./SafeMath.sol";
  *
  */
 contract UpgradeableToken is ERC20Basic, Burnable {
+  using SafeMath for uint;
 
   /** Contract / person who can set the upgrade path. This can be the same as team multisig wallet, as what it is with its default value. */
   address public upgradeMaster;
@@ -24,14 +25,14 @@ contract UpgradeableToken is ERC20Basic, Burnable {
   UpgradeAgent public upgradeAgent;
 
   /** How many tokens we have upgraded by now. */
-  uint public totalUpgraded;
+  uint public totalUpgraded = 0;
 
   /**
    * Upgrade states.
    *
    * - NotAllowed: The child contract has not reached a condition where the upgrade can bgun
    * - WaitingForAgent: Token allows upgrade, but we don't have a new agent yet
-   * - ReadyToUpgrade: The agent is set, but not a single token has been upgraded yet
+   * - ReadyToUpgrade: The agent is set, but not a single token has been upgraded yet. This allows changing the upgrade agent while there is time.
    * - Upgrading: Upgrade agent is set and the balance holders can upgrade their tokens
    *
    */
@@ -40,7 +41,7 @@ contract UpgradeableToken is ERC20Basic, Burnable {
   /**
    * Somebody has upgraded some of his tokens.
    */
-  event Upgrade(address indexed _from, address indexed _to, uint _value);
+  event Upgrade(address indexed from, address to, uint value);
 
   /**
    * New upgrade agent available.
@@ -50,8 +51,8 @@ contract UpgradeableToken is ERC20Basic, Burnable {
   /**
    * Do not allow construction without upgrade master set.
    */
-  function UpgradeableToken(address _upgradeMaster) {
-    setUpgradeMaster(_upgradeMaster);
+  function UpgradeableToken(address master) {
+    setUpgradeMaster(master);
   }
 
   /**
@@ -65,9 +66,8 @@ contract UpgradeableToken is ERC20Basic, Burnable {
     // Validate input value.
     require(value != 0);
 
-    burnTokens(msg.sender, value);
-
     // Take tokens out from circulation
+    burnTokens(msg.sender, value);
     totalUpgraded = totalUpgraded.add(value);
 
     // Upgrade agent reissues the tokens
@@ -78,13 +78,11 @@ contract UpgradeableToken is ERC20Basic, Burnable {
   /**
    * Set an upgrade agent that handles the upgrade process
    */
-  function setUpgradeAgent(address agent) external {
+  function setUpgradeAgent(address agent) onlyMaster external {
     // Check whether the token is in a state that we could think of upgrading
     require(canUpgrade());
 
     require(agent != 0x0);
-    // Only a master can designate the next agent
-    require(msg.sender == upgradeMaster);
     // Upgrade has already begun for an agent
     require(getUpgradeState() != UpgradeState.Upgrading);
 
@@ -113,8 +111,7 @@ contract UpgradeableToken is ERC20Basic, Burnable {
    *
    * This allows us to set a new owner for the upgrade mechanism.
    */
-  function changeUpgradeMaster(address new_master) public {
-    require(msg.sender == upgradeMaster);
+  function changeUpgradeMaster(address new_master) onlyMaster public {
     setUpgradeMaster(new_master);
   }
 
@@ -127,10 +124,15 @@ contract UpgradeableToken is ERC20Basic, Burnable {
   }
 
   /**
-   * Child contract can enable to provide the condition when the upgrade can begin.
+   * Child contract can override to provide the condition in which the upgrade can begin.
    */
   function canUpgrade() public constant returns(bool) {
      return true;
   }
 
+
+  modifier onlyMaster() {
+    require(msg.sender == upgradeMaster);
+    _;
+  }
 }
