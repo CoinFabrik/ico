@@ -1,13 +1,14 @@
 pragma solidity ^0.4.13;
 
 import './ERC20Basic.sol';
+import './Burnable.sol';
 import './SafeMath.sol';
 
 /**
  * @title Holdable Token
  * @dev Implementation of the simplified interface in ERC20Basic that provides an incentive to hold tokens for a time after the crowdsale ends. 
  */
-contract HoldableToken is ERC20Basic {
+contract HoldableToken is ERC20Basic, Burnable {
   using SafeMath for uint;
 
   uint private constant payments = 14;
@@ -155,6 +156,12 @@ contract HoldableToken is ERC20Basic {
     for (uint i = heldTokensPerPayday.length; i < curPayday.sub(1); i++) {
       heldTokensPerPayday.push(heldTokens);
     }
+  }
+
+  function burnTokens(address account, uint value) internal {
+    internalTransfer(account, address(this), value);
+    contributors[address(this)].secondaryBalance = contributors[address(this)].secondaryBalance.sub(value);
+    Burned(account, value);
   }
 
 }
