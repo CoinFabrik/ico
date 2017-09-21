@@ -4,12 +4,12 @@
  * Licensed under the Apache License, version 2.0: https://github.com/TokenMarketNet/ico/blob/master/LICENSE.txt
 */
 
-pragma solidity ^0.4.6;
+pragma solidity ^0.4.15;
 
 import "./SafeMath.sol";
 import "./Ownable.sol";
 
-/// @dev Tranche based pricing with special support for pre-ico deals.
+/// @dev Tranche based pricing.
 ///      Implementing "first price" tranches, meaning, that if buyers order is
 ///      covering more than one tranche, the price of the lowest tranche will apply
 ///      to the whole order.
@@ -18,9 +18,6 @@ contract TokenTranchePricing is Ownable {
   using SafeMath for uint;
 
   uint public constant MAX_TRANCHES = 10;
-
-  // This contains all pre-ICO addresses, and their prices (weis per token)
-  mapping (address => uint) public preicoAddresses;
 
   /**
   * Define pricing schedule using tranches.
@@ -66,17 +63,6 @@ contract TokenTranchePricing is Ownable {
     require(tranches[trancheCount.sub(1)].price != 0);
   }
 
-  /// @dev This is invoked once for every pre-ICO address, set pricePerToken
-  ///      to 0 to disable
-  /// @param preicoAddress PresaleFundCollector address
-  /// @param pricePerToken How many weis one token cost for pre-ico investors
-  function setPreicoAddress(address preicoAddress, uint pricePerToken)
-    public
-    onlyOwner
-  {
-    preicoAddresses[preicoAddress] = pricePerToken;
-  }
-
   /// @dev Iterate through tranches. You reach end of tranches when price = 0
   /// @return tuple (time, price)
   function getTranche(uint n) public constant returns (uint, uint) {
@@ -120,17 +106,8 @@ contract TokenTranchePricing is Ownable {
   }
 
   /// @dev Calculate the current price for buy in amount.
-  function calculatePrice(uint value, uint weiRaised, uint tokensSold, address msgSender, uint decimals) public constant returns (uint) {
-
-    uint multiplier = 10 ** decimals;
-
-    // This investor is coming through pre-ico
-    if(preicoAddresses[msgSender] > 0) {
-      return value.mul(multiplier).div(preicoAddresses[msgSender]);
-    }
-
+  function calculatePrice(uint tokensSold) public constant returns (uint) {
     uint price = getCurrentPrice(tokensSold);
-    return value.mul(multiplier).div(price);
   }
 
 }
