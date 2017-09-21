@@ -33,9 +33,9 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
    *
    * @param token_name Token name string
    * @param token_symbol Token symbol - typically it's all caps
-   * @param initial_supply How many tokens we start with (represented with its decimals)
+   * @param initial_supply How many tokens we start with (including the decimal places in its representation)
    * @param token_decimals Number of decimal places
-   * @param team_multisig Team's multisig
+   * @param team_multisig The multisig of the team
    * @param blocks_between_payments Amount of blocks between each revenue payment
    * @param crowdsale_end End of the crowdsale
    */
@@ -54,7 +54,7 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
   }
 
   /**
-   * When token is released to be transferable, prohibit new token creation.
+   * @dev Release token transfers which lets us establish the balance of the loyalty program.
    */
   function releaseTokenTransfer() public onlyReleaseAgent {
     uint crowdsaleExcess = balanceOf(crowdsale);

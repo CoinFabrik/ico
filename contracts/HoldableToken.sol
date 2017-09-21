@@ -61,13 +61,14 @@ contract HoldableToken is ERC20Basic, Burnable {
 
   /**
    * @dev Amount of revenue that is divided among loyal token holders each payday.
-   * @returns Revenue corresponding to a payday.
+   * @return Revenue corresponding to a payday.
    */
   function revenuePerPayday() internal returns (uint);
 
   /**
    * @dev Calculates the revenue that corresponds to this account since the last transfer.
-   * @param account 
+   * @param account Address to be checked.
+   * @return Revenue in tokens for the account since the last transfer.
    */
   function pendingRevenue(address account) internal constant returns(uint) {
     if (contributors[account].primaryBalance == 0)
@@ -93,7 +94,7 @@ contract HoldableToken is ERC20Basic, Burnable {
 
   /**
    * @dev Calculates the current payday.
-   * @returns Current payday.
+   * @return Current payday.
    * Token balances should reflect the extra tokens for each token held during paydays including the current one.
    */
   function currentPayday() private constant returns (uint) {
