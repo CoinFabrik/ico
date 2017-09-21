@@ -21,6 +21,7 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
 
   function Crowdsale(address team_multisig, uint start, uint end) GenericCrowdsale(team_multisig, start, end) TokenTranchePricing(_tranches) public {
     CrowdsaleToken token = new CrowdsaleToken(token_name, token_symbol, token_initial_supply, token_decimals, team_multisig, blocks_between_payments, end);
+    token.setReleaseAgent(address(this));
   }
 
   function assignTokens(address receiver, uint tokenAmount) internal {
@@ -38,16 +39,21 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
   }
 
   function preallocate(address receiver, uint fullTokens, uint weiPrice) public onlyOwner notFinished {
-    require(receiver != address(0));
-    uint tokenAmount = fullTokens.mul(10**uint(token.decimals()));
-    require(tokenAmount != 0);
-    uint weiAmount = weiPrice.mul(tokenAmount); // This can also be 0, in which case we give out tokens for free
-    if(weiAmount > 0) {
+    if (weiPrice > 0) {
       super.preallocate(receiver, fullTokens, weiPrice);
     } else {
+      require(receiver != address(0));
+      uint tokenAmount = fullTokens.mul(10**uint(token.decimals()));
+      require(tokenAmount != 0);
       tokenAmountOf[receiver] = tokenAmountOf[receiver].add(tokenAmount);
       assignTokens(receiver, tokenAmount);
     }
+  }
+
+  function finalize() public inState(State.Success) onlyOwner stopInEmergency {
+    token.releaseTransfer();
+    uint remaining_tokens = token.balanceOf(address(this));
+    token.transfer(address(token), remaining_tokens);
   }
 
   // These two setters are present only to correct block numbers if they are off from their target date by more than, say, a day

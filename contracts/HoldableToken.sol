@@ -17,7 +17,6 @@ contract HoldableToken is ERC20Basic, Burnable {
   uint public blocksBetweenPayments;
   uint public end;
   address public crowdsale;
-  bool purchasable = true;
 
   struct Contributor {
     uint primaryBalance;
@@ -37,10 +36,10 @@ contract HoldableToken is ERC20Basic, Burnable {
 
 
   /**
-   * @dev transfer token for a specified address
+   * @dev transfer tokens to a specified address.
    * @param destination The address to transfer to.
    * @param value The amount to be transferred.
-   * @return true on  success
+   * @return true on success
    */
   function transfer(address destination, uint value) public returns (bool success) {
     bool result = internalTransfer(msg.sender, destination, value);
@@ -61,10 +60,15 @@ contract HoldableToken is ERC20Basic, Burnable {
   }
 
   /**
-   * @dev Amount of revenue that is divided among loyal token holders each payday
+   * @dev Amount of revenue that is divided among loyal token holders each payday.
+   * @returns Revenue corresponding to a payday.
    */
   function revenuePerPayday() internal returns (uint);
 
+  /**
+   * @dev Calculates the revenue that corresponds to this account since the last transfer.
+   * @param account 
+   */
   function pendingRevenue(address account) internal constant returns(uint) {
     if (contributors[account].primaryBalance == 0)
       return 0;
@@ -89,6 +93,7 @@ contract HoldableToken is ERC20Basic, Burnable {
 
   /**
    * @dev Calculates the current payday.
+   * @returns Current payday.
    * Token balances should reflect the extra tokens for each token held during paydays including the current one.
    */
   function currentPayday() private constant returns (uint) {
@@ -105,7 +110,7 @@ contract HoldableToken is ERC20Basic, Burnable {
     // From this point on we know that the source account has enough tokens for the transfer.
 
     // Special case: the source is the crowdsale distributing tokens that may be held by loyal supporters
-    if ((source == crowdsale) && (purchasable)) {
+    if ((source == crowdsale) && (block.number <= end)) {
       contributors[crowdsale].secondaryBalance = contributors[crowdsale].secondaryBalance.sub(value);
       contributors[destination].primaryBalance = contributors[destination].primaryBalance.add(value);
       heldTokensPerPayday[0] = heldTokensPerPayday[0].add(value);

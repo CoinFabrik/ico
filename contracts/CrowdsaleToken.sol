@@ -26,6 +26,7 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
 
   string public name;
   string public symbol;
+  uint public loyalty_program_balance;
 
   /**
    * Construct the token.
@@ -34,15 +35,15 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
    *
    * @param token_name Token name string
    * @param token_symbol Token symbol - typically it's all caps
-   * @param initial_supply How many tokens we start with
+   * @param initial_supply How many tokens we start with (represented with its decimals)
    * @param token_decimals Number of decimal places
    * @param team_multisig Team's multisig
    * @param blocks_between_payments Amount of blocks between each revenue payment
-   * @param _end End of the crowdsale
+   * @param crowdsale_end End of the crowdsale
    */
 
-  function CrowdsaleToken(string token_name, string token_symbol, uint initial_supply, uint8 token_decimals, address team_multisig, uint blocks_between_payments, uint _end)
-    UpgradeableToken(team_multisig) HoldableToken(blocks_between_payments, _end) {
+  function CrowdsaleToken(string token_name, string token_symbol, uint initial_supply, uint8 token_decimals, address team_multisig, uint blocks_between_payments, uint crowdsale_end)
+    UpgradeableToken(team_multisig) HoldableToken(blocks_between_payments, crowdsale_end) {
 
     uint revenueTokens = initial_supply.mul(3).div(10);
     uint nonrevenueTokens = initial_supply.sub(revenueTokens);
@@ -58,9 +59,8 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
    * When token is released to be transferable, prohibit new token creation.
    */
   function releaseTokenTransfer() public onlyReleaseAgent {
-    uint crowdsaleExcess = contributors[crowdsale].secondaryBalance;
-    internalTransfer(crowdsale, address(this), crowdsaleExcess);
-    purchasable = false;
+    uint crowdsaleExcess = balanceOf(crowdsale);
+    loyalty_program_balance = balanceOf(address(this)).add(crowdsaleExcess);
     super.releaseTokenTransfer();
   }
 
