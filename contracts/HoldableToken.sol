@@ -1,13 +1,14 @@
 pragma solidity ^0.4.13;
 
 import './ERC20Basic.sol';
+import './Burnable.sol';
 import './SafeMath.sol';
 
 /**
  * @title Holdable Token
  * @dev Implementation of the simplified interface in ERC20Basic that provides an incentive to hold tokens for a time after the crowdsale ends. 
  */
-contract HoldableToken is ERC20Basic {
+contract HoldableToken is ERC20Basic, Burnable {
   using SafeMath for uint;
 
   uint private constant payments = 14;
@@ -26,10 +27,11 @@ contract HoldableToken is ERC20Basic {
 
   mapping(address => Contributor) public contributors;
 
-  function HoldableToken(uint blocks_between_payments, uint _end) internal {
+
+  function HoldableToken(uint blocks_between_payments, uint crowdsale_end) internal {
     heldTokensPerPayday.push(0);
     blocksBetweenPayments = blocks_between_payments;
-    end = _end;
+    end = crowdsale_end;
     crowdsale = msg.sender;
   }
 
@@ -64,19 +66,21 @@ contract HoldableToken is ERC20Basic {
   function revenuePerPayday() internal returns (uint);
 
   function pendingRevenue(address account) internal constant returns(uint) {
+    if (contributors[account].primaryBalance == 0)
+      return 0;
     uint curPayday = currentPayday();
     uint revenue = 0;
     uint heldTokens = 0;
+    uint nextPayday = contributors[account].nextPayday > 0 ? contributors[account].nextPayday : 1;
 
-    for (uint i = contributors[account].nextPayday; i <= curPayday; i++) {
-      //If i equals 0, then the overflow will make the guard false
-      uint index = i-1;
+    for (uint i = nextPayday; i <= curPayday; i++) {
+      uint index = i - 1;
       heldTokens = index < heldTokensPerPayday.length ? heldTokensPerPayday[index] : heldTokens;
-      // TODO: add interface for revenuePerPayday so it is calculated by derived contract.
       // Warning: overflow in the multiplication will block all operations for the account
       // The magnitude of the revenue per payday should be chosen to guarantee the safety of all operations.
       // E.g. if the revenue is taken out of an initial pool of 10^23 units, all operations are safe since
       // 10^23 * 10^23 = 10^46 < 10^77 ~= 2^256
+      // heldTokens can't be zero as long as this contributor has a primary balance higher than zero.
       uint pay = contributors[account].primaryBalance.mul(revenuePerPayday()).div(heldTokens);
       revenue = pay.add(revenue);
     }
@@ -147,10 +151,20 @@ contract HoldableToken is ERC20Basic {
    * @param curPayday The current payday
    */
   function updatePaydayAmounts(uint curPayday) private {
+    if (curPayday == 0) return;
     uint heldTokens = heldTokensPerPayday[heldTokensPerPayday.length.sub(1)];
-    for (uint i = heldTokensPerPayday.length; i <= curPayday; i++) {
+    for (uint i = heldTokensPerPayday.length; i < curPayday.sub(1); i++) {
       heldTokensPerPayday.push(heldTokens);
     }
+  }
+
+  /**
+   * Internal function for destroying tokens.
+   */
+  function burnTokens(address account, uint value) internal {
+    internalTransfer(account, address(this), value);
+    contributors[address(this)].secondaryBalance = contributors[address(this)].secondaryBalance.sub(value);
+    Burned(account, value);
   }
 
 }

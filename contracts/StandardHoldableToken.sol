@@ -78,7 +78,7 @@ contract StandardHoldableToken is ERC20, HoldableToken {
    * @dev Transfer tokens from one address to another
    * @param from address The address which you want to send tokens from
    * @param to address The address which you want to transfer to
-   * @param value uint the amout of tokens to be transfered
+   * @param value uint the amount of tokens to be transferred
    */
   function transferFrom(address from, address to, uint value) public returns (bool success) {
     uint currentAllowance = allowed[from][msg.sender];
