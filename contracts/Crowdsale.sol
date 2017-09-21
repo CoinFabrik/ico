@@ -16,10 +16,10 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
   uint private constant token_in_wei = 5 * (10 ** 14);
   uint tokensAmount1HalfBillion = 500000000 * (10 ** uint(token_decimals));
   uint tokensPerWei1 = 2000 * (10 ** uint(token_decimals));
-  uint[] tranches = [tokensAmount1HalfBillion, tokensPerWei1];
+  uint[] tranches_conf = [tokensAmount1HalfBillion, tokensPerWei1];
 
 
-  function Crowdsale(address team_multisig, uint start, uint end) GenericCrowdsale(team_multisig, start, end) TokenTranchePricing(tranches) public {
+  function Crowdsale(address team_multisig, uint start, uint end) GenericCrowdsale(team_multisig, start, end) TokenTranchePricing(tranches_conf) public {
     CrowdsaleToken token = new CrowdsaleToken(token_name, token_symbol, token_initial_supply, token_decimals, team_multisig, blocks_between_payments, end);
     token.setReleaseAgent(address(this));
   }
