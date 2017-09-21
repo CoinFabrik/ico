@@ -85,7 +85,7 @@ contract GenericCrowdsale is Haltable {
   event Invested(address investor, uint weiAmount, uint tokenAmount, uint128 customerId);
 
   // The rules about what kind of investments we accept were changed
-  event InvestmentPolicyChanged(bool requireCId, bool requiredSignedAddress, address signerAddress);
+  event InvestmentPolicyChanged(bool requireCId, bool requireSignedAddress, address signer);
 
   // Address early participation whitelist status changed
   event Whitelisted(address addr, bool status);
@@ -192,7 +192,7 @@ contract GenericCrowdsale is Haltable {
    * @param customerId UUIDv4 that identifies this contributor
    */
   function buyWithSignedAddress(uint128 customerId, uint8 v, bytes32 r, bytes32 s) public payable validCustomerId(customerId) {
-    bytes32 hash = sha256(addr);
+    bytes32 hash = sha256(msg.sender);
     require(ecrecover(hash, v, r, s) == signerAddress);
     investInternal(msg.sender, customerId);
   }
@@ -305,7 +305,7 @@ contract GenericCrowdsale is Haltable {
    */
   function returnExcedent(uint excedent, address agent) internal {
     if (excedent > 0) {
-      agent.transfer(weiToReturn);
+      agent.transfer(excedent);
     }
   }
 
@@ -334,6 +334,7 @@ contract GenericCrowdsale is Haltable {
 
   modifier unsignedBuyAllowed() {
     require(!requiredSignedAddress);
+    _;
   }
 
   /** Modifier allowing execution only if the crowdsale is currently running.  */
