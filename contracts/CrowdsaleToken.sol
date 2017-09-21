@@ -22,6 +22,11 @@ import './UpgradeableToken.sol';
  */
 contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
 
+  event UpdatedTokenInformation(string newName, string newSymbol);
+
+  string public name;
+  string public symbol;
+
   /**
    * Construct the token.
    *
@@ -37,11 +42,10 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
    * @param _crowdsale Crowdsale's address
    */
 
-
   function CrowdsaleToken(string token_name, string token_symbol, uint initial_supply, uint8 token_decimals, address team_multisig, uint blocks_between_payments, uint _end, address _crowdsale)
     UpgradeableToken(team_multisig) HoldableToken(blocks_between_payments, _end, _crowdsale) {
     uint revenueTokens = initial_supply.mul(3).div(10);
-    uint nonrevenueTokens = initial_supply.sub(revenue);
+    uint nonrevenueTokens = initial_supply.sub(revenueTokens);
     contributors[crowdsale].secondaryBalance = nonrevenueTokens;
     contributors[address(this)].secondaryBalance = revenueTokens;
 
@@ -55,7 +59,7 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
    * When token is released to be transferable, prohibit new token creation.
    */
   function releaseTokenTransfer() public onlyReleaseAgent {
-    crowdsaleExcess = contributors[crowdsale].secondaryBalance;
+    uint crowdsaleExcess = contributors[crowdsale].secondaryBalance;
     internalTransfer(crowdsale, address(this), crowdsaleExcess);
     purchasable = false;
     super.releaseTokenTransfer();
