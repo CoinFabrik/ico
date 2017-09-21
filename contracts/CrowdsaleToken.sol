@@ -39,16 +39,15 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
    * @param team_multisig Team's multisig
    * @param blocks_between_payments Amount of blocks between each revenue payment
    * @param _end End of the crowdsale
-   * @param _crowdsale Crowdsale's address
    */
 
-  function CrowdsaleToken(string token_name, string token_symbol, uint initial_supply, uint8 token_decimals, address team_multisig, uint blocks_between_payments, uint _end, address _crowdsale)
-    UpgradeableToken(team_multisig) HoldableToken(blocks_between_payments, _end, _crowdsale) {
+  function CrowdsaleToken(string token_name, string token_symbol, uint initial_supply, uint8 token_decimals, address team_multisig, uint blocks_between_payments, uint _end)
+    UpgradeableToken(team_multisig) HoldableToken(blocks_between_payments, _end) {
+
     uint revenueTokens = initial_supply.mul(3).div(10);
     uint nonrevenueTokens = initial_supply.sub(revenueTokens);
     contributors[crowdsale].secondaryBalance = nonrevenueTokens;
     contributors[address(this)].secondaryBalance = revenueTokens;
-
 
     name = token_name;
     symbol = token_symbol;
@@ -82,4 +81,5 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
 
     UpdatedTokenInformation(name, symbol);
   }
+
 }
