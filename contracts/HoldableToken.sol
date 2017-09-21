@@ -16,7 +16,7 @@ contract HoldableToken is ERC20Basic {
   uint public blocksBetweenPayments;
   uint public end;
   address public crowdsale;
-  bool puchasable = true;
+  bool purchasable = true;
 
   struct Contributor {
     uint primaryBalance;
@@ -101,7 +101,7 @@ contract HoldableToken is ERC20Basic {
     // From this point on we know that the source account has enough tokens for the transfer.
 
     // Special case: the source is the crowdsale distributing tokens that may be held by loyal supporters
-    if ((source == crowdsale) && (puchasable)) {
+    if ((source == crowdsale) && (purchasable)) {
       contributors[crowdsale].secondaryBalance = contributors[crowdsale].secondaryBalance.sub(value);
       contributors[destination].primaryBalance = contributors[destination].primaryBalance.add(value);
       heldTokensPerPayday[0] = heldTokensPerPayday[0].add(value);
