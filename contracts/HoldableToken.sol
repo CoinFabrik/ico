@@ -158,6 +158,9 @@ contract HoldableToken is ERC20Basic, Burnable {
     }
   }
 
+  /**
+   * Internal function for destroying tokens.
+   */
   function burnTokens(address account, uint value) internal {
     internalTransfer(account, address(this), value);
     contributors[address(this)].secondaryBalance = contributors[address(this)].secondaryBalance.sub(value);
