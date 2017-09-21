@@ -22,8 +22,6 @@ import './UpgradeableToken.sol';
  */
 contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
 
-  event UpdatedTokenInformation(string newName, string newSymbol);
-
   string public name;
   string public symbol;
   uint public loyalty_program_balance;
@@ -70,16 +68,6 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
    */
   function canUpgrade() public constant returns(bool) {
     return released && super.canUpgrade();
-  }
-
-  /**
-   * Owner can update token information here
-   */
-  function setTokenInformation(string token_name, string token_symbol) onlyOwner {
-    name = token_name;
-    symbol = token_symbol;
-
-    UpdatedTokenInformation(name, symbol);
   }
 
 }
