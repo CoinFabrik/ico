@@ -10,13 +10,13 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
   string constant private token_symbol = "RBT";
   uint private constant token_initial_supply = 0;
   uint8 private constant token_decimals = 16;
-  uint decimalTokensCap = 1000000000 * (10 ** uint(token_decimals)); // One billion tokens 
+  uint tokensCap = 1000000000 * (10 ** uint(token_decimals)); // One billion tokens 
 
   uint private constant blocks_between_payments =  25200;
   uint private constant token_in_wei = 5 * (10 ** 14);
-  uint decimalTokensAmount1HalfBillion = 500000000 * (10 ** uint(token_decimals));
-  uint decimalTokensPerWei1 = 2000 * (10 ** uint(token_decimals));
-  uint[] _tranches = [decimalTokensAmount1HalfBillion, decimalTokensPerWei1];
+  uint tokensAmount1HalfBillion = 500000000 * (10 ** uint(token_decimals));
+  uint tokensPerWei1 = 2000 * (10 ** uint(token_decimals));
+  uint[] _tranches = [tokensAmount1HalfBillion, tokensPerWei1];
 
 
   function Crowdsale(address team_multisig, uint start, uint end) GenericCrowdsale(team_multisig, start, end) TokenTranchePricing(_tranches) public {
@@ -28,13 +28,13 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
   }
 
   function calculateTokenAmount(uint weiAmount, address customer) internal constant returns (uint tokenAmount){
-    uint decimalTokensPerWei = calculatePrice(tokensSold);
-    tokenAmount = decimalTokensPerWei.mul(weiAmount).mul(decimalTokensPerWei);
+    uint tokensPerWei = calculatePrice(tokensSold);
+    tokenAmount = tokensPerWei.mul(weiAmount).mul(tokensPerWei);
   }
 
   function weiAllowedToReceive(uint weiAmount, address customer) internal constant returns (uint weiAllowed) {
-    uint decimalTokensPerWei = calculatePrice(tokensSold);
-    weiAllowed = decimalTokensCap.sub(tokensSold).div(decimalTokensPerWei);
+    uint tokensPerWei = calculatePrice(tokensSold);
+    weiAllowed = tokensCap.sub(tokensSold).div(tokensPerWei);
   }
 
   function preallocate(address receiver, uint fullTokens, uint weiPrice) public onlyOwner notFinished {
