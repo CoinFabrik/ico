@@ -17,50 +17,38 @@ contract TokenTranchePricing is Ownable {
 
   using SafeMath for uint;
 
-  uint public constant MAX_TRANCHES = 10;
-
   /**
-  * Define pricing schedule using tranches.
-  */
+   * Define pricing schedule using tranches.
+   */
   struct Tranche {
-
       // Amount in weis when this tranche becomes active
       uint amount;
-
       // How many tokens per wei you will get while this tranche is active
       uint price;
   }
 
-  // Store tranches in a fixed array, so that it can be seen in a blockchain explorer
-  // Tranche 0 is always (0, 0)
-  // (TODO: change this when we confirm dynamic arrays are explorable)
-  Tranche[10] public tranches;
-
-  // How many active tranches we have
-  uint public trancheCount;
+  Tranche[] public tranches;
 
   /// @dev Contruction, creating a list of tranches
-  /// @param _tranches uint[] tranches Pairs of (start amount, price)
-  function TokenTranchePricing(uint[] _tranches) {
+  /// @param init_tranches Raw array of ordered pairs: (start amount, price)
+  function TokenTranchePricing(uint[] init_tranches) {
     // Need to have tuples, length check
-    require(_tranches.length % 2 == 1 || _tranches.length >= MAX_TRANCHES.mul(2)); 
-
-    trancheCount = _tranches.length.div(2);
+    require(init_tranches.length % 2 == 0);
 
     uint highestAmount = 0;
 
-    for(uint i=0; i<_tranches.length/2; i++) {
-      tranches[i].amount = _tranches[i*2];
-      tranches[i].price = _tranches[i*2+1];
-
+    for (uint i = 0; i < init_tranches.length / 2; i++) {
       // No invalid steps
-      require((highestAmount != 0) && (tranches[i].amount <= highestAmount));
+      require((i == 0) || (init_tranches[i * 2] > highestAmount));
+
+      tranches[i].amount = init_tranches[i * 2];
+      tranches[i].price = init_tranches[i * 2 + 1];
 
       highestAmount = tranches[i].amount;
     }
 
     // Last tranche price must be zero, terminating the crowdale
-    require(tranches[trancheCount.sub(1)].price != 0);
+    require(tranches[tranches.length.sub(1)].price == 0);
   }
 
   /// @dev Iterate through tranches. You reach end of tranches when price = 0
@@ -74,7 +62,7 @@ contract TokenTranchePricing is Ownable {
   }
 
   function getLastTranche() private constant returns (Tranche) {
-    return tranches[trancheCount-1];
+    return tranches[tranches.length - 1];
   }
 
   function getPricingStartsAt() public constant returns (uint) {
@@ -89,25 +77,19 @@ contract TokenTranchePricing is Ownable {
   /// @param tokensSold total amount of tokens sold, for calculating the current tranche
   /// @return {[type]} [description]
   function getCurrentTranche(uint tokensSold) private constant returns (Tranche) {
-    uint i;
-
-    for(i = 0; i < tranches.length; i++) {
-      if(tokensSold < tranches[i].amount) {
-        return tranches[i.sub(1)];
+    // TODO: If using an absurd amount of tranches, implement binary search.
+    for (uint i = tranches.length - 1; i < tranches.length; i--) {
+      if (tokensSold >= tranches[i].amount) {
+        return tranches[i];
       }
     }
   }
 
   /// @dev Get the current price.
   /// @param tokensSold total amount of tokens sold, for calculating the current tranche
-  /// @return The current price or 0 if we are outside trache ranges
+  /// @return The current price or 0 if we are outside tranche ranges
   function getCurrentPrice(uint tokensSold) public constant returns (uint result) {
     return getCurrentTranche(tokensSold).price;
-  }
-
-  /// @dev Calculate the current price for buy in amount.
-  function calculatePrice(uint tokensSold) public constant returns (uint) {
-    uint price = getCurrentPrice(tokensSold);
   }
 
 }

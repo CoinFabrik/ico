@@ -29,12 +29,12 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
   }
 
   function calculateTokenAmount(uint weiAmount, address customer) internal constant returns (uint tokenAmount){
-    uint tokensPerWei = calculatePrice(tokensSold);
+    uint tokensPerWei = getCurrentPrice(tokensSold);
     tokenAmount = tokensPerWei.mul(weiAmount).mul(tokensPerWei);
   }
 
   function weiAllowedToReceive(uint weiAmount, address customer) internal constant returns (uint weiAllowed) {
-    uint tokensPerWei = calculatePrice(tokensSold);
+    uint tokensPerWei = getCurrentPrice(tokensSold);
     weiAllowed = tokensCap.sub(tokensSold).div(tokensPerWei);
   }
 
@@ -51,7 +51,7 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
   }
 
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
-    token.releaseTransfer();
+    token.releaseTokenTransfer();
     uint remaining_tokens = token.balanceOf(address(this));
     token.transfer(address(token), remaining_tokens);
   }
