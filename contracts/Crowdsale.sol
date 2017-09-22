@@ -12,7 +12,6 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
   uint private constant token_initial_supply = 1000000000 * (10 ** uint(token_decimals)); // One billion tokens
   uint8 private constant token_decimals = 16;
   uint private constant tokensCap = 400000000 * (10 ** uint(token_decimals)); // 40% of a billion tokens 
-  uint private constant blocks_between_payments =  25200;
 
   uint firstTranche = 100000 * (10 ** uint(token_decimals));
   uint firstTranchePrice = 2000 * (10 ** uint(token_decimals)) / 1 ether;
@@ -22,7 +21,7 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
 
 
   function Crowdsale(address team_multisig, uint start, uint end) GenericCrowdsale(team_multisig, start, end) TokenTranchePricing(tranches_conf) public {
-    CrowdsaleToken token = new CrowdsaleToken(token_name, token_symbol, token_initial_supply, token_decimals, team_multisig, blocks_between_payments, end);
+    CrowdsaleToken token = new CrowdsaleToken(token_name, token_symbol, token_initial_supply, token_decimals, team_multisig, end);
     token.setReleaseAgent(address(this));
   }
 

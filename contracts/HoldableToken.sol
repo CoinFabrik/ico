@@ -11,12 +11,13 @@ import './SafeMath.sol';
 contract HoldableToken is ERC20Basic, Burnable {
   using SafeMath for uint;
 
-  uint private constant payments = 14;
+  uint public constant payments = 14;
+  uint public constant blocksBetweenPayments = 25200;
 
   uint[] public heldTokensPerPayday;
-  uint public blocksBetweenPayments;
   uint public end;
   address public crowdsale;
+
 
   struct Contributor {
     uint primaryBalance;
@@ -27,9 +28,8 @@ contract HoldableToken is ERC20Basic, Burnable {
   mapping(address => Contributor) public contributors;
 
 
-  function HoldableToken(uint blocks_between_payments, uint crowdsale_end) internal {
+  function HoldableToken(uint crowdsale_end) internal {
     heldTokensPerPayday.push(0);
-    blocksBetweenPayments = blocks_between_payments;
     end = crowdsale_end;
     crowdsale = msg.sender;
   }
