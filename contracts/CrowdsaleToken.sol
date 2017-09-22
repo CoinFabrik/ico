@@ -25,7 +25,6 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
   string public name;
   string public symbol;
   uint public loyalty_program_balance;
-
   /**
    * Construct the token.
    *
@@ -36,12 +35,11 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
    * @param initial_supply How many tokens we start with (including the decimal places in its representation)
    * @param token_decimals Number of decimal places
    * @param team_multisig The multisig of the team
-   * @param blocks_between_payments Amount of blocks between each revenue payment
    * @param crowdsale_end End of the crowdsale
    */
 
-  function CrowdsaleToken(string token_name, string token_symbol, uint initial_supply, uint8 token_decimals, address team_multisig, uint blocks_between_payments, uint crowdsale_end)
-    UpgradeableToken(team_multisig) HoldableToken(blocks_between_payments, crowdsale_end) {
+  function CrowdsaleToken(string token_name, string token_symbol, uint initial_supply, uint8 token_decimals, address team_multisig, uint crowdsale_end)
+    UpgradeableToken(team_multisig) HoldableToken(crowdsale_end) {
 
     uint revenueTokens = initial_supply.mul(3).div(10);
     uint nonrevenueTokens = initial_supply.sub(revenueTokens);
@@ -68,6 +66,10 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
    */
   function canUpgrade() public constant returns(bool) {
     return released && super.canUpgrade();
+  }
+
+  function revenuePerPayday() internal returns (uint) {
+    return loyalty_program_balance.div(payments);   
   }
 
 }
