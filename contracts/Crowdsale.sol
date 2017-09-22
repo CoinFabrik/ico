@@ -14,11 +14,11 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
   uint private constant tokensCap = 400000000 * (10 ** uint(token_decimals)); // 40% of a billion tokens 
   uint private constant blocks_between_payments =  25200;
 
-  uint firstTranche = 100000 * (10 ** uint(token_decimals));
-  uint firstTranchePrice = 2000 * (10 ** uint(token_decimals)) / 1 ether;
-  uint secondTranche = 400000 * (10 ** uint(token_decimals));
-  uint secondTranchePrice = 2000 * (10 ** uint(token_decimals)) / 1 ether;  
-  uint[] tranches_conf = [firstTranche, firstTranchePrice, secondTranche, secondTranchePrice];
+  uint private constant firstTranche = 100000 * (10 ** uint(token_decimals));
+  uint private constant firstTranchePrice = 2000 * (10 ** uint(token_decimals)) / 1 ether;
+  uint private constant secondTranche = 400000 * (10 ** uint(token_decimals));
+  uint private constant secondTranchePrice = 2000 * (10 ** uint(token_decimals)) / 1 ether;  
+  uint[] private tranches_conf = [firstTranche, firstTranchePrice, secondTranche, secondTranchePrice];
 
 
   function Crowdsale(address team_multisig, uint start, uint end) GenericCrowdsale(team_multisig, start, end) TokenTranchePricing(tranches_conf) public {
@@ -59,15 +59,4 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
     token.transfer(address(token), remaining_tokens);
   }
 
-  // These two setters are present only to correct block numbers if they are off from their target date by more than, say, a day
-  // Uncomment only if necessary
-  // function setStartingBlock(uint startingBlock) public onlyOwner inState(State.PreFunding) {
-  //     require(startingBlock > block.number && startingBlock < endsAt);
-  //     startsAt = startingBlock;
-  // }
-
-  // function setEndingBlock(uint endingBlock) public onlyOwner notFinished {
-  //     require(endingBlock > block.number && endingBlock > startsAt);
-  //     endsAt = endingBlock;
-  // }
 }
