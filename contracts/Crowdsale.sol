@@ -40,6 +40,9 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
     weiAllowed = maxAllowed.min256(weiAmount);
   }
 
+  /**
+   * @dev We override the preallocate function so we can use it to transfer the share of the team and the charity
+   */
   function preallocate(address receiver, uint fullTokens, uint weiPrice) public onlyOwner notFinished {
     if (weiPrice > 0) {
       super.preallocate(receiver, fullTokens, weiPrice);
@@ -52,6 +55,9 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
     }
   }
 
+  /**
+   * @dev This override ensures the token is released and the remaining tokens are transferred to the loyalty program.
+   */
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
     token.releaseTokenTransfer();
     uint remaining_tokens = token.balanceOf(address(this));

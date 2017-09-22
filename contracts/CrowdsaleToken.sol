@@ -68,6 +68,10 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
     return released && super.canUpgrade();
   }
 
+  /**
+   * @dev Internal behaviour configuration for the loyalty program.
+   * @return Revenue paid to all loyal holders in a single payday.
+   */
   function revenuePerPayday() internal returns (uint) {
     return loyalty_program_balance.div(payments);   
   }

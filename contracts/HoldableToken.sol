@@ -75,8 +75,11 @@ contract HoldableToken is ERC20Basic, Burnable {
       return 0;
     uint curPayday = currentPayday();
     uint revenue = 0;
-    uint heldTokens = 0;
-    uint nextPayday = contributors[account].nextPayday > 0 ? contributors[account].nextPayday : 1;
+    // Unnecessary in the current implementation since the nextPayday always corresponds to
+    //  a valid index in the heldTokensPerPayday dynamic array.
+    // We leave the initialization like this to guard against future implementation changes that break this property.
+    uint heldTokens = heldTokensPerPayday[heldTokensPerPayday.length - 1];
+    uint nextPayday = contributors[account].nextPayday.max256(1);
 
     for (uint i = nextPayday; i <= curPayday; i++) {
       uint index = i - 1;
@@ -102,7 +105,7 @@ contract HoldableToken is ERC20Basic, Burnable {
     if (block.number <= end || end == 0) return 0;
     uint curPayday = block.number.sub(end).div(blocksBetweenPayments);
     // Cap the payday at the amount of payments
-    curPayday = curPayday > payments ? payments : curPayday;
+    curPayday = curPayday.min256(payments);
     return curPayday;
   }
 
