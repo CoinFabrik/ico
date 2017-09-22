@@ -8,15 +8,17 @@ import "./TokenTranchePricing.sol";
 contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
   string constant private token_name = "Ribbits";
   string constant private token_symbol = "RBT";
-  uint private constant token_initial_supply = 0;
-  uint8 private constant token_decimals = 16;
-  uint tokensCap = 1000000000 * (10 ** uint(token_decimals)); // One billion tokens 
 
+  uint private constant token_initial_supply = 1000000000 * (10 ** uint(token_decimals)); // One billion tokens
+  uint8 private constant token_decimals = 16;
+  uint private constant tokensCap = 400000000 * (10 ** uint(token_decimals)); // 40% of a billion tokens 
   uint private constant blocks_between_payments =  25200;
-  uint private constant token_in_wei = 5 * (10 ** 14);
-  uint tokensAmount1HalfBillion = 500000000 * (10 ** uint(token_decimals));
-  uint tokensPerWei1 = 2000 * (10 ** uint(token_decimals));
-  uint[] tranches_conf = [tokensAmount1HalfBillion, tokensPerWei1];
+
+  uint firstTranche = 100000 * (10 ** uint(token_decimals));
+  uint firstTranchePrice = 2000 * (10 ** uint(token_decimals)) / 1 ether;
+  uint secondTranche = 400000 * (10 ** uint(token_decimals));
+  uint secondTranchePrice = 2000 * (10 ** uint(token_decimals)) / 1 ether;  
+  uint[] tranches_conf = [firstTranche, firstTranchePrice, secondTranche, secondTranchePrice];
 
 
   function Crowdsale(address team_multisig, uint start, uint end) GenericCrowdsale(team_multisig, start, end) TokenTranchePricing(tranches_conf) public {
@@ -35,7 +37,8 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
 
   function weiAllowedToReceive(uint weiAmount, address customer) internal constant returns (uint weiAllowed) {
     uint tokensPerWei = getCurrentPrice(tokensSold);
-    weiAllowed = tokensCap.sub(tokensSold).div(tokensPerWei);
+    uint maxAllowed = tokensCap.sub(tokensSold).div(tokensPerWei);
+    weiAllowed = maxAllowed.min256(weiAmount);
   }
 
   function preallocate(address receiver, uint fullTokens, uint weiPrice) public onlyOwner notFinished {
