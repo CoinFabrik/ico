@@ -1,7 +1,7 @@
 pragma solidity ^0.4.15;
 
 /**
- * Originally from  https://github.com/OpenZeppelin/zeppelin-solidity
+ * Originally from https://github.com/OpenZeppelin/zeppelin-solidity
  * Modified by https://www.coinfabrik.com/
  */
 
@@ -31,14 +31,6 @@ library SafeMath {
     uint c = a + b;
     assert(c >= a);
     return c;
-  }
-
-  function max64(uint64 a, uint64 b) internal constant returns (uint64) {
-    return a >= b ? a : b;
-  }
-
-  function min64(uint64 a, uint64 b) internal constant returns (uint64) {
-    return a < b ? a : b;
   }
 
   function max256(uint a, uint b) internal constant returns (uint) {
