@@ -26,15 +26,24 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
     token.setTransferAgent(address(this));
   }
 
+  /**
+   * @dev We transfer tokens from this contract so they get converted into primary tokens during the transfer.
+   */
   function assignTokens(address receiver, uint tokenAmount) internal {
     token.transfer(receiver, tokenAmount);
   }
 
+  /**
+   * The price is provided by the TokenTranchePricing contract
+   */
   function calculateTokenAmount(uint weiAmount, address customer) internal constant returns (uint tokenAmount){
     uint tokensPerWei = getCurrentPrice(tokensSold);
     tokenAmount = tokensPerWei.mul(weiAmount);
   }
 
+  /**
+   * The price is provided by the TokenTranchePricing contract
+   */
   function weiAllowedToReceive(uint weiAmount, address customer) internal constant returns (uint weiAllowed) {
     uint tokensPerWei = getCurrentPrice(tokensSold);
     uint maxAllowed = tokensCap.sub(tokensSold).div(tokensPerWei);
@@ -42,7 +51,7 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
   }
 
   /**
-   * @dev We override the preallocate function so we can use it to transfer the share of the team and the charity
+   * @dev We override the preallocate function so we can use it to transfer the share of the team and the charity when the price is zero.
    */
   function preallocate(address receiver, uint fullTokens, uint weiPrice) public onlyOwner notFinished {
     if (weiPrice > 0) {
@@ -63,6 +72,7 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
    * @dev This override ensures the token is released and the remaining tokens are transferred to the loyalty program.
    */
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
+    // Ordering is important: releasing the tokens avoids transferring primary tokens to the token contract
     token.releaseTokenTransfer();
     uint remaining_tokens = token.balanceOf(address(this));
     token.transfer(address(token), remaining_tokens);
