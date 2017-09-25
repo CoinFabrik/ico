@@ -70,16 +70,18 @@ contract HoldableToken is ERC20Basic, Burnable {
    * @param account Address to be checked.
    * @return Revenue in tokens for the account since the last transfer.
    */
-  function pendingRevenue(address account) internal constant returns(uint) {
+  function pendingRevenue(address account) private constant returns(uint) {
     if (contributors[account].primaryBalance == 0)
       return 0;
+    // The current token holder having a primary balance greater than zero implies
+    //  that the total held tokens is greater than zero
     uint curPayday = currentPayday();
     uint revenue = 0;
-    // Unnecessary in the current implementation since the nextPayday always corresponds to
-    //  a valid index in the heldTokensPerPayday dynamic array.
-    // We leave the initialization like this to guard against future implementation changes that break this property.
-    uint heldTokens = heldTokensPerPayday[heldTokensPerPayday.length - 1];
+    uint heldTokens;
     uint nextPayday = contributors[account].nextPayday.max256(1);
+    // The nextPayday always maps to a valid index in the heldTokensPerPayday dynamic array.
+    // This guarantees that heldTokens is initialized in the first iteration at least.
+    assert(nextPayday - 1 < heldTokensPerPayday.length);
 
     for (uint i = nextPayday; i <= curPayday; i++) {
       uint index = i - 1;

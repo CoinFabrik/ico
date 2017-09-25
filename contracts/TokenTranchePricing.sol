@@ -31,7 +31,7 @@ contract TokenTranchePricing is Ownable {
 
   /// @dev Contruction, creating a list of tranches
   /// @param init_tranches Raw array of ordered pairs: (start amount, price)
-  function TokenTranchePricing(uint[] init_tranches) {
+  function TokenTranchePricing(uint[] init_tranches) public {
     // Need to have tuples, length check
     require(init_tranches.length % 2 == 0);
 
@@ -78,6 +78,7 @@ contract TokenTranchePricing is Ownable {
   /// @return {[type]} [description]
   function getCurrentTranche(uint tokensSold) private constant returns (Tranche) {
     // TODO: If using an absurd amount of tranches, implement binary search.
+    // Index i is intended to overflow to end the loop
     for (uint i = tranches.length - 1; i < tranches.length; i--) {
       if (tokensSold >= tranches[i].amount) {
         return tranches[i];

@@ -23,6 +23,7 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
   function Crowdsale(address team_multisig, uint start, uint end) GenericCrowdsale(team_multisig, start, end) TokenTranchePricing(tranches_conf) public {
     CrowdsaleToken token = new CrowdsaleToken(token_name, token_symbol, token_initial_supply, token_decimals, team_multisig, end);
     token.setReleaseAgent(address(this));
+    token.setTransferAgent(address(this));
   }
 
   function assignTokens(address receiver, uint tokenAmount) internal {
@@ -31,7 +32,7 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
 
   function calculateTokenAmount(uint weiAmount, address customer) internal constant returns (uint tokenAmount){
     uint tokensPerWei = getCurrentPrice(tokensSold);
-    tokenAmount = tokensPerWei.mul(weiAmount).mul(tokensPerWei);
+    tokenAmount = tokensPerWei.mul(weiAmount);
   }
 
   function weiAllowedToReceive(uint weiAmount, address customer) internal constant returns (uint weiAllowed) {
@@ -48,7 +49,10 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
       super.preallocate(receiver, fullTokens, weiPrice);
     } else {
       require(receiver != address(0));
-      uint tokenAmount = fullTokens.mul(10**uint(token.decimals()));
+      uint constant tokensOnSale = tokensCap.sub(tokensSold).div(tokensPerWei);
+      uint constant availableTeamTokens = token.balanceOf(address(this)).sub(tokensOnSale);
+      uint constant tokenAmount = fullTokens.mul(10**uint(token.decimals()));
+      require(availableTeamTokens >= tokenAmount)
       require(tokenAmount != 0);
       tokenAmountOf[receiver] = tokenAmountOf[receiver].add(tokenAmount);
       assignTokens(receiver, tokenAmount);
