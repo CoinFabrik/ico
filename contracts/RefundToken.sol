@@ -14,8 +14,8 @@ contract RefundToken {
     refund_master = master;
   }
 
-  function enableRefund(address agent, uint tokens, ERC20 contract) {
+  function enableRefund(address agent, uint tokens, ERC20 token_contract) {
     require(msg.sender == refund_master);
-    contract.approve(agent, tokens);
+    token_contract.approve(agent, tokens);
   }
 }
