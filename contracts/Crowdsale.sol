@@ -1,11 +1,11 @@
 pragma solidity ^0.4.15;
 
-import "./CappedCrowdsale.sol";
+import "./GenericCrowdsale.sol";
 import "./CrowdsaleToken.sol";
 import "./BonusFinalizeAgent.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
-contract Crowdsale is CappedCrowdsale {
+contract Crowdsale is GenericCrowdsale {
   uint private constant token_initial_supply = 0;
   uint8 private constant token_decimals = 15;
   bool private constant token_mintable = true;
@@ -22,7 +22,6 @@ contract Crowdsale is CappedCrowdsale {
       token.setMintAgent(address(f_agent), true);
       token.setReleaseAgent(address(f_agent));
       setFinalizeAgent(f_agent);
-      setFundingCap(funding_cap);
       // Need to set a cap here or expose a public setter in the contract.
   }
 
@@ -30,7 +29,7 @@ contract Crowdsale is CappedCrowdsale {
   function assignTokens(address receiver, uint tokenAmount) internal;
 
   //TODO: implement token amount calculation
-  function calculateTokenAmount(uint weiAmount, address agent) constant internal returns (uint);
+  function calculateTokenAmount(uint weiAmount, address agent) internal constant returns (uint weiAllowed, uint tokenAmount);
 
   // These two setters are present only to correct block numbers if they are off from their target date by more than, say, a day
   // Uncomment only if necessary
