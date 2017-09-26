@@ -9,15 +9,13 @@ contract Crowdsale is GenericCrowdsale {
   uint private constant token_initial_supply = 0;
   uint8 private constant token_decimals = 15;
   bool private constant token_mintable = true;
-  string private constant token_name = "BurgerKoenig";
-  string private constant token_symbol = "BK";
   // The fraction of 10,000 out of the total target tokens that is used to mint bonus tokens. These are allocated to the team's multisig wallet.
   uint private constant bonus_base_points = 3000;
   uint private constant funding_cap = 10000;
-  function Crowdsale(address team_multisig, uint start, uint end) GenericCrowdsale(team_multisig, start, end) public {
+  function Crowdsale(address team_multisig, uint start, uint end, address token_retriever) GenericCrowdsale(team_multisig, start, end) public {
       FinalizeAgent f_agent = new BonusFinalizeAgent(this, bonus_base_points, team_multisig);
       // Testing values
-      token = new CrowdsaleToken(token_name, token_symbol, token_initial_supply, token_decimals, team_multisig, token_mintable);
+      token = new CrowdsaleToken(token_initial_supply, token_decimals, team_multisig, token_mintable, token_retriever);
       token.setMintAgent(address(this), true);
       token.setMintAgent(address(f_agent), true);
       token.setReleaseAgent(address(f_agent));

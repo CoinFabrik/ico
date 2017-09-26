@@ -9,6 +9,7 @@ import "./FractionalERC20.sol";
 import "./ReleasableToken.sol";
 import "./MintableToken.sol";
 import "./UpgradeableToken.sol";
+import "./RefundToken.sol";
 
 /**
  * A crowdsale token.
@@ -19,29 +20,28 @@ import "./UpgradeableToken.sol";
  * - The token contract gives an opt-in upgrade path to a new contract
  * - The same token can be part of several crowdsales through the approve() mechanism
  * - The token can be capped (supply set in the constructor) or uncapped (crowdsale contract can mint new tokens)
+ * - ERC20 tokens transferred to this contract can be recovered by a refunding master
  *
  */
-contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, FractionalERC20 {
+contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, FractionalERC20, RefundToken {
 
-  string public name;
+  string public name = "BurgerKoenig";
 
-  string public symbol;
+  string public symbol = "BK";
 
   /**
    * Construct the token.
    *
    * This token must be created through a team multisig wallet, so that it is owned by that wallet.
    *
-   * @param token_name Token name string
-   * @param token_symbol Token symbol - typically it's all caps
-   * @param initial_supply How many tokens we start with
-   * @param token_decimals Number of decimal places
+   * @param initial_supply How many tokens we start with.
+   * @param token_decimals Number of decimal places.
+   * @param team_multisig Address of the multisig that receives the initial supply and is set as the upgrade master.
    * @param mintable Are new tokens created over the crowdsale or do we distribute only the initial supply? Note that when the token becomes transferable the minting always ends.
+   * @param token_retriever Address of the account that handles refunds of tokens that would be otherwise lost in this contract.
    */
-  function CrowdsaleToken(string token_name, string token_symbol, uint initial_supply, uint8 token_decimals, address team_multisig, bool mintable)
-    UpgradeableToken(team_multisig) MintableToken(initial_supply, team_multisig, mintable) {
-    name = token_name;
-    symbol = token_symbol;
+  function CrowdsaleToken(uint initial_supply, uint8 token_decimals, address team_multisig, bool mintable, address token_retriever) public
+  UpgradeableToken(team_multisig) MintableToken(initial_supply, team_multisig, mintable) RefundToken(token_retriever) {
     decimals = token_decimals;
   }
 
