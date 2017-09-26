@@ -49,9 +49,9 @@ contract TokenTranchePricing is Ownable {
     tranches.length = init_tranches.length / tranche_size;
     for (uint i = 0; i < init_tranches.length / tranche_size; i++) {
       // No invalid steps
-      uint constant amount = init_tranches[i * tranche_size + amount_offset];
-      uint constant start = init_tranches[i * tranche_size + start_offset];
-      uint constant end = init_tranches[i * tranche_size + end_offset];
+      uint amount = init_tranches[i * tranche_size + amount_offset];
+      uint start = init_tranches[i * tranche_size + start_offset];
+      uint end = init_tranches[i * tranche_size + end_offset];
       require(start < end);
       // Bail out when entering unnecessary tranches
       // This is preferably checked before deploying contract into any blockchain.

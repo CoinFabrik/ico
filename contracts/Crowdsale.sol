@@ -55,9 +55,9 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
       super.preallocate(receiver, fullTokens, weiPrice);
     } else {
       require(receiver != address(0));
-      uint constant tokensOnSale = tokensCap.sub(tokensSold);
-      uint constant availableTeamTokens = token.balanceOf(address(this)).sub(tokensOnSale);
-      uint constant tokenAmount = fullTokens.mul(10**uint(token.decimals()));
+      uint tokensOnSale = tokensCap.sub(tokensSold);
+      uint availableTeamTokens = token.balanceOf(address(this)).sub(tokensOnSale);
+      uint tokenAmount = fullTokens.mul(10**uint(token.decimals()));
       require(availableTeamTokens >= tokenAmount);
       require(tokenAmount != 0);
       tokenAmountOf[receiver] = tokenAmountOf[receiver].add(tokenAmount);
