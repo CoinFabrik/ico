@@ -53,8 +53,8 @@ contract ReleasableToken is StandardHoldableToken, Ownable {
   /**
    * Limit token transfer until the crowdsale is over.
    */
-  modifier canTransfer(address _sender) {
-    require(released || transferAgents[_sender]);
+  modifier canTransfer(address sender) {
+    require(released || transferAgents[sender]);
     _;
   }
 
@@ -71,15 +71,15 @@ contract ReleasableToken is StandardHoldableToken, Ownable {
   }
 
   /** We restrict transfer by overriding it */
-  function transfer(address _to, uint _value) public canTransfer(msg.sender) returns (bool success) {
+  function transfer(address to, uint value) public canTransfer(msg.sender) returns (bool success) {
     // Call StandardHoldableToken.transfer()
-   return super.transfer(_to, _value);
+   return super.transfer(to, value);
   }
 
   /** We restrict transferFrom by overriding it */
-  function transferFrom(address _from, address _to, uint _value) public canTransfer(_from) returns (bool success) {
+  function transferFrom(address from, address to, uint value) public canTransfer(from) returns (bool success) {
     // Call StandardHoldableToken.transferForm()
-    return super.transferFrom(_from, _to, _value);
+    return super.transferFrom(from, to, value);
   }
 
 }
