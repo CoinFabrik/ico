@@ -66,12 +66,13 @@ contract UpgradeableToken is ERC20Basic, Burnable {
     // Validate input value.
     require(value != 0);
 
+    // Upgrade agent reissues the tokens
+    upgradeAgent.upgradeFrom(msg.sender, value);
+    
     // Take tokens out from circulation
     burnTokens(msg.sender, value);
     totalUpgraded = totalUpgraded.add(value);
 
-    // Upgrade agent reissues the tokens
-    upgradeAgent.upgradeFrom(msg.sender, value);
     Upgrade(msg.sender, upgradeAgent, value);
   }
 
