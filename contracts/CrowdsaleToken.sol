@@ -5,9 +5,10 @@ pragma solidity ^0.4.15;
  * Modified by https://www.coinfabrik.com/
  */
 
-import './FractionalERC20.sol';
-import './ReleasableToken.sol';
-import './UpgradeableToken.sol';
+import "./FractionalERC20.sol";
+import "./ReleasableToken.sol";
+import "./UpgradeableToken.sol";
+import "./RefundToken.sol";
 
 /**
  * A crowdsale token.
@@ -18,12 +19,13 @@ import './UpgradeableToken.sol';
  * - The token contract gives an opt-in upgrade path to a new contract
  * - The same token can be part of several crowdsales through the approve() mechanism
  * - The token can be capped (supply set in the constructor) or uncapped (crowdsale contract can mint new tokens)
+ * - ERC20 tokens transferred to this contract can be recovered by a refunding master
  *
  */
-contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
+contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20, RefundToken {
 
-  string public name;
-  string public symbol;
+  string public name = "Ribbits";
+  string public symbol = "RBT";
   uint public loyalty_program_balance;
 
   /**
@@ -31,23 +33,20 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20 {
    *
    * This token must be created through a team multisig wallet, so that it is owned by that wallet.
    *
-   * @param token_name Token name string
-   * @param token_symbol Token symbol - typically it's all caps
    * @param initial_supply How many tokens we start with (including the decimal places in its representation)
    * @param token_decimals Number of decimal places
    * @param team_multisig The multisig of the team
    * @param crowdsale_end End of the crowdsale
+   * @param token_retriever Address of the account that handles refunds of tokens that would be otherwise lost in this contract.
    */
-  function CrowdsaleToken(string token_name, string token_symbol, uint initial_supply, uint8 token_decimals, address team_multisig, uint crowdsale_end)
-    UpgradeableToken(team_multisig) HoldableToken(crowdsale_end) {
+  function CrowdsaleToken(uint initial_supply, uint8 token_decimals, address team_multisig, uint crowdsale_end, address token_retriever) public
+  UpgradeableToken(team_multisig) HoldableToken(crowdsale_end) RefundToken(token_retriever) {
 
     uint revenueTokens = initial_supply.mul(3).div(10);
     uint nonrevenueTokens = initial_supply.sub(revenueTokens);
     contributors[crowdsale].secondaryBalance = nonrevenueTokens;
     contributors[address(this)].secondaryBalance = revenueTokens;
 
-    name = token_name;
-    symbol = token_symbol;
     decimals = token_decimals;
   }
 

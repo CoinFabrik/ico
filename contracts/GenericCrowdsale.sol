@@ -130,8 +130,10 @@ contract GenericCrowdsale is Haltable {
       require(earlyParticipantWhitelist[receiver]);
     }
 
-    uint weiAmount = weiAllowedToReceive(msg.value, receiver);
-    uint tokenAmount = calculateTokenAmount(weiAmount, msg.sender);
+    uint weiAmount, tokenAmount;
+    (weiAmount, tokenAmount) = calculateTokenAmount(msg.value, msg.sender);
+    // Sanity check against bad implementation.
+    assert(weiAmount <= msg.value);
     
     // Dust transaction if no tokens can be given
     require(tokenAmount != 0);
@@ -310,18 +312,16 @@ contract GenericCrowdsale is Haltable {
   }
 
   /** 
-   *  Calculate the size of the investment that we can accept from this address.
-   */
-  function weiAllowedToReceive(uint weiAmount, address customer) internal constant returns (uint weiAllowed);
-
-  /** 
-   *  Calculate the amount of tokens that correspond to the received amount.
+   *  Calculate the amount of tokens that corresponds to the received amount.
+   *  The wei amount is returned too in case not all of it can be invested.
    *
    *  Note: When there's an excedent due to rounding error, it should be returned to allow refunding.
    *  This is worked around in the current design using an appropriate amount of decimals in the FractionalERC20 standard.
    *  The workaround is good enough for most use cases, hence the simplified function signature.
+   *  @return weiAllowed The amount of wei accepted in this transaction.
+   *  @return tokenAmount The tokens that are assigned to the agent in this transaction.
    */
-  function calculateTokenAmount(uint weiAmount, address customer) internal constant returns (uint tokenAmount);
+  function calculateTokenAmount(uint weiAmount, address agent) internal constant returns (uint weiAllowed, uint tokenAmount);
 
   //
   // Modifiers

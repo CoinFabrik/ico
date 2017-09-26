@@ -7,18 +7,16 @@ const config = require('../config.js')(web3);
 
 
 module.exports = function(deployer, network, accounts) {
-    const startBlock = network == "privateTestnet" ? config.tests.startBlock : config.startBlock;
-    const endBlock = network == "privateTestnet" ? config.tests.endBlock : config.endBlock;
     deployer.deploy(SafeMath);
     deployer.link(SafeMath, Crowdsale);
     if (network != "liveNet") {
         deployer.deploy(MultiSigWallet, config.multisig_owners, 1, {gas: 2000000})
         .then(async function() {
-            await deployer.deploy(Crowdsale, MultiSigWallet.address, startBlock, endBlock, {gas: 4200000});
+            await deployer.deploy(Crowdsale, MultiSigWallet.address, config.tests.startBlock, config.tests.endBlock, accounts[0], {gas: 4200000});
         });
     }
     else {
         // !! In production deployment we use config.MW_address as the address of the multisig wallet
-        deployer.deploy(Crowdsale, config.MW_address, startBlock, endBlock, {gas: 4200000});
+        deployer.deploy(Crowdsale, config.MW_address, config.startBlock, config.endBlock, accounts[0], {gas: 4200000});
     }
 };

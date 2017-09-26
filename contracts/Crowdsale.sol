@@ -6,9 +6,6 @@ import "./TokenTranchePricing.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
 contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
-  string constant private token_name = "Ribbits";
-  string constant private token_symbol = "RBT";
-
   uint private constant token_initial_supply = 1000000000 * (10 ** uint(token_decimals)); // One billion tokens
   uint8 private constant token_decimals = 16;
   uint private constant tokensCap = 400000000 * (10 ** uint(token_decimals)); // 40% of a billion tokens 
@@ -20,8 +17,8 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
   uint[] private tranches_conf = [firstTranche, firstTranchePrice, secondTranche, secondTranchePrice];
 
 
-  function Crowdsale(address team_multisig, uint start, uint end) GenericCrowdsale(team_multisig, start, end) TokenTranchePricing(tranches_conf) public {
-    CrowdsaleToken token = new CrowdsaleToken(token_name, token_symbol, token_initial_supply, token_decimals, team_multisig, end);
+  function Crowdsale(address team_multisig, uint start, uint end, address token_retriever) GenericCrowdsale(team_multisig, start, end) TokenTranchePricing(tranches_conf) public {
+    CrowdsaleToken token = new CrowdsaleToken(token_initial_supply, token_decimals, team_multisig, end, token_retriever);
     token.setReleaseAgent(address(this));
     token.setTransferAgent(address(this));
   }
@@ -36,7 +33,7 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
   /**
    * The price is provided by the TokenTranchePricing contract
    */
-  function calculateTokenAmount(uint weiAmount, address customer) internal constant returns (uint tokenAmount){
+  function calculateTokenAmount(uint weiAmount, address customer) internal constant returns (uint weiAllowed, uint tokenAmount){
     uint tokensPerWei = getCurrentPrice(tokensSold);
     tokenAmount = tokensPerWei.mul(weiAmount);
   }
