@@ -132,6 +132,8 @@ contract GenericCrowdsale is Haltable {
 
     uint weiAmount, tokenAmount;
     (weiAmount, tokenAmount) = calculateTokenAmount(msg.value, msg.sender);
+    // Sanity check against bad implementation.
+    assert(weiAmount <= msg.value);
     
     // Dust transaction if no tokens can be given
     require(tokenAmount != 0);
@@ -316,6 +318,8 @@ contract GenericCrowdsale is Haltable {
    *  Note: When there's an excedent due to rounding error, it should be returned to allow refunding.
    *  This is worked around in the current design using an appropriate amount of decimals in the FractionalERC20 standard.
    *  The workaround is good enough for most use cases, hence the simplified function signature.
+   *  @return weiAllowed The amount of wei accepted in this transaction.
+   *  @return tokenAmount The tokens that are assigned to the agent in this transaction.
    */
   function calculateTokenAmount(uint weiAmount, address agent) internal constant returns (uint weiAllowed, uint tokenAmount);
 
