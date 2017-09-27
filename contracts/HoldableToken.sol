@@ -15,6 +15,7 @@ contract HoldableToken is ERC20Basic, Burnable {
   uint public constant blocksBetweenPayments = 25200;
 
   uint[] public heldTokensPerPayday;
+  uint public loyalty_program_paid = 0;
   uint public end;
   address public crowdsale;
 
@@ -153,6 +154,7 @@ contract HoldableToken is ERC20Basic, Burnable {
     if (revenue > 0) {
       internalTransfer(address(this), account, revenue);
       contributors[account].nextPayday = currentPayday().add(1);
+      loyalty_program_paid = loyalty_program_paid.add(revenue);
       Transfer(address(this), account, revenue);
     }
   }

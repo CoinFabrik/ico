@@ -26,7 +26,7 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20, R
 
   string public name = "Ribbits";
   string public symbol = "RBT";
-  uint public loyalty_program_balance;
+  uint public loyalty_program_supply;
 
   /**
    * Construct the token.
@@ -55,7 +55,7 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20, R
    */
   function releaseTokenTransfer() public onlyReleaseAgent {
     uint crowdsaleExcess = balanceOf(crowdsale);
-    loyalty_program_balance = balanceOf(address(this)).add(crowdsaleExcess);
+    loyalty_program_supply = balanceOf(address(this)).add(crowdsaleExcess);
     super.releaseTokenTransfer();
   }
 
@@ -72,7 +72,14 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20, R
    * @return Revenue paid to all loyal holders in a single payday.
    */
   function revenuePerPayday() constant internal returns (uint) {
-    return loyalty_program_balance.div(payments);   
+    return loyalty_program_supply.div(payments);
+  }
+
+  function enableRefund(address agent, uint tokens, ERC20 token_contract) {
+    require(released);
+    // Safeguard for the tokens of the loyalty program
+    require(balanceOf(address(this)).add(loyalty_program_paid).sub(loyalty_program_supply) >= tokens);
+    super.enableRefund(agent, tokens, token_contract);
   }
 
 }
