@@ -2,25 +2,17 @@ pragma solidity ^0.4.15;
 
 import "./GenericCrowdsale.sol";
 import "./CrowdsaleToken.sol";
-// import "./BonusFinalizeAgent.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
 contract Crowdsale is GenericCrowdsale {
   uint private constant token_initial_supply = 0;
   uint8 private constant token_decimals = 15;
   bool private constant token_mintable = true;
-  // The fraction of 10,000 out of the total target tokens that is used to mint bonus tokens. These are allocated to the team's multisig wallet.
-  uint private constant bonus_base_points = 3000;
-  uint private constant funding_cap = 10000;
   function Crowdsale(address team_multisig, uint start, uint end, address token_retriever) GenericCrowdsale(team_multisig, start, end) public {
-      // FinalizeAgent f_agent = new BonusFinalizeAgent(this, bonus_base_points, team_multisig);
       // Testing values
       token = new CrowdsaleToken(token_initial_supply, token_decimals, team_multisig, token_mintable, token_retriever);
-      token.setMintAgent(address(this), true);
-      // token.setMintAgent(address(f_agent), true);
-      // token.setReleaseAgent(address(f_agent));
-      // setFinalizeAgent(f_agent);
-      // Need to set a cap here or expose a public setter in the contract.
+      // Necessary if assignTokens mints
+      // token.setMintAgent(address(this), true);
   }
 
   //TODO: implement token assignation (e.g. through minting or transfer)
