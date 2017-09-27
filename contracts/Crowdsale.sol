@@ -2,7 +2,7 @@ pragma solidity ^0.4.15;
 
 import "./GenericCrowdsale.sol";
 import "./CrowdsaleToken.sol";
-import "./BonusFinalizeAgent.sol";
+// import "./BonusFinalizeAgent.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
 contract Crowdsale is GenericCrowdsale {
@@ -13,13 +13,13 @@ contract Crowdsale is GenericCrowdsale {
   uint private constant bonus_base_points = 3000;
   uint private constant funding_cap = 10000;
   function Crowdsale(address team_multisig, uint start, uint end, address token_retriever) GenericCrowdsale(team_multisig, start, end) public {
-      FinalizeAgent f_agent = new BonusFinalizeAgent(this, bonus_base_points, team_multisig);
+      // FinalizeAgent f_agent = new BonusFinalizeAgent(this, bonus_base_points, team_multisig);
       // Testing values
       token = new CrowdsaleToken(token_initial_supply, token_decimals, team_multisig, token_mintable, token_retriever);
       token.setMintAgent(address(this), true);
-      token.setMintAgent(address(f_agent), true);
-      token.setReleaseAgent(address(f_agent));
-      setFinalizeAgent(f_agent);
+      // token.setMintAgent(address(f_agent), true);
+      // token.setReleaseAgent(address(f_agent));
+      // setFinalizeAgent(f_agent);
       // Need to set a cap here or expose a public setter in the contract.
   }
 
