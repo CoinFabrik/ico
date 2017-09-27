@@ -130,7 +130,8 @@ contract GenericCrowdsale is Haltable {
       require(earlyParticipantWhitelist[receiver]);
     }
 
-    uint weiAmount, tokenAmount;
+    uint weiAmount
+    uint tokenAmount;
     (weiAmount, tokenAmount) = calculateTokenAmount(msg.value, msg.sender);
     // Sanity check against bad implementation.
     assert(weiAmount <= msg.value);
