@@ -64,7 +64,7 @@ contract HoldableToken is ERC20Basic, Burnable {
    * @dev Amount of revenue that is divided among loyal token holders each payday.
    * @return Revenue corresponding to a payday.
    */
-  function revenuePerPayday() internal returns (uint);
+  function revenuePerPayday() constant internal returns (uint);
 
   /**
    * @dev Calculates the revenue that corresponds to this account since the last transfer.

@@ -1,13 +1,9 @@
 const config = require('../config.js')(web3);
-const assertFail = require('./helpers/assertFail');
-
 const SafeMath = artifacts.require('./SafeMath.sol');
 const MultiSigWallet = artifacts.require('./MultiSigWallet.sol');
-// const FlatPricing = artifacts.require('./FlatPricing.sol');
-// const BonusFinalizeAgent = artifacts.require('./BonusFinalizeAgent.sol');
 const CrowdsaleToken = artifacts.require('./CrowdsaleToken.sol');
-// const FixedCeiling = artifacts.require('./FixedCeiling.sol');
 const Crowdsale = artifacts.require('./Crowdsale.sol');
+
 const iterationLimit = 120;
 
 function delay_promise(delay) {
