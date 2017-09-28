@@ -28,7 +28,7 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20, R
   string public symbol = "RBT";
   uint public loyalty_program_supply;
 
-  address refund_master;
+  address public refund_master;
 
   /**
    * Construct the token.
