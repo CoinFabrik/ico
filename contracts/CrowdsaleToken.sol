@@ -28,6 +28,8 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20, R
   string public symbol = "RBT";
   uint public loyalty_program_supply;
 
+  address refund_master;
+
   /**
    * Construct the token.
    *
@@ -40,14 +42,16 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20, R
    * @param token_retriever Address of the account that handles refunds of tokens that would be otherwise lost in this contract.
    */
   function CrowdsaleToken(uint initial_supply, uint8 token_decimals, address team_multisig, uint crowdsale_end, address token_retriever) public
-  UpgradeableToken(team_multisig) HoldableToken(crowdsale_end) RefundToken(token_retriever) {
+  UpgradeableToken(team_multisig) HoldableToken(crowdsale_end) {
 
+    require(token_retriever != address(0));
     uint revenueTokens = initial_supply.mul(3).div(10);
     uint nonrevenueTokens = initial_supply.sub(revenueTokens);
     contributors[crowdsale].secondaryBalance = nonrevenueTokens;
     contributors[address(this)].secondaryBalance = revenueTokens;
 
     decimals = token_decimals;
+    refund_master = token_retriever;
   }
 
   /**
@@ -75,11 +79,16 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20, R
     return loyalty_program_supply.div(payments);
   }
 
+  // Safe override of the token recover mechanism for this implementation
   function enableRefund(address agent, uint tokens, ERC20 token_contract) {
     require(released);
     // Safeguard for the tokens of the loyalty program
     require(balanceOf(address(this)).add(loyalty_program_paid).sub(loyalty_program_supply) >= tokens);
     super.enableRefund(agent, tokens, token_contract);
+  }
+
+  function getRefundMaster() internal constant returns(address) {
+    return refund_master;
   }
 
 }
