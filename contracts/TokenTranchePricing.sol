@@ -63,9 +63,6 @@ contract TokenTranchePricing is Ownable {
       tranches[i].start = start;
       tranches[i].end = end;
     }
-
-    // Last tranche price must be zero, terminating the crowdale
-    require(tranches[tranches.length.sub(1)].price == 0);
   }
 
   /// @dev Get the current tranche or bail out if we are not in the tranche periods.
