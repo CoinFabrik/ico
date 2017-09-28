@@ -35,16 +35,15 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
    */
   function calculateTokenAmount(uint weiAmount, address customer) internal constant returns (uint weiAllowed, uint tokenAmount){
     uint tokensPerWei = getCurrentPrice(tokensSold);
-    tokenAmount = tokensPerWei.mul(weiAmount);
-  }
-
-  /**
-   * The price is provided by the TokenTranchePricing contract
-   */
-  function weiAllowedToReceive(uint weiAmount, address customer) internal constant returns (uint weiAllowed) {
-    uint tokensPerWei = getCurrentPrice(tokensSold);
     uint maxAllowed = tokensCap.sub(tokensSold).div(tokensPerWei);
     weiAllowed = maxAllowed.min256(weiAmount);
+    if (weiAmount < maxAllowed) {
+      tokenAmount = tokensPerWei.mul(weiAmount);
+    }
+    // With this case we let the crowdsale end even when there are rounding errors due to the tokens to wei ratio
+    else {
+      tokenAmount = tokensCap.sub(tokensSold);
+    }
   }
 
   /**
