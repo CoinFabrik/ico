@@ -29,7 +29,7 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Fra
 
   string public symbol = "BK";
 
-  address refund_master;
+  address public refund_master;
 
   /**
    * Construct the token.
