@@ -21,6 +21,9 @@ contract Crowdsale is GenericCrowdsale {
   //TODO: implement token amount calculation
   function calculateTokenAmount(uint weiAmount, address agent) internal constant returns (uint weiAllowed, uint tokenAmount);
 
+  //TODO: implement to control funding state criteria
+  function isCrowdsaleFull() internal constant returns (bool full);
+
   // These two setters are present only to correct block numbers if they are off from their target date by more than, say, a day
   // Uncomment only if necessary
   // function setStartingBlock(uint startingBlock) public onlyOwner inState(State.PreFunding) {
