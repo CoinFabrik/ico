@@ -8,7 +8,7 @@ import "./TokenTranchePricing.sol";
 contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
   uint private constant token_initial_supply = 1000000000 * (10 ** uint(token_decimals)); // One billion tokens
   uint8 private constant token_decimals = 16;
-  uint private constant tokensCap = 400000000 * (10 ** uint(token_decimals)); // 40% of a billion tokens 
+  uint public constant tokensCap = 400000000 * (10 ** uint(token_decimals)); // 40% of a billion tokens 
 
   uint private constant firstTranche = 100000 * (10 ** uint(token_decimals));
   uint private constant firstTranchePrice = 2000 * (10 ** uint(token_decimals)) / 1 ether;
@@ -64,6 +64,14 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
       assignTokens(receiver, tokenAmount);
     }
   }
+
+  /**
+   * @dev We define the condition of full crowdsale as the tokens cap reached.
+   */
+  function isCrowdsaleFull() internal constant returns (bool full) {
+    return tokensSold == tokensCap;
+  }
+
 
   /**
    * @dev This override ensures the token is released and the remaining tokens are transferred to the loyalty program.
