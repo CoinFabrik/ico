@@ -29,6 +29,8 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Fra
 
   string public symbol = "BK";
 
+  address refund_master;
+
   /**
    * Construct the token.
    *
@@ -41,8 +43,10 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Fra
    * @param token_retriever Address of the account that handles refunds of tokens that would be otherwise lost in this contract.
    */
   function CrowdsaleToken(uint initial_supply, uint8 token_decimals, address team_multisig, bool mintable, address token_retriever) public
-  UpgradeableToken(team_multisig) MintableToken(initial_supply, team_multisig, mintable) RefundToken(token_retriever) {
+  UpgradeableToken(team_multisig) MintableToken(initial_supply, team_multisig, mintable) {
+    require(token_retriever != address(0));
     decimals = token_decimals;
+    refund_master = token_retriever;
   }
 
   /**
@@ -58,6 +62,10 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Fra
    */
   function canUpgrade() public constant returns(bool) {
     return released && super.canUpgrade();
+  }
+
+  function getRefundMaster() internal constant returns(address) {
+    return refund_master;
   }
 
 }
