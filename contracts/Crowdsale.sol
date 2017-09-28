@@ -20,7 +20,7 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
   function Crowdsale(address team_multisig, uint start, uint end, address token_retriever) GenericCrowdsale(team_multisig, start, end) TokenTranchePricing(tranches_conf) public {
     CrowdsaleToken token = new CrowdsaleToken(token_initial_supply, token_decimals, team_multisig, end, token_retriever);
     token.setReleaseAgent(address(this));
-    token.setTransferAgent(address(this));
+    token.setTransferAgent(address(this), true);
   }
 
   /**
@@ -66,7 +66,7 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
   }
 
   /**
-   * @dev We define the condition of full crowdsale as the tokens cap reached.
+   * @dev We define the condition of full crowdsale as the token cap reached.
    */
   function isCrowdsaleFull() internal constant returns (bool full) {
     return tokensSold == tokensCap;
