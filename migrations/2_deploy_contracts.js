@@ -1,6 +1,6 @@
 const SafeMath = artifacts.require('./SafeMath.sol');
 const MultiSigWallet = artifacts.require('./MultiSigWallet.sol');
-const HubiiCrowdsale = artifacts.require('./Crowdsale.sol');
+const Crowdsale = artifacts.require('./Crowdsale.sol');
 
 const config = require('../config.js')(web3);
 
