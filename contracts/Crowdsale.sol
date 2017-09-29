@@ -2,7 +2,7 @@ pragma solidity ^0.4.15;
 
 import "./GenericCrowdsale.sol";
 import "./CrowdsaleToken.sol";
-import "./LostAndFoundTokens.sol";
+import "./LostAndFoundToken.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
 contract Crowdsale is GenericCrowdsale, LostAndFoundTokens {
