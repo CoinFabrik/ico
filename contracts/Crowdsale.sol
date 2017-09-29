@@ -5,7 +5,7 @@ import "./CrowdsaleToken.sol";
 import "./LostAndFoundToken.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
-contract Crowdsale is GenericCrowdsale, LostAndFoundTokens {
+contract Crowdsale is GenericCrowdsale, LostAndFoundToken {
   uint private constant token_initial_supply = 1;
   uint8 private constant token_decimals = 15;
   bool private constant token_mintable = true;
