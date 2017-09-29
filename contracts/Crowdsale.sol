@@ -2,10 +2,11 @@ pragma solidity ^0.4.15;
 
 import "./GenericCrowdsale.sol";
 import "./CrowdsaleToken.sol";
+import "./LostAndFoundTokens.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
-contract Crowdsale is GenericCrowdsale {
-  uint private constant token_initial_supply = 0;
+contract Crowdsale is GenericCrowdsale, LostAndFoundTokens {
+  uint private constant token_initial_supply = 1;
   uint8 private constant token_decimals = 15;
   bool private constant token_mintable = true;
   function Crowdsale(address team_multisig, uint start, uint end, address token_retriever) GenericCrowdsale(team_multisig, start, end) public {
@@ -23,6 +24,15 @@ contract Crowdsale is GenericCrowdsale {
 
   //TODO: implement to control funding state criteria
   function isCrowdsaleFull() internal constant returns (bool full);
+
+  /**
+   * This function decides who handles lost tokens.
+   * Do note that this function is NOT meant to be used in a token refund mecahnism.
+   * Its sole purpose is determining who can move around ERC20 tokens accidentally sent to this contract.
+   */
+  function getLostAndFoundMaster() internal constant returns (address) {
+    return owner;
+  }
 
   // These two setters are present only to correct block numbers if they are off from their target date by more than, say, a day
   // Uncomment only if necessary
