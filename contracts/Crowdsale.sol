@@ -46,7 +46,6 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
     }
   }
 
-<<<<<<< HEAD
   /**
    * @dev We override the preallocate function so we can use it to transfer the share of the team and the charity when the price is zero.
    */
@@ -82,16 +81,5 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
     uint remaining_tokens = token.balanceOf(address(this));
     token.transfer(address(token), remaining_tokens);
   }
-=======
-  //TODO: implement to control funding state criteria
-  function isCrowdsaleFull() internal constant returns (bool full);
-
-  // These two setters are present only to correct block numbers if they are off from their target date by more than, say, a day
-  // Uncomment only if necessary
-  // function setStartingBlock(uint startingBlock) public onlyOwner inState(State.PreFunding) {
-  //     require(startingBlock > block.number && startingBlock < endsAt);
-  //     startsAt = startingBlock;
-  // }
->>>>>>> master
 
 }

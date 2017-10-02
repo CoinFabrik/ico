@@ -68,9 +68,6 @@ contract GenericCrowdsale is Haltable {
   /** Addresses that are allowed to invest even before ICO officially opens. For testing, for ICO partners, etc. */
   mapping (address => bool) public earlyParticipantWhitelist;
 
-  /** This is for manual testing of the interaction with the owner's wallet. You can set it to any value and inspect this in a blockchain explorer to see that crowdsale interaction works. */
-  uint8 public ownerTestValue;
-
   /** State machine
    *
    * - Prefunding: We have not reached the starting block yet
@@ -279,11 +276,6 @@ contract GenericCrowdsale is Haltable {
     else if (block.number < startsAt) return State.PreFunding;
     else if (block.number <= endsAt && !isCrowdsaleFull()) return State.Funding;
     else return State.Success;
-  }
-
-  /** This is for manual testing of multisig wallet interaction */
-  function setOwnerTestValue(uint8 val) public onlyOwner stopInEmergency {
-    ownerTestValue = val;
   }
 
   /** Interface marker. */
