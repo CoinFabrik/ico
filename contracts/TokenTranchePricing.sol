@@ -70,7 +70,7 @@ contract TokenTranchePricing is Ownable {
   /// @return {[type]} [description]
   function getCurrentTranche(uint tokensSold) private constant returns (Tranche) {
     for (uint i = 0; i < tranches.length; i++) {
-      if (tranches[i].start <= block.number && block.number < tranches[i].end &&  tokensSold < tranches[i].amount) {
+      if (tranches[i].start <= block.number && block.number < tranches[i].end && tokensSold < tranches[i].amount) {
         return tranches[i];
       }
     }

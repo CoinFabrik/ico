@@ -81,5 +81,4 @@ contract Crowdsale is GenericCrowdsale, TokenTranchePricing {
     uint remaining_tokens = token.balanceOf(address(this));
     token.transfer(address(token), remaining_tokens);
   }
-
 }
