@@ -17,9 +17,6 @@ import './ERC20.sol';
  */
 contract StandardToken is BasicToken, ERC20 {
 
-  /* Token supply got increased and a new owner received these tokens */
-  event Minted(address receiver, uint amount);
-
   mapping (address => mapping (address => uint)) allowed;
 
   /* Interface declaration */

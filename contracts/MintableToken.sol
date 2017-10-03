@@ -7,6 +7,8 @@ pragma solidity ^0.4.15;
 
 import "./Ownable.sol";
 import "./SafeMath.sol";
+import "./Mintable.sol";
+import "./ERC20Basic.sol";
 
 /**
  * A token that can increase its supply by another contract.
@@ -15,7 +17,7 @@ import "./SafeMath.sol";
  * Only mint agents, contracts whitelisted by owner, can mint new tokens.
  *
  */
-contract MintableToken is Ownable {
+contract MintableToken is ERC20Basic, Mintable, Ownable {
 
   using SafeMath for uint;
 
@@ -53,11 +55,6 @@ contract MintableToken is Ownable {
 
     Minted(receiver, amount);
   }
-
-  /**
-   * To be implemented by the token contract
-   */
-  function mintInternal(address receiver, uint amount) internal;
 
   /**
    * Owner can allow a crowdsale contract to mint new tokens.

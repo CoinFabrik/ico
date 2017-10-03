@@ -106,7 +106,7 @@ contract GenericCrowdsale is Haltable {
    * Ideally, no contract calls this crowdsale without supporting ERC20.
    * However, some sort of refunding function may be desired to cover such situations.
    */
-  function() payable {
+  function() payable public {
     buy();
   }
 

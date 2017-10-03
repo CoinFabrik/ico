@@ -9,6 +9,7 @@ import "./FractionalERC20.sol";
 import "./ReleasableToken.sol";
 import "./UpgradeableToken.sol";
 import "./LostAndFoundToken.sol";
+import "./MintableToken.sol";
 
 /**
  * A crowdsale token.
@@ -22,7 +23,7 @@ import "./LostAndFoundToken.sol";
  * - ERC20 tokens transferred to this contract can be recovered by a lost and found master
  *
  */
-contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20, LostAndFoundToken {
+contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, FractionalERC20, LostAndFoundToken {
 
   string public name = "BurgerKoenig";
 

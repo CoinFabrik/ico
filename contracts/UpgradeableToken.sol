@@ -51,7 +51,7 @@ contract UpgradeableToken is ERC20Basic, Burnable {
   /**
    * Do not allow construction without upgrade master set.
    */
-  function UpgradeableToken(address master) {
+  function UpgradeableToken(address master) internal {
     setUpgradeMaster(master);
   }
 
