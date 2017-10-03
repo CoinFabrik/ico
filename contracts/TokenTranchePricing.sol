@@ -45,6 +45,9 @@ contract TokenTranchePricing is Ownable {
   function TokenTranchePricing(uint[] init_tranches) public {
     // Need to have tuples, length check
     require(init_tranches.length % tranche_size == 0);
+    // A tranche with amount zero can never be selected and is therefore useless.
+    // This check and the one inside the loop ensure no tranche can have an amount equal to zero.
+    require(init_tranches[amount_offset] > 0);
 
     tranches.length = init_tranches.length / tranche_size;
     for (uint i = 0; i < init_tranches.length / tranche_size; i++) {
