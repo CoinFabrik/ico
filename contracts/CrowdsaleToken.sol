@@ -80,11 +80,11 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20, L
   }
 
   // Safe override of the token recover mechanism for this implementation
-  function enableRefund(address agent, uint tokens, ERC20 token_contract) {
+  function enableLostAndFound(address agent, uint tokens, ERC20 token_contract) {
     require(released);
     // Safeguard for the tokens of the loyalty program
     require(balanceOf(address(this)).add(loyalty_program_paid).sub(loyalty_program_supply) >= tokens);
-    super.enableRefund(agent, tokens, token_contract);
+    super.enableLostAndFound(agent, tokens, token_contract);
   }
 
   function getLostAndFoundMaster() internal constant returns(address) {
