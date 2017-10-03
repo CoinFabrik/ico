@@ -8,7 +8,7 @@ pragma solidity ^0.4.15;
 import "./FractionalERC20.sol";
 import "./ReleasableToken.sol";
 import "./UpgradeableToken.sol";
-import "./RefundToken.sol";
+import "./LostAndFoundToken.sol";
 
 /**
  * A crowdsale token.
@@ -19,16 +19,16 @@ import "./RefundToken.sol";
  * - The token contract gives an opt-in upgrade path to a new contract
  * - The same token can be part of several crowdsales through the approve() mechanism
  * - The token can be capped (supply set in the constructor) or uncapped (crowdsale contract can mint new tokens)
- * - ERC20 tokens transferred to this contract can be recovered by a refunding master
+ * - ERC20 tokens transferred to this contract can be recovered by a lost and found master
  *
  */
-contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20, RefundToken {
+contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20, LostAndFoundToken {
 
   string public name = "Ribbits";
   string public symbol = "RBT";
   uint public loyalty_program_supply;
 
-  address public refund_master;
+  address public lost_and_found_master;
 
   /**
    * Construct the token.
@@ -39,7 +39,7 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20, R
    * @param token_decimals Number of decimal places
    * @param team_multisig The multisig of the team
    * @param crowdsale_end End of the crowdsale
-   * @param token_retriever Address of the account that handles refunds of tokens that would be otherwise lost in this contract.
+   * @param token_retriever Address of the account that handles ERC20 tokens that were accidentally sent to this contract.
    */
   function CrowdsaleToken(uint initial_supply, uint8 token_decimals, address team_multisig, uint crowdsale_end, address token_retriever) public
   UpgradeableToken(team_multisig) HoldableToken(crowdsale_end) {
@@ -51,7 +51,7 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20, R
     contributors[address(this)].secondaryBalance = revenueTokens;
 
     decimals = token_decimals;
-    refund_master = token_retriever;
+    lost_and_found_master = token_retriever;
   }
 
   /**
@@ -87,8 +87,8 @@ contract CrowdsaleToken is ReleasableToken, UpgradeableToken, FractionalERC20, R
     super.enableRefund(agent, tokens, token_contract);
   }
 
-  function getRefundMaster() internal constant returns(address) {
-    return refund_master;
+  function getLostAndFoundMaster() internal constant returns(address) {
+    return lost_and_found_master;
   }
 
 }
