@@ -6,7 +6,6 @@ pragma solidity ^0.4.15;
  */
 
 import "./Ownable.sol";
-import './StandardToken.sol';
 import "./SafeMath.sol";
 
 /**
@@ -16,7 +15,7 @@ import "./SafeMath.sol";
  * Only mint agents, contracts whitelisted by owner, can mint new tokens.
  *
  */
-contract MintableToken is StandardToken, Ownable {
+contract MintableToken is Ownable {
 
   using SafeMath for uint;
 
@@ -42,23 +41,23 @@ contract MintableToken is StandardToken, Ownable {
   /**
    * Create new tokens and allocate them to an address.
    *
-   * Only callable by a crowdsale contract (mint agent).
+   * Only callable by a mint agent (e.g. crowdsale contract).
    */
-  function mint(address receiver, uint amount) onlyMintAgent public {
+  function mint(address receiver, uint amount) onlyMintAgent canMint public {
     mintInternal(receiver, amount);
-  }
 
-  function mintInternal(address receiver, uint amount) canMint private {
-    totalSupply = totalSupply.add(amount);
-    balances[receiver] = balances[receiver].add(amount);
-
-    // Removed because this may be confused with anonymous transfers in the upcoming fork.
+    // TODO: Remove this. It may be confused with anonymous transfers in the upcoming fork.
     // This will make the mint transaction appear in EtherScan.io
     // We can remove this after there is a standardized minting event
-    // Transfer(0, receiver, amount);
+    Transfer(0, receiver, amount);
 
     Minted(receiver, amount);
   }
+
+  /**
+   * To be implemented by the token contract
+   */
+  function mintInternal(address receiver, uint amount) internal;
 
   /**
    * Owner can allow a crowdsale contract to mint new tokens.

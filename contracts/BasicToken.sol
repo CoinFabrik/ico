@@ -13,7 +13,7 @@ import './Burnable.sol';
  * @title Basic token
  * @dev Basic version of StandardToken, with no allowances. 
  */
-contract BasicToken is ERC20Basic, Burnable {
+contract BasicToken is ERC20Basic, Burnable, Mintable {
   using SafeMath for uint;
 
   mapping(address => uint) balances;
@@ -57,6 +57,14 @@ contract BasicToken is ERC20Basic, Burnable {
     balances[account] = balances[account].sub(value);
     totalSupply = totalSupply.sub(value);
     Burned(account, value);
+  }
+
+  /**
+   * @dev Provides an internal minting function.
+   */
+  function mintInternal(address receiver, uint amount) internal {
+    totalSupply = totalSupply.add(amount);
+    balances[receiver] = balances[receiver].add(amount);
   }
   
 }
