@@ -16,8 +16,6 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken {
   function Crowdsale(address team_multisig, uint start, uint end, address token_retriever) GenericCrowdsale(team_multisig, start, end) public {
       // Testing values
       token = new CrowdsaleToken(token_initial_supply, token_decimals, team_multisig, token_mintable, token_retriever);
-      // Necessary if assignTokens mints
-      // token.setMintAgent(address(this), true);
   }
 
   //TODO: implement token assignation (e.g. through minting or transfer)
@@ -39,10 +37,9 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken {
   }
 
   /**
-   * Sets new minimum buy. Only the owner can call it
+   * @dev Sets new minimum buy value for a transaction. Only the owner can call it
    */
-
-  function setMininmumBuyValue(uint newValue) public onlyOwner {
+  function setMinimumBuyValue(uint newValue) public onlyOwner {
     minimum_buy_value = newValue;
   }
 
@@ -53,8 +50,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken {
    *
    * @param customerId UUIDv4 that identifies this contributor
    */
-  function buyWithSignedAddress(uint128 customerId, uint8 v, bytes32 r, bytes32 s) public payable validCustomerId(customerId) {
-    require(msg.value >= minimum_buy_value);
+  function buyWithSignedAddress(uint128 customerId, uint8 v, bytes32 r, bytes32 s) public payable valueIsBigEnough validCustomerId(customerId) {
     super.buyWithSignedAddress(customerId, v, r, s);
   }
 
@@ -64,8 +60,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken {
    * 
    * @param customerId UUIDv4 that identifies this contributor
    */
-  function buyWithCustomerId(uint128 customerId) public payable validCustomerId(customerId) unsignedBuyAllowed {
-    require(msg.value >= minimum_buy_value);
+  function buyWithCustomerId(uint128 customerId) public payable valueIsBigEnough validCustomerId(customerId) unsignedBuyAllowed {
     super.buyWithCustomerId(customerId) ;
   }
 
@@ -74,8 +69,12 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken {
    *
    * Pay for funding, get invested tokens back in the sender address.
    */
-  function buy() public payable unsignedBuyAllowed {
-    require(msg.value >= minimum_buy_value);
+  function buy() public payable valueIsBigEnough unsignedBuyAllowed {
     super.buy();
+  }
+
+  modifier valueIsBigEnough() {
+    require(msg.value >= minimum_buy_value);
+    _;
   }
 }
