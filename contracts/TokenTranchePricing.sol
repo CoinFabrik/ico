@@ -23,10 +23,10 @@ contract TokenTranchePricing is Ownable {
   struct Tranche {
       // Amount in tokens when this tranche becomes inactive
       uint amount;
-      // Block interval [start, end)
-      // Starting block (included in the interval)
+      // Time interval [start, end)
+      // Starting timestamp (included in the interval)
       uint start;
-      // Ending block (excluded from the interval)
+      // Ending timestamp (excluded from the interval)
       uint end;
       // How many tokens per wei you will get while this tranche is active
       uint price;
@@ -41,13 +41,14 @@ contract TokenTranchePricing is Ownable {
   Tranche[] public tranches;
 
   /// @dev Contruction, creating a list of tranches
-  /// @param init_tranches Raw array of ordered tuples: (start amount, start block, end block, price)
+  /// @param init_tranches Raw array of ordered tuples: (start amount, start timestamp, end timestamp, price)
   function TokenTranchePricing(uint[] init_tranches) public {
     // Need to have tuples, length check
     require(init_tranches.length % tranche_size == 0);
     // A tranche with amount zero can never be selected and is therefore useless.
     // This check and the one inside the loop ensure no tranche can have an amount equal to zero.
     require(init_tranches[amount_offset] > 0);
+    require(init_tranches[start_offset] + 1 hours > block.timestamp);
 
     tranches.length = init_tranches.length / tranche_size;
     for (uint i = 0; i < init_tranches.length / tranche_size; i++) {
@@ -55,7 +56,7 @@ contract TokenTranchePricing is Ownable {
       uint amount = init_tranches[i * tranche_size + amount_offset];
       uint start = init_tranches[i * tranche_size + start_offset];
       uint end = init_tranches[i * tranche_size + end_offset];
-      require(block.number < start && start < end);
+      require(block.timestamp < start && start + 1 hours <= end );
       // Bail out when entering unnecessary tranches
       // This is preferably checked before deploying contract into any blockchain.
       require(i == 0 || (end >= tranches[i - 1].end && amount > tranches[i - 1].amount) ||
@@ -73,7 +74,7 @@ contract TokenTranchePricing is Ownable {
   /// @return {[type]} [description]
   function getCurrentTranche(uint tokensSold) private constant returns (Tranche) {
     for (uint i = 0; i < tranches.length; i++) {
-      if (tranches[i].start <= block.number && block.number < tranches[i].end && tokensSold < tranches[i].amount) {
+      if (tranches[i].start <= block.timestamp && block.timestamp < tranches[i].end && tokensSold < tranches[i].amount) {
         return tranches[i];
       }
     }

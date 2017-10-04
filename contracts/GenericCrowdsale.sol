@@ -29,10 +29,10 @@ contract GenericCrowdsale is Haltable {
   /* ether will be transferred to this address */
   address public multisigWallet;
 
-  /* the starting block number of the crowdsale */
+  /* the starting time of the crowdsale */
   uint public startsAt;
 
-  /* the ending block number of the crowdsale */
+  /* the ending time of the crowdsale */
   uint public endsAt;
 
   /* the number of tokens already sold through this contract*/
@@ -70,7 +70,7 @@ contract GenericCrowdsale is Haltable {
 
   /** State machine
    *
-   * - Prefunding: We have not reached the starting block yet
+   * - Prefunding: We have not reached the starting time yet
    * - Funding: Active crowdsale
    * - Success: Crowdsale ended
    * - Finalized: The finalize function has been called and succesfully executed
@@ -96,7 +96,7 @@ contract GenericCrowdsale is Haltable {
 
     // Don't mess the dates
     require(start != 0 && end != 0);
-    require(block.number < start && start < end);
+    require(block.timestamp + 1 hours < start && start + 1 hours < end);
     startsAt = start;
     endsAt = end;
   }
@@ -273,8 +273,8 @@ contract GenericCrowdsale is Haltable {
    */
   function getState() public constant returns (State) {
     if (finalized) return State.Finalized;
-    else if (block.number < startsAt) return State.PreFunding;
-    else if (block.number <= endsAt && !isCrowdsaleFull()) return State.Funding;
+    else if (block.timestamp < startsAt) return State.PreFunding;
+    else if (block.timestamp <= endsAt && !isCrowdsaleFull()) return State.Funding;
     else return State.Success;
   }
 
