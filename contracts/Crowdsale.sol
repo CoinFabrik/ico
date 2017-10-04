@@ -33,16 +33,4 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken {
   function getLostAndFoundMaster() internal constant returns (address) {
     return owner;
   }
-
-  // These two setters are present only to correct block numbers if they are off from their target date by more than, say, a day
-  // Uncomment only if necessary
-  // function setStartingBlock(uint startingBlock) public onlyOwner inState(State.PreFunding) {
-  //     require(startingBlock > block.number && startingBlock < endsAt);
-  //     startsAt = startingBlock;
-  // }
-
-  // function setEndingBlock(uint endingBlock) public onlyOwner notFinished {
-  //     require(endingBlock > block.number && endingBlock > startsAt);
-  //     endsAt = endingBlock;
-  // }
 }
