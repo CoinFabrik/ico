@@ -25,9 +25,9 @@ import "./MintableToken.sol";
  */
 contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, FractionalERC20, LostAndFoundToken {
 
-  string public name = "BurgerKoenig";
+  string public name = "";
 
-  string public symbol = "BK";
+  string public symbol = "BANX";
 
   address public lost_and_found_master;
 

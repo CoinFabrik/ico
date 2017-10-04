@@ -14,12 +14,18 @@ function config_f(web3) {
   config.startTime = ;
   config.endTime = ;
   config.MW_address = "0xe190E5cb7E5E5BE452Dc3C3B34033C7213D3B4df";
+
+
   // This is our multisig wallet in mainnet that we use for testing.
   config.fundingCap = web3.toWei("180000");
   config.multisig_owners = ["0xf19258256b06324c7516b00bf5c76af001ee1e95"];
-
   config.tests.startBlock = web3.eth.blockNumber + 10;
   config.tests.endBlock = config.tests.startBlock + 70;
+
+  //Test: start 3.5 minutes after deployment, end 25 minutes after that (similar to differences in previous implementation with Block Numbers)
+  config.tests.startTime = Math.round(new Date().getTime()/1000) + 210;
+  config.tests.endTime = config.tests.startTime + 1500;
+  
   config.tests.multisig_owners = ["0x8ffc991fc4c4fc53329ad296c1afe41470cffbb3"];
   return config;
 }
