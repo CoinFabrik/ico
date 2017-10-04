@@ -11,6 +11,8 @@ function config_f(web3) {
   config.startBlock = 4187037 + 11263;
   // We give two week's worth of blocks for the crowdsale to run its course: 55,819 at 21.67 seconds per block on average
   config.endBlock = config.startBlock + 55819;
+  config.startTime = ;
+  config.endTime = ;
   config.MW_address = "0xe190E5cb7E5E5BE452Dc3C3B34033C7213D3B4df";
   // This is our multisig wallet in mainnet that we use for testing.
   config.fundingCap = web3.toWei("180000");
