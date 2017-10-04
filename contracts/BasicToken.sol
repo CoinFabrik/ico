@@ -32,23 +32,23 @@ contract BasicToken is ERC20Basic, Burnable, Mintable {
 
   /**
    * @dev transfer token for a specified address
-   * @param _to The address to transfer to.
-   * @param _value The amount to be transferred.
+   * @param to The address to transfer to.
+   * @param value The amount to be transferred.
    */
-  function transfer(address _to, uint _value) public returns (bool success) {
-    balances[msg.sender] = balances[msg.sender].sub(_value);
-    balances[_to] = balances[_to].add(_value);
-    Transfer(msg.sender, _to, _value);
+  function transfer(address to, uint value) public returns (bool success) {
+    balances[msg.sender] = balances[msg.sender].sub(value);
+    balances[to] = balances[to].add(value);
+    Transfer(msg.sender, to, value);
     return true;
   }
 
   /**
    * @dev Gets the balance of the specified address.
-   * @param _owner The address to query the the balance of. 
+   * @param account The address to query the the balance of. 
    * @return An uint representing the amount owned by the passed address.
    */
-  function balanceOf(address _owner) public constant returns (uint balance) {
-    return balances[_owner];
+  function balanceOf(address account) public constant returns (uint balance) {
+    return balances[account];
   }
 
   /**
