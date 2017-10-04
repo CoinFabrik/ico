@@ -9,6 +9,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken {
   uint private constant token_initial_supply = 1;
   uint8 private constant token_decimals = 15;
   bool private constant token_mintable = true;
+  uint private constant sellable_tokens = 6 * (10 ** 5) * (10 ** uint(token_decimals));
   
   //Sets minimum value that can be bought
   uint private minimum_buy_value = 1;
@@ -25,7 +26,9 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken {
   function calculateTokenAmount(uint weiAmount, address agent) internal constant returns (uint weiAllowed, uint tokenAmount);
 
   //TODO: implement to control funding state criteria
-  function isCrowdsaleFull() internal constant returns (bool full);
+  function isCrowdsaleFull() internal constant returns (bool) {
+    return tokensSold >= sellable_tokens;
+  }
 
   /**
    * This function decides who handles lost tokens.
