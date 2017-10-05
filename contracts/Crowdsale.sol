@@ -20,8 +20,11 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
       // Testing values
       token = new CrowdsaleToken(token_initial_supply, token_decimals, team_multisig, token_mintable, token_retriever);
 
-      // Necessary if assignTokens mints
+      // Set permissions to mint, transfer and release
       token.setMintAgent(address(this), true); 
+      token.setTransferAgent(address(this), true); 
+      token.setReleaseAgent(address(this));
+
       //Tokens to be sold through this contract
       token.mint(address(this), sellable_tokens);
   }
@@ -101,8 +104,18 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
   //Extended to trasfer unused funds to team team_multisig
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
     uint unspentTokens = sellable_tokens.sub(tokensSold);
+    token.releaseTokenTransfer();
     token.transfer(multisigWallet, unspentTokens);
     super.finalize();
+  }
+
+  /**
+   * Override to reject calls unless the crowdsale is finalized or the contract is  
+   */
+  function enableLostAndFound(address agent, uint tokens, ERC20 token_contract) public {
+    //Either the state is finalized or the token_contract is not this crowdsale token 
+    require( (getState() == State.Finalized) || ( address(token_contract) != address(token) ) );
+    super.enableLostAndFound(agent, tokens, token_contract);
   }
 
   modifier valueIsBigEnough() {
