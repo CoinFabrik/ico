@@ -8,18 +8,20 @@ import "./TokenTranchePricing.sol";
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
 contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
   //initial supply in 400k, sold tokens from initial minting
+  uint8 private constant token_decimals = 18;
   uint private constant token_initial_supply = 4 * (10 ** 5) * (10 ** uint(token_decimals));
-  uint8 private constant token_decimals = 15;
   bool private constant token_mintable = true;
   uint private constant sellable_tokens = 6 * (10 ** 5) * (10 ** uint(token_decimals));
   
   //Sets minimum value that can be bought
   uint private minimum_buy_value = 1;
   
-  function Crowdsale(address team_multisig, uint start, uint end, address token_retriever) GenericCrowdsale(team_multisig, start, end) public {
+  function Crowdsale(address team_multisig, uint start, uint end, address token_retriever, uint[] tranches) TokenTranchePricing(tranches) GenericCrowdsale(team_multisig, start, end) public {
       // Testing values
       token = new CrowdsaleToken(token_initial_supply, token_decimals, team_multisig, token_mintable, token_retriever);
 
+      // Necessary if assignTokens mints
+      token.setMintAgent(address(this), true); 
       //Tokens to be sold through this contract
       token.mint(address(this), sellable_tokens);
   }
