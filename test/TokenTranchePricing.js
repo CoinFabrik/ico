@@ -2,7 +2,7 @@ const advanceBlock = require('./helpers/advanceBlock');
 const advanceToBlock = require('./helpers/advanceToBlock');
 const TokenTranchePricing = artifacts.require("../contracts/TokenTranchePricing.sol");
 
-const BigNumber = web3.BigNumber
+const BigNumber = web3.BigNumber;
 
 require('chai')
   .use(require('chai-as-promised'))
