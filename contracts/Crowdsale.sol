@@ -3,9 +3,10 @@ pragma solidity ^0.4.15;
 import "./GenericCrowdsale.sol";
 import "./CrowdsaleToken.sol";
 import "./LostAndFoundToken.sol";
+import "./TokenTranchePricing.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
-contract Crowdsale is GenericCrowdsale, LostAndFoundToken {
+contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
   uint private constant token_initial_supply = 1;
   uint8 private constant token_decimals = 15;
   bool private constant token_mintable = true;
@@ -19,11 +20,26 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken {
       token = new CrowdsaleToken(token_initial_supply, token_decimals, team_multisig, token_mintable, token_retriever);
   }
 
-  //TODO: implement token assignation (e.g. through minting or transfer)
-  function assignTokens(address receiver, uint tokenAmount) internal;
+  //Token assignation through minting
+  function assignTokens(address receiver, uint tokenAmount) internal{
+    token.mint(receiver, tokenAmount);
+  }
 
-  //TODO: implement token amount calculation
-  function calculateTokenAmount(uint weiAmount, address agent) internal constant returns (uint weiAllowed, uint tokenAmount);
+  //Token amount calculation
+  function calculateTokenAmount(uint weiAmount, address agent) internal constant returns (uint weiAllowed, uint tokenAmount){
+    uint tokensPerWei = getCurrentPrice(tokensSold);
+    uint maxAllowed = sellable_tokens.sub(tokensSold).div(tokensPerWei);
+    weiAllowed = maxAllowed.min256(weiAmount);
+
+    if (weiAmount < maxAllowed) {
+      tokenAmount = tokensPerWei.mul(weiAmount);
+    }
+    // With this case we let the crowdsale end even when there are rounding errors due to the tokens to wei ratio
+    else {
+      tokenAmount = sellable_tokens.sub(tokensSold);
+    }
+
+  }
 
   //TODO: implement to control funding state criteria
   function isCrowdsaleFull() internal constant returns (bool) {
