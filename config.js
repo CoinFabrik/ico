@@ -2,6 +2,8 @@ function config_f(web3) {
   const config = {};
   config.tests = {};
 
+  const BigNumber = web3.BigNumber;
+
   // 9/8/2017 20:56 UTC block number: 4,137,656
   // 17/8/2017 ~0:00 UTC block number offset: 28,239 at 21.8 seconds per block on average
   // 19/8/2017 17:58 UTC block number: 4,178,454
@@ -14,8 +16,6 @@ function config_f(web3) {
   config.startTime = ;
   config.endTime = ;
   config.MW_address = "0xe190E5cb7E5E5BE452Dc3C3B34033C7213D3B4df";
-
-
   // This is our multisig wallet in mainnet that we use for testing.
   config.fundingCap = web3.toWei("180000");
   config.multisig_owners = ["0xf19258256b06324c7516b00bf5c76af001ee1e95"];
@@ -27,6 +27,48 @@ function config_f(web3) {
   config.tests.endTime = config.tests.startTime + 1500;
   
   config.tests.multisig_owners = ["0x8ffc991fc4c4fc53329ad296c1afe41470cffbb3"];
+
+  const ether_in_eur = new BigNumber(287.31);
+  const pre_ico_tranches_quantity = 3;
+  const tranches_quantity = 11;
+  const pre_ico_tranches_start = 17;
+  const pre_ico_tranches_end = 42;
+  const ico_tranches_start = 100;
+  const ico_tranches_end = 200;
+  
+  const eur_per_fulltokens = [new BigNumber(0.07), new BigNumber(0.08), new BigNumber(0.09), new BigNumber(0.10), new BigNumber(0.11), new BigNumber(0.12), new BigNumber(0.13), new BigNumber(0.14), new BigNumber(0.15), new BigNumber(0.16), new BigNumber(0.17)];
+
+  const tokens_per_wei = prices.map(function(price) {
+    return price.dividedToIntegerBy(ether_in_eur);    
+  });
+  
+
+
+  var amounts = [new BigNumber(60000), new BigNumber(120000), new BigNumber(200000)];
+
+  for (let i = pre_ico_tranches_quantity; i < tranches_quantity; i++) {
+    amounts.push(new BigNumber(amounts[i-1] + 50000000));
+  }
+  amounts.forEach(function(amount) {
+    return amount.times(10**18);
+  });
+
+  config.tranches = [];
+
+  for (let i = 0; i < pre_ico_tranches_quantity; i++) {
+    config.tranches.push(amounts[i]);
+    config.tranches.push(pre_ico_tranches_start);
+    config.tranches.push(pre_ico_tranches_end);
+    config.tranches.push(tokens_per_wei[i]);
+  }
+
+  for (let i = pre_ico_tranches_quantity; i < tranches_quantity; i++) {
+    config.tranches.push(amounts[i]);
+    config.tranches.push(ico_tranches_start);
+    config.tranches.push(ico_tranches_end);
+    config.tranches.push(tokens_per_wei[i]);    
+  }
+
   return config;
 }
 
