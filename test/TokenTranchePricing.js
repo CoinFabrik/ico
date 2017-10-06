@@ -88,10 +88,5 @@ contract('TokenTranchePricing', function(accounts) {
     await (tranchePricing.getCurrentPrice(4)).should.be.rejectedWith('invalid opcode');
     await increaseTimeTo(lastTranchePastTime);
     await (tranchePricing.getCurrentPrice(4)).should.be.rejectedWith('invalid opcode');
-
-
-
-
-
   });
 });
