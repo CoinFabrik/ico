@@ -13,8 +13,8 @@ function config_f(web3) {
   config.startBlock = 4187037 + 11263;
   // We give two week's worth of blocks for the crowdsale to run its course: 55,819 at 21.67 seconds per block on average
   config.endBlock = config.startBlock + 55819;
-  config.startTime = ;
-  config.endTime = ;
+  config.startTime = 1;
+  config.endTime = 1000000000000;
   config.MW_address = "0xe190E5cb7E5E5BE452Dc3C3B34033C7213D3B4df";
   // This is our multisig wallet in mainnet that we use for testing.
   config.fundingCap = web3.toWei("180000");
@@ -47,7 +47,7 @@ function config_f(web3) {
   var amounts = [new BigNumber(60000), new BigNumber(120000), new BigNumber(200000)];
 
   for (let i = pre_ico_tranches_quantity; i < tranches_quantity; i++) {
-    amounts.push(new BigNumber(amounts[i-1] + 50000000));
+    amounts.push(amounts[i-1].add(50000000));
   }
   amounts.forEach(function(amount) {
     return amount.times(10**18);
