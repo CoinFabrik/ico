@@ -38,8 +38,8 @@ function config_f(web3) {
   
   const eur_per_fulltokens = [new BigNumber(0.07), new BigNumber(0.08), new BigNumber(0.09), new BigNumber(0.10), new BigNumber(0.11), new BigNumber(0.12), new BigNumber(0.13), new BigNumber(0.14), new BigNumber(0.15), new BigNumber(0.16), new BigNumber(0.17)];
 
-  const tokens_per_wei = prices.map(function(price) {
-    return price.dividedToIntegerBy(ether_in_eur);    
+  const tokens_per_wei = eur_per_fulltokens.map(function(price) {
+    return ether_in_eur.dividedToIntegerBy(price);    
   });
   
 
