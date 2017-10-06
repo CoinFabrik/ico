@@ -13,21 +13,25 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
   bool private constant token_mintable = true;
   uint private constant sellable_tokens = 6 * (10 ** 5) * (10 ** uint(token_decimals));
   
-  //Sets minimum value that can be bought
-  uint private minimum_buy_value = 1;
+  //Sets minimum value that can be bought (TODO: configure initial value)
+  uint public minimum_buy_value = 1;
   
-  function Crowdsale(address team_multisig, uint start, uint end, address token_retriever, uint[] tranches) TokenTranchePricing(tranches) GenericCrowdsale(team_multisig, start, end) public {
-      // Testing values
-      token = new CrowdsaleToken(token_initial_supply, token_decimals, team_multisig, token_mintable, token_retriever);
+  function Crowdsale(address team_multisig, uint start, uint end, address token_retriever, uint[] tranches)
+  TokenTranchePricing(tranches) GenericCrowdsale(team_multisig, start, end) public {
+    // Testing values
+    token = new CrowdsaleToken(token_initial_supply, token_decimals, team_multisig, token_mintable, token_retriever);
 
-      // Necessary if assignTokens mints
-      token.setMintAgent(address(this), true); 
-      //Tokens to be sold through this contract
-      token.mint(address(this), sellable_tokens);
+    // Set permissions to mint, transfer and release
+    token.setMintAgent(address(this), true);
+    token.setTransferAgent(address(this), true);
+    token.setReleaseAgent(address(this));
+
+    //Tokens to be sold through this contract
+    token.mint(address(this), sellable_tokens);
   }
 
-  //Token assignation through trasfer
-  function assignTokens(address receiver, uint tokenAmount) internal{
+  //Token assignation through transfer
+  function assignTokens(address receiver, uint tokenAmount) internal {
     token.transfer(receiver, tokenAmount);
   }
 
@@ -44,17 +48,16 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
     else {
       tokenAmount = sellable_tokens.sub(tokensSold);
     }
-
   }
 
-  //TODO: implement to control funding state criteria
+  // Implements the criterion of the funding state 
   function isCrowdsaleFull() internal constant returns (bool) {
     return tokensSold >= sellable_tokens;
   }
 
   /**
    * This function decides who handles lost tokens.
-   * Do note that this function is NOT meant to be used in a token refund mecahnism.
+   * Do note that this function is NOT meant to be used in a token refund mechanism.
    * Its sole purpose is determining who can move around ERC20 tokens accidentally sent to this contract.
    */
   function getLostAndFoundMaster() internal constant returns (address) {
@@ -62,14 +65,14 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
   }
 
   /**
-   * @dev Sets new minimum buy value for a transaction. Only the owner can call it
+   * @dev Sets new minimum buy value for a transaction. Only the owner can call it.
    */
   function setMinimumBuyValue(uint newValue) public onlyOwner {
     minimum_buy_value = newValue;
   }
 
   /**
-   * Investing function that recognizes the payer and verifies he is allowed to invest.
+   * Investing function that recognizes the payer and verifies that he is allowed to invest.
    *
    * Overwritten to add configurable minimum value
    *
@@ -98,11 +101,22 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
     super.buy();
   }
 
-  //Extended to trasfer unused funds to team team_multisig
+  // Extended to transfer unused funds to team team_multisig and release the token
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
-    uint unspentTokens = sellable_tokens.sub(tokensSold);
-    token.transfer(multisigWallet, unspentTokens);
+    token.releaseTokenTransfer();
+    uint unsoldTokens = token.balanceOf(address(this));
+    token.transfer(multisigWallet, unsoldTokens);
     super.finalize();
+  }
+
+  /**
+   * Override to reject calls unless the crowdsale is finalized or
+   *  the token contract is not the one corresponding to this crowdsale
+   */
+  function enableLostAndFound(address agent, uint tokens, ERC20 token_contract) public {
+    // Either the state is finalized or the token_contract is not this crowdsale token
+    require( address(token_contract) != address(token) || getState() == State.Finalized );
+    super.enableLostAndFound(agent, tokens, token_contract);
   }
 
   modifier valueIsBigEnough() {

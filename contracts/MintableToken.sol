@@ -29,15 +29,15 @@ contract MintableToken is ERC20Basic, Mintable, Ownable {
   event MintingAgentChanged(address addr, bool state);
 
 
-  function MintableToken(uint _initialSupply, address _multisig, bool _mintable) internal {
-    require(_multisig != address(0));
+  function MintableToken(uint initialSupply, address multisig, bool mintable) internal {
+    require(multisig != address(0));
     // Cannot create a token without supply and no minting
-    require(_mintable || _initialSupply != 0);
+    require(mintable || initialSupply != 0);
     // Create initially all balance on the team multisig
-    if (_initialSupply > 0)
-        mintInternal(_multisig, _initialSupply);
+    if (initialSupply > 0)
+        mintInternal(multisig, initialSupply);
     // No more new supply allowed after the token creation
-    mintingFinished = !_mintable;
+    mintingFinished = !mintable;
   }
 
   /**
