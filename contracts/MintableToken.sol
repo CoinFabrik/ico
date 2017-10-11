@@ -35,7 +35,7 @@ contract MintableToken is ERC20Basic, Mintable, Ownable {
     require(mintable || initialSupply != 0);
     // Create initially all balance on the team multisig
     if (initialSupply > 0)
-        mintInternal(multisig, initialSupply);
+      mintInternal(multisig, initialSupply);
     // No more new supply allowed after the token creation
     mintingFinished = !mintable;
   }
