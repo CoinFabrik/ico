@@ -37,8 +37,8 @@ contract StandardToken is BasicToken, ERC20 {
     // require(value <= allowance);
     // SafeMath uses assert instead of require though, beware when using an analysis tool
 
-    balances[to] = balances[to].add(value);
     balances[from] = balances[from].sub(value);
+    balances[to] = balances[to].add(value);
     allowed[from][msg.sender] = allowance.sub(value);
     Transfer(from, to, value);
     return true;
