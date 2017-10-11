@@ -18,7 +18,7 @@ contract('MintableToken', function(accounts) {
     await (MintableToken.new(0, accounts[1], false)).should.be.rejectedWith('invalid opcode');
   });
 
-  it("Should place the initial supply in the correct address' balance", async function() {
+  it("Should place the initial supply in the correct addresses' balance", async function() {
     let token = await MintableToken.new(30, accounts[1], true);
     (await token.balanceOf(accounts[1])).should.be.bignumber.and.equal(30);
   });
