@@ -13,24 +13,22 @@ function delay_promise(delay) {
 	});
 }
 
-contract('Haltable', function(accounts) {
+contract('Haltable', function() {
   it("Should not throw during construction", async function() {
     await (Haltable.new()).should.not.be.rejectedWith('invalid opcode');
   });
 
-  it("Should return correct values", async function(accounts){
-  	//haltable = await (Haltable.new({from: web3.eth.accounts[0]}));
-  	(3).should.be.equal(3);
-  	//(await haltable.halted()).should.be.equal(false);
-  	//console.log(await haltable.halt({from: web3.eth.accounts[0]}));
+  it("Should return correct values", async function(){
+  	haltable = await (Haltable.new({from: web3.eth.accounts[0]}));
+  	//(3).should.be.equal(3);
+  	(await haltable.halted()).should.be.equal(false);
+  	await haltable.halt({from: web3.eth.accounts[0]});
   	//await delay_promise(5000);
   	//await (console.log(await haltable.halted()));
-  	//(await haltable.halted()).should.be.equal(true);
-  	// console.log(await haltable.unhalt({from: web3.eth.accounts[0]}));
-  	// (await haltable.halted()).should.be.equal(false);
-  	// console.log(await haltable.halt({from: web3.eth.accounts[1]}));
-  	// (await haltable.halted()).should.be.equal(false);
-  	// console.log(await haltable.unhalt({from: web3.eth.accounts[1]}));
-  	// (await haltable.halted()).should.be.equal(false);
+  	(await haltable.halted()).should.be.equal(true);
+  	await haltable.unhalt({from: web3.eth.accounts[0]});
+  	(await haltable.halted()).should.be.equal(false);
+  	await haltable.halt({from: web3.eth.accounts[1]}).should.rejected;
+  	(await haltable.halted()).should.be.equal(false);
   });
 });
