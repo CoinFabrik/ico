@@ -7,7 +7,7 @@ require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should();
 
-contract('TokenTranchePricing', function(accounts) {
+contract('MintableToken', function(accounts) {
 
   it("Should throw during construction", async function() {
     // Multisig's address is 0.
