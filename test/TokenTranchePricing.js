@@ -2,10 +2,12 @@ const advanceBlock = require('./helpers/advanceBlock');
 const advanceToBlock = require('./helpers/advanceToBlock');
 const latestBlockTime = require('./helpers/latestBlockTime');
 const TokenTranchePricing = artifacts.require("../contracts/TokenTranchePricing.sol");
-const minutes = require('./helpers/durations').minutes;
-const hours = require('./helpers/durations').hours;
-const increaseTime = require('./helpers/increaseTime').increaseTime;
-const increaseTimeTo = require('./helpers/increaseTime').increaseTimeTo;
+const durations = require('./helpers/durations');
+const minutes = durations.minutes;
+const hours = durations.hours;
+const increaseTimes = require('./helpers/increaseTime');
+const increaseTime = increaseTimes.increaseTime;
+const increaseTimeTo = increaseTimes.increaseTimeTo;
 
 const BigNumber = web3.BigNumber;
 
