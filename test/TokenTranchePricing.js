@@ -2,10 +2,12 @@ const advanceBlock = require('./helpers/advanceBlock');
 const advanceToBlock = require('./helpers/advanceToBlock');
 const latestBlockTime = require('./helpers/latestBlockTime');
 const TokenTranchePricing = artifacts.require("../contracts/TokenTranchePricing.sol");
-const minutes = require('./helpers/durations').minutes;
-const hours = require('./helpers/durations').hours;
-const increaseTime = require('./helpers/increaseTime').increaseTime;
-const increaseTimeTo = require('./helpers/increaseTime').increaseTimeTo;
+const durations = require('./helpers/durations');
+const minutes = durations.minutes;
+const hours = durations.hours;
+const increaseTimes = require('./helpers/increaseTime');
+const increaseTime = increaseTimes.increaseTime;
+const increaseTimeTo = increaseTimes.increaseTimeTo;
 
 const BigNumber = web3.BigNumber;
 
@@ -44,12 +46,12 @@ contract('TokenTranchePricing', function(accounts) {
     // Same time period but different ordered amount limits
     await increaseTime(minutes(1));    
     let current_time = latestBlockTime();
-    await (TokenTranchePricing.new([1, current_time+hours(1)+minutes(2), current_time+hours(2)+minutes(3), 20, 2, current_time+hours(1)+minutes(2), current_time+hours(2)+minutes(3), 30])).should.not.be.rejectedWith('invalid opcode');
+    await (TokenTranchePricing.new([1, current_time+hours(1)+minutes(2), current_time+hours(2)+minutes(3), 20, 2, current_time+hours(1)+minutes(2), current_time+hours(2)+minutes(3), 30])).should.not.be.rejected;
  
     // Same amount limits but different ordered ending times
     await increaseTime(minutes(1));
     current_time = latestBlockTime();
-    await (TokenTranchePricing.new([5, current_time+hours(1)+minutes(3), current_time+hours(2)+minutes(4), 20, 5, current_time+hours(1)+minutes(3), current_time+hours(2)+minutes(5), 30])).should.not.be.rejectedWith('invalid opcode');
+    await (TokenTranchePricing.new([5, current_time+hours(1)+minutes(3), current_time+hours(2)+minutes(4), 20, 5, current_time+hours(1)+minutes(3), current_time+hours(2)+minutes(5), 30])).should.not.be.rejected;
   });
 
   it("Should return prices correctly", async function() {
