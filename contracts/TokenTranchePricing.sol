@@ -7,13 +7,12 @@
 pragma solidity ^0.4.15;
 
 import "./SafeMath.sol";
-import "./Ownable.sol";
 
 /// @dev Tranche based pricing.
 ///      Implementing "first price" tranches, meaning, that if buyers order is
 ///      covering more than one tranche, the price of the lowest tranche will apply
 ///      to the whole order.
-contract TokenTranchePricing is Ownable {
+contract TokenTranchePricing {
 
   using SafeMath for uint;
 
