@@ -1,3 +1,4 @@
 node_modules
 build
 .testnet
+__pycache__
