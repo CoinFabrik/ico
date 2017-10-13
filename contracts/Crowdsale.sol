@@ -113,7 +113,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
    * Override to reject calls unless the crowdsale is finalized or
    *  the token contract is not the one corresponding to this crowdsale
    */
-  function enableLostAndFound(address agent, uint tokens, ERC20 token_contract) public {
+  function enableLostAndFound(address agent, uint tokens, EIP20Token token_contract) public {
     // Either the state is finalized or the token_contract is not this crowdsale token
     require( address(token_contract) != address(token) || getState() == State.Finalized );
     super.enableLostAndFound(agent, tokens, token_contract);
