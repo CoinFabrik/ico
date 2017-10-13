@@ -8,7 +8,7 @@ pragma solidity ^0.4.15;
 import "./Ownable.sol";
 import "./SafeMath.sol";
 import "./Mintable.sol";
-import "./ERC20Basic.sol";
+import "./EIP20Token.sol";
 
 /**
  * A token that can increase its supply by another contract.
@@ -17,7 +17,7 @@ import "./ERC20Basic.sol";
  * Only mint agents, contracts whitelisted by owner, can mint new tokens.
  *
  */
-contract MintableToken is ERC20Basic, Mintable, Ownable {
+contract MintableToken is EIP20Token, Mintable, Ownable {
 
   using SafeMath for uint;
 
@@ -49,6 +49,7 @@ contract MintableToken is ERC20Basic, Mintable, Ownable {
     mintInternal(receiver, amount);
 
     // TODO: Remove this. It may be confused with anonymous transfers in the upcoming fork.
+    //       When doing so, remove the EIP20Token dependency from this contract too.
     // This will make the mint transaction appear in EtherScan.io
     // We can remove this after there is a standardized minting event
     Transfer(0, receiver, amount);

@@ -5,7 +5,6 @@ pragma solidity ^0.4.15;
  * Modified by https://www.coinfabrik.com/
  */
 
-import "./FractionalERC20.sol";
 import "./ReleasableToken.sol";
 import "./UpgradeableToken.sol";
 import "./LostAndFoundToken.sol";
@@ -23,11 +22,13 @@ import "./MintableToken.sol";
  * - ERC20 tokens transferred to this contract can be recovered by a lost and found master
  *
  */
-contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, FractionalERC20, LostAndFoundToken {
+contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, LostAndFoundToken {
 
   string public name = "BurgerKoenig";
 
   string public symbol = "BK";
+
+  uint8 public decimals;
 
   address public lost_and_found_master;
 

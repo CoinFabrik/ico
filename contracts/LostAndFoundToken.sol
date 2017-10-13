@@ -4,7 +4,7 @@ pragma solidity ^0.4.15;
  * Authored by https://www.coinfabrik.com/
  */
 
-import "./ERC20.sol";
+import "./EIP20Token.sol";
 
 // This contract aims to provide an inheritable way to recover tokens from a contract not meant to hold tokens
 // To use this contract, have your token-ignoring contract inherit this one and implement getLostAndFoundMaster to decide who can move lost tokens.
@@ -20,7 +20,7 @@ contract LostAndFoundToken {
    * @param tokens Amount of tokens approved for transfer
    * @param token_contract Contract of the token
    */
-  function enableLostAndFound(address agent, uint tokens, ERC20 token_contract) public {
+  function enableLostAndFound(address agent, uint tokens, EIP20Token token_contract) public {
     require(msg.sender == getLostAndFoundMaster());
     token_contract.approve(agent, tokens);
   }
