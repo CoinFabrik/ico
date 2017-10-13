@@ -1,27 +1,50 @@
 pragma solidity ^0.4.15;
 
 /**
- * Originally by FirstBlood: https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
- * Modified by https://github.com/TokenMarketNet/ico
+ * Originally from https://github.com/OpenZeppelin/zeppelin-solidity
  * Modified by https://www.coinfabrik.com/
  */
 
-import './BasicToken.sol';
-import './ERC20.sol';
+import './EIP20Token.sol';
+import './SafeMath.sol';
+import './Burnable.sol';
+import './Mintable.sol';
 
 /**
- * @title Standard ERC20 token
- *
- * @dev Implementation of the basic standard token.
- * @dev https://github.com/ethereum/EIPs/issues/20
+ * @title Standard token
+ * @dev Basic implementation of the EIP20 standard token (also known as ERC20 token).
  */
-contract StandardToken is BasicToken, ERC20 {
+contract StandardToken is EIP20Token, Burnable, Mintable {
+  using SafeMath for uint;
 
-  mapping (address => mapping (address => uint)) allowed;
+  uint private total_supply;
+  mapping(address => uint) private balances;
+  mapping(address => mapping (address => uint)) private allowed;
 
-  /* Interface declaration */
-  function isToken() public constant returns (bool) {
+
+  function totalSupply() public constant returns (uint) {
+    return total_supply;
+  }
+
+  /**
+   * @dev transfer token for a specified address
+   * @param to The address to transfer to.
+   * @param value The amount to be transferred.
+   */
+  function transfer(address to, uint value) public returns (bool success) {
+    balances[msg.sender] = balances[msg.sender].sub(value);
+    balances[to] = balances[to].add(value);
+    Transfer(msg.sender, to, value);
     return true;
+  }
+
+  /**
+   * @dev Gets the balance of the specified address.
+   * @param account The address whose balance is to be queried.
+   * @return An uint representing the amount owned by the passed address.
+   */
+  function balanceOf(address account) public constant returns (uint balance) {
+    return balances[account];
   }
 
   /**
@@ -78,8 +101,7 @@ contract StandardToken is BasicToken, ERC20 {
    * Works around https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
    *
    */
-  function addApproval(address spender, uint addedValue) public
-  returns (bool success) {
+  function addApproval(address spender, uint addedValue) public returns (bool success) {
       uint oldValue = allowed[msg.sender][spender];
       allowed[msg.sender][spender] = oldValue.add(addedValue);
       Approval(msg.sender, spender, allowed[msg.sender][spender]);
@@ -91,8 +113,7 @@ contract StandardToken is BasicToken, ERC20 {
    *
    * Works around https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
    */
-  function subApproval(address spender, uint subtractedValue) public
-  returns (bool success) {
+  function subApproval(address spender, uint subtractedValue) public returns (bool success) {
 
       uint oldVal = allowed[msg.sender][spender];
 
@@ -104,5 +125,34 @@ contract StandardToken is BasicToken, ERC20 {
       Approval(msg.sender, spender, allowed[msg.sender][spender]);
       return true;
   }
+
+  /**
+   * @dev Provides an internal function for destroying tokens. Useful for upgrades.
+   */
+  function burnTokens(address account, uint value) internal {
+    balances[account] = balances[account].sub(value);
+    total_supply = total_supply.sub(value);
+    Burned(account, value);
+  }
+
+  /**
+   * @dev Provides an internal minting function.
+   */
+  function mintInternal(address receiver, uint amount) internal {
+    total_supply = total_supply.add(amount);
+    balances[receiver] = balances[receiver].add(amount);
+  }
+
+
+  /**
+   * Obsolete. Removed this check based on:
+   * https://blog.coinfabrik.com/smart-contract-short-address-attack-mitigation-failure/
+   * @dev Fix for the ERC20 short address attack.
+   *
+   * modifier onlyPayloadSize(uint size) {
+   *    require(msg.data.length >= size + 4);
+   *    _;
+   * }
+   */
   
 }
