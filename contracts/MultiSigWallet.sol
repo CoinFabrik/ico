@@ -3,6 +3,7 @@ pragma solidity ^0.4.15;
 /**
  * Originally from https://github.com/ConsenSys/MultiSigWallet
  * Modified by https://www.coinfabrik.com/
+ * Warning: We do not recommend using this version as a multisignature wallet since it has been modified and is intended for internal testing purposes
  */
 
 /// @title Multisignature wallet - Allows multiple parties to agree on transactions before execution.
@@ -75,7 +76,7 @@ contract MultiSigWallet {
         _;
     }
 
-    modifier validRequirement(uint ownerCount, uint required) {
+    modifier validRequirement(uint ownerCount, uint signersRequired) {
         require (   ownerCount <= MAX_OWNER_COUNT
                  && required <= ownerCount
                  && required != 0
@@ -98,7 +99,7 @@ contract MultiSigWallet {
     /// @dev Contract constructor sets initial owners and required number of confirmations.
     /// @param init_owners List of initial owners.
     /// @param required Number of required confirmations.
-    function MultiSigWallet(address[] init_owners, uint required)
+    function MultiSigWallet(address[] init_owners, uint signers_required)
         public
         validRequirement(init_owners.length, required)
     {
@@ -165,7 +166,7 @@ contract MultiSigWallet {
 
     /// @dev Allows to change the number of required confirmations. Transaction has to be sent by wallet.
     /// @param required Number of required confirmations.
-    function changeRequirement(uint required)
+    function changeRequirement(uint signersRequired)
         public
         onlyWallet
         validRequirement(owners.length, required)
