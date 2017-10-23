@@ -19,6 +19,11 @@ const CrowdsaleToken = artifacts.require('./CrowdsaleToken.sol');
 const Crowdsale = artifacts.require('./Crowdsale.sol');
 
 
+const amount_offset = 0; 
+const start_offset = 1;
+const end_offset = 2;
+const price_offset = 3;
+
 
 const BigNumber = web3.BigNumber;
 
@@ -52,10 +57,11 @@ require('chai')
     });
   }
 
-  async function block_await(targetBlock) {
+  async function block_await(target_block) {
     const actualBlock = await web3.eth.getBlock("latest").number;
-    if (actualBlock < targetBlock) {
-      return delay_promise(1000).then(block_await(targetBlock));
+    if (actualBlock < target_block) {
+      await delay_promise(1000);
+      return block_await(target_block);
     } else {
       return actualBlock;
     }
@@ -64,7 +70,8 @@ require('chai')
   async function timestamp_await(target_timestamp) {
     const actual_timestamp = await web3.eth.getBlock("latest").timestamp;
     if (actual_timestamp < target_timestamp) {
-      return delay_promise((target_timestamp - actual_timestamp)*1000).then(timestamp_await(target_timestamp));
+      await delay_promise(5*1000);
+      return timestamp_await(target_timestamp);
     } else {
       return actual_timestamp;
     }
@@ -89,9 +96,9 @@ contract('Crowdsale', function(accounts) {
   let mulisigwallet;
 
   const init_prom = MultiSigWallet.deployed()
-  .then(function(instance){
+  .then(function(instance) {
     multiSigWallet = instance;})
-  .then(function(){
+  .then(function() {
     return Crowdsale.deployed();})
   .then(function(instance) {
     console.log("CROWDSALE ADDRESS: ", instance.address);
@@ -99,7 +106,7 @@ contract('Crowdsale', function(accounts) {
     return crowdsale.token();})
   .then(function(tokenAddress) {
     return CrowdsaleToken.at(tokenAddress);})
-  .then(function(tokenInstance){
+  .then(function(tokenInstance) {
     crowdsaleToken = tokenInstance;
   });
 
@@ -135,20 +142,16 @@ contract('Crowdsale', function(accounts) {
       await delay_promise(1000);
       const transaction = await web3.eth.getTransaction(txHash);
       if (transaction["blockNumber"] != null) {
-      await async_call(web3.currentProvider.sendAsync, { method: "debug_traceTransaction", params: [txHash, {}], jsonrpc: "2.0", id: rpcId}).then(function (response) {
-        let lastOperationIndex = response["result"]["structLogs"].length-1;
-        if (expectedResult == "failure") {
-          assert.notEqual(response["result"]["structLogs"][lastOperationIndex]["error"], null, "Transaction expected to succeed failed 🗙 ");
-        } else if (expectedResult == "success") {
-          assert.equal(response["result"]["structLogs"][lastOperationIndex]["error"], null, "Transaction expected to fail succeeded 🗙 ");
-        }
-      }).catch(function(error) {
-        console.log('UNEXPECTED ERROR <- "handled by mineTransaction", handle in function in order to trace error. 🗙 ');
-        console.log(error);
-      });
-      rpcId = rpcId + 1;
-      console.log("Awaited approximately", iteration,  "seconds until mined 🔨",);
-      return txHash;
+        const tx_receipt = await web3.eth.getTransactionReceipt(txHash);
+          if (expectedResult == "failure") {
+            // After out of band discussion with Vitalik and others, I've amended this proposal to simply insert a 1 byte return status (1 for success, 0 for failure).
+            assert.equal(tx_receipt["status"], 0, "Transaction expected to fail succeeded 🗙 ");
+          } else if (expectedResult == "success") {
+            assert.equal(tx_receipt["status"], 1, "Transaction expected to succeed failed 🗙 ");
+          }
+        rpcId = rpcId + 1;
+        console.log("Awaited approximately", iteration,  "seconds until mined 🔨",);
+        return txHash;
       } else {
       return start(iteration + 1);
       }
@@ -160,13 +163,14 @@ contract('Crowdsale', function(accounts) {
 
    
   it_synched("Checks that nobody can buy before the pre-ico starts", async function() {
-    let actualDate = await web3.eth.getBlock("latest").number;
-    let startDate = await crowdsale.startsAt();
-    if (actualDate + minutes(5) < startDate) {
-      await mineTransaction({"etherToSend":3, "sender":accounts[1], "operation":crowdsale.buy, "expectedResult":"failure"});
-      (await crowdsaleToken.balanceOf(accounts[1])).should.be.bignumber.and.equal(0);
-      await mineTransaction({"operation":crowdsale.setEarlyParticipantWhitelist, "receiver": accounts[1]});
+    await mineTransaction({"operation":crowdsale.setEarlyParticipantWhitelist, "receiver": accounts[1]});
+    const actual_date = await web3.eth.getBlock("latest").timestamp;
+    const first_tranche = await crowdsale.tranches(0);
+    if (actual_date + minutes(1) < first_tranche[start_offset].toNumber()) {
       await mineTransaction({"etherToSend":3, "sender":accounts[0], "operation":crowdsale.buy, "expectedResult":"failure"});
+      await mineTransaction({"etherToSend":3, "sender":accounts[1], "operation":crowdsale.buy, "expectedResult":"failure"});
+      (await crowdsaleToken.balanceOf(accounts[0])).should.be.bignumber.and.equal(0);
+      (await crowdsaleToken.balanceOf(accounts[1])).should.be.bignumber.and.equal(0);
     } else {
       console.log("Not tested because of start date been passed");
     }
@@ -174,106 +178,106 @@ contract('Crowdsale', function(accounts) {
 
 
   it_synched("Checks that whitelisted early investors can buy during pre-ico", async function() {
-    let start_date = await crowdsale.startsAt();
-    await timestamp_await(start_date);
-    let etherToSend = 3;
-    await mineTransaction({"etherToSend":etherToSend, "sender":accounts[1], "operation":crowdsale.buy, "expectedResult":"success"});
-    investmentPerAccount[accounts[1]] = investmentPerAccount[accounts[1]].plus(etherToSend);
-    const balance = await crowdsaleToken.balanceOf(accounts[1]);
-    assert.isTrue(balance.greaterThan(0));
-    (await crowdsale.investorCount()).should.be.bignumber.and.equal(1);
-
+    const first_tranche = await crowdsale.tranches(0);
+    const actual_date_X = await web3.eth.getBlock("latest").timestamp;
+    const actual_date = await timestamp_await(first_tranche[start_offset].toNumber());
+    if (actual_date > first_tranche[start_offset].toNumber() && actual_date + minutes(1) < first_tranche[end_offset].toNumber()) {
+      const etherToSend = 3;
+      await mineTransaction({"etherToSend":etherToSend, "sender":accounts[1], "operation":crowdsale.buy, "expectedResult":"success"});
+      investmentPerAccount[accounts[1]] = investmentPerAccount[accounts[1]].plus(etherToSend);
+      const balance = await crowdsaleToken.balanceOf(accounts[1]);
+      assert.isTrue(balance.greaterThan(0));
+      (await crowdsale.investorCount()).should.be.bignumber.and.equal(1);
+    } else {
+      console.log("Not tested because of pre-ico passed");
+    }
     // let expectedBalance = web3.toBigNumber(10**decimals*web3.toWei(etherToSend)).dividedBy(tokensInWei);
   });
   
   it_synched("Checks that non-whitelisted investors cannot buy during pre-ico", async function() {
     const initial_investor_count = await crowdsale.investorCount();
     const initial_balance = await crowdsaleToken.balanceOf(accounts[2]);
-    let actualDate = await web3.eth.getBlock("latest").number;
-    await mineTransaction({"etherToSend":3, "sender":accounts[2], "operation":crowdsale.buy, "expectedResult":"failure"});
-    // await crowdsaleToken.balanceOf((accounts[2])).should.be.bignumber.and.equal(initial_balance);
-    (await crowdsale.investorCount()).should.be.bignumber.and.equal(initial_investor_count);
+    const first_tranche = await crowdsale.tranches(0);
+    const actual_date = await web3.eth.getBlock("latest").timestamp;
+    if (actual_date + minutes(1) < first_tranche[end_offset].toNumber()) {
+      await mineTransaction({"etherToSend":3, "sender":accounts[2], "operation":crowdsale.buy, "expectedResult":"failure"});
+      (await crowdsaleToken.balanceOf((accounts[2]))).should.be.bignumber.and.equal(initial_balance);
+      (await crowdsale.investorCount()).should.be.bignumber.and.equal(initial_investor_count);
+    } else {
+      console.log("Not tested because of missing pre-ico");
+    }
   });
 
   it_synched("Checks that no one can buy between pre-ico's end and ico's start", async function() {
     const initial_investor_count = await crowdsale.investorCount();
     const initial_balance = await crowdsaleToken.balanceOf(accounts[2]);
-    await timestamp_await(config.pre_ico_tranches_end + seconds(30));
+    const first_tranche = await crowdsale.tranches(0);
+    const second_tranche = await crowdsale.tranches(1);
+    const actual_date = await timestamp_await(first_tranche[end_offset].toNumber());
+    if (actual_date > first_tranche[end_offset].toNumber() && actual_date + minutes(1) < second_tranche[start_offset].toNumber()) {
+      await mineTransaction({"etherToSend":3, "sender":accounts[2], "operation":crowdsale.buy, "expectedResult":"failure"});
+      (await crowdsale.investorCount()).should.be.bignumber.and.equal(initial_investor_count);
+      (await crowdsaleToken.balanceOf(accounts[2])).should.be.bignumber.and.equal(initial_balance);
+    } else {
+      console.log("Something gone wrong");
+    }
+  });
 
-    let etherToSend = 3;
-    await mineTransaction({"etherToSend":etherToSend, "sender":accounts[2], "operation":crowdsale.buy, "expectedResult":"failure"});
-    (await crowdsaleToken.balanceOf(accounts[2])).should.be.bignumber.and.equal(initial_balance);
-    (await crowdsale.investorCount()).should.be.bignumber.and.equal(initial_investor_count);
+  it_synched('Checks that ether goes where it should after a purchase', async function() {
+    const second_tranche = await crowdsale.tranches(1);
+    const start_date = await crowdsale.startsAt();
+    // console.log("START:", second_tranche[start_offset].toNumber());
+
+    const actual_date = await timestamp_await(second_tranche[start_offset].toNumber());
+    const another_actual_date = await timestamp_await(start_date);
+    assert.isTrue(another_actual_date >= actual_date);
+    // console.log(actual_date);
+    if (actual_date + minutes(1) < second_tranche[end_offset].toNumber()) {
+      const initial_balance = await web3.eth.getBalance(accounts[1]);
+      const etherToSend = 2;
+      let txHash = await mineTransaction({"etherToSend":etherToSend, "sender":accounts[1], "operation":crowdsale.buy, "expectedResult":"success"});
+      // const finalBalance = await web3.eth.getBalance(accounts[1]);
+      // console.log(finalBalance);
+      // const spent = initial_balance.sub(finalBalance);
+      // console.log(spent);
+      // const tx_receipt = await web3.eth.getTransactionReceipt(txHash);
+      // console.log(tx_receipt);
+      // const expected_spent = etherToSend + web3.fromWei(tx_receipt.gasUsed * GAS_PRICE);
+      // console.log(expected_spent);
+      // assert.isTrue(spent.equals(expected_spent));
+      // const total_collected = await crowdsale.weiRaised();
+      // (await web3.eth.getBalance(multiSigWallet.address)).should.be.bignumber.and.equal(total_collected);
+      // investmentPerAccount[accounts[1]] = investmentPerAccount[accounts[1]].plus(etherToSend);
+    } else {
+      console.log("I can't understand what's happening");
+    }
+  });
+
+  it_synched('Checks that customers can buy using its id', async function() {
+    const etherToSend = 1;
+    await mineTransaction({"etherToSend":etherToSend, "sender":accounts[2], "operation":crowdsale.buyWithCustomerId, "expectedResult":"success", "id":123});
+    investmentPerAccount[accounts[2]] = investmentPerAccount[accounts[2]].plus(etherToSend);
+    (await crowdsaleToken.investedAmountOf(accounts[2])).should.be.bignumber.and.equal(investmentPerAccount[accounts[2]]);
   });
 
 
+  it_synched('Pauses and resumes the contribution', async function() {
+    const etherToSend = 1;
+    await mineTransaction({"operation":crowdsale.halt, "expectedResult":"success"});
+    assert.isTrue(await crowdsale.halted());
+    await mineTransaction({"etherToSend":etherToSend, "sender":accounts[2], "operation":crowdsale.buy, "expectedResult":"failure"});
+    await mineTransaction({"operation":crowdsale.unhalt, "expectedResult":"success"});
+    assert.isFalse(await crowdsale.halted());
+    const collectedBefore = await crowdsale.weiRaised();
+    await mineTransaction({"etherToSend":etherToSend, "sender":accounts[2], "operation":crowdsale.buy, "expectedResult":"success"});
+    investmentPerAccount[accounts[2]] = investmentPerAccount[accounts[2]].plus(etherToSend);
+    const collectedAfter = await crowdsale.weiRaised();
+    assert.isTrue(web3.fromWei(collectedBefore).lessThan(web3.fromWei(collectedAfter)));
+  });
 
-  // it_synched('Checks that ether goes where it should after a purchase', async function() {
-    
-  //   timestamp_await(config.ico_tranches_start);
-
-  //   const initial_bbalance = await web3.eth.getBalance(accounts[1]);
-    
-  //   let etherToSend = 2;
-    
-  //   let txHash = await mineTransaction({"etherToSend":etherToSend, "sender":accounts[1], "operation":crowdsale.buy, "expectedResult":"success"});
-    
-  //   const finalBalance = await web3.eth.getBalance(accounts[1]);
-    
-  //   const spent = web3.fromWei(initial_balance.sub(finalBalance)).toNumber();
-    
-  //   tx_receipt = await web3.eth.getTransactionReceipt(txHash);
-
-  //   const expected_gas_usage = parseFloat(web3.fromWei(tx_receipt.gasUsed * GAS_PRICE));
-    
-  //   const expected_spent = etherToSend + parseFloat(web3.fromWei(tx_receipt.gasUsed * GAS_PRICE));
-    
-  //   const gas_used = parseFloat(web3.fromWei(tx_receipt.gasUsed * GAS_PRICE));
-    
-  //   const total_collected = await crowdsale.weiRaised();
-    
-  //   assert.isTrue(web3.fromWei(total_collected).equals(investmentPerAccount[accounts[1]].plus(etherToSend)));
-    
-  //   const balanceContributionWallet = await web3.eth.getBalance(multiSigWallet.address);
-    
-  //   assert.isTrue(web3.fromWei(balanceContributionWallet).equals(investmentPerAccount[accounts[1]].plus(etherToSend)));
-    
-  //   investmentPerAccount[accounts[1]] = investmentPerAccount[accounts[1]].plus(etherToSend);
-
-  // });
-
-  // it_synched('Checks that customers can buy using its id', async function() {
-  //   let etherToSend = 1;
-  //   let id = 123;
-  //   await mineTransaction({"etherToSend":etherToSend, "sender":accounts[2], "operation":crowdsale.buyWithCustomerId, "expectedResult":"success", "id":id});
-
-  //   const balance = await crowdsaleToken.balanceOf(accounts[2]);
-  //   investmentPerAccount[accounts[2]] = investmentPerAccount[accounts[2]].plus(etherToSend);
-  //   let expectedBalance = web3.toBigNumber(10**decimals*web3.toWei(etherToSend)).dividedBy(tokensInWei);
-  //   assert.isTrue(balance.equals(expectedBalance));
-  // });
-
-
-  // it_synched('Pauses and resumes the contribution', async function() {
-  //   let etherToSend = 1;
-  //   await mineTransaction({"operation":crowdsale.halt, "expectedResult":"success"});
-  //   assert.isTrue(await crowdsale.halted());
-  //   await mineTransaction({"etherToSend":etherToSend, "sender":accounts[2], "operation":crowdsale.buy, "expectedResult":"failure"});
-
-  //   await mineTransaction({"operation":crowdsale.unhalt, "expectedResult":"success"});
-  //   assert.isFalse(await crowdsale.halted());
-
-  //   const collectedBefore = await crowdsale.weiRaised();
-  //   await mineTransaction({"etherToSend":etherToSend, "sender":accounts[2], "operation":crowdsale.buy, "expectedResult":"success"});
-  //   investmentPerAccount[accounts[2]] = investmentPerAccount[accounts[2]].plus(etherToSend);
-  //   const collectedAfter = await crowdsale.weiRaised();
-  //   assert.isTrue(web3.fromWei(collectedBefore).lessThan(web3.fromWei(collectedAfter)));
-  // });
-
-  // it_synched('Check transfers failure before tokens are released', async function() {
-  //   await mineTransaction({"operation":crowdsaleToken.transfer, "sender":accounts[1], "tokensToSend":1, "receiver":accounts[2], "expectedResult":"failure"});
-  // });
-
+  it_synched('Check transfers fail before tokens are released', async function() {
+    await mineTransaction({"operation":crowdsaleToken.transfer, "sender":accounts[1], "tokensToSend":1, "receiver":accounts[2], "expectedResult":"failure"});
+  });
 
   // it_synched('Checks state after all tokens have been sold to multiple accounts', async function() {
   //   let fundingCap = await crowdsale.weiFundingCap();
