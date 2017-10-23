@@ -47,30 +47,30 @@ contract TokenTranchePricing {
     // A tranche with amount zero can never be selected and is therefore useless.
     // This check and the one inside the loop ensure no tranche can have an amount equal to zero.
     require(init_tranches[amount_offset] > 0);
-    require(init_tranches[start_offset] + 1 hours > block.timestamp);
+    require(init_tranches[start_offset].add(1 hours) > block.timestamp);
 
-    tranches.length = init_tranches.length / tranche_size;
-    for (uint i = 0; i < init_tranches.length / tranche_size; i++) {
+    tranches.length = init_tranches.length.div(tranche_size);
+    for (uint i = 0; i < init_tranches.length.div(tranche_size); i++) {
       // No invalid steps
-      uint amount = init_tranches[i * tranche_size + amount_offset];
-      uint start = init_tranches[i * tranche_size + start_offset];
-      uint end = init_tranches[i * tranche_size + end_offset];
-      require(block.timestamp < start && start + 1 hours <= end );
+      uint amount = init_tranches[i.mul(tranche_size).add(amount_offset)];
+      uint start = init_tranches[i.mul(tranche_size).add(start_offset)];
+      uint end = init_tranches[i.mul(tranche_size).add(end_offset)];
+      require(block.timestamp < start && start.add(1 hours) <= end);
       // Bail out when entering unnecessary tranches
       // This is preferably checked before deploying contract into any blockchain.
-      require(i == 0 || (end >= tranches[i - 1].end && amount > tranches[i - 1].amount) ||
-              (end > tranches[i - 1].end && amount >= tranches[i - 1].amount));
+      require(i == 0 || (end >= tranches[i.sub(1)].end && amount > tranches[i.sub(1)].amount) ||
+              (end > tranches[i.sub(1)].end && amount >= tranches[i.sub(1)].amount));
 
       tranches[i].amount = amount;
-      tranches[i].price = init_tranches[i * tranche_size + price_offset];
+      tranches[i].price = init_tranches[i.mul(tranche_size).add(price_offset)];
       tranches[i].start = start;
       tranches[i].end = end;
     }
   }
 
-  /// @dev Get the current tranche or bail out if we are not in the tranche periods.
+  /// @dev Get the current tranche or bail out if there is no tranche defined for the current block.
   /// @param tokensSold total amount of tokens sold, for calculating the current tranche
-  /// @return {[type]} [description]
+  /// @return Returns the struct representing the current tranche
   function getCurrentTranche(uint tokensSold) private constant returns (Tranche) {
     for (uint i = 0; i < tranches.length; i++) {
       if (tranches[i].start <= block.timestamp && block.timestamp < tranches[i].end && tokensSold < tranches[i].amount) {
@@ -81,9 +81,9 @@ contract TokenTranchePricing {
     revert();
   }
 
-  /// @dev Get the current price.
+  /// @dev Get the current price. May revert if there is no tranche currently active.
   /// @param tokensSold total amount of tokens sold, for calculating the current tranche
-  /// @return The current price or 0 if we are outside tranche ranges
+  /// @return The current price
   function getCurrentPrice(uint tokensSold) public constant returns (uint result) {
     return getCurrentTranche(tokensSold).price;
   }

@@ -6,8 +6,8 @@ pragma solidity ^0.4.15;
  */
 interface EIP20Token {
 
-  function totalSupply() public constant returns (uint256 totalSupply);
-  function balanceOf(address who) public constant returns (uint256 balance);
+  function totalSupply() public constant returns (uint256);
+  function balanceOf(address who) public constant returns (uint256);
   function transfer(address to, uint256 value) public returns (bool success);
   function transferFrom(address from, address to, uint256 value) public returns (bool success);
   function approve(address spender, uint256 value) public returns (bool success);
