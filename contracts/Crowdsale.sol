@@ -9,12 +9,12 @@ import "./TokenTranchePricing.sol";
 contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
   //initial supply in 400k, sold tokens from initial minting
   uint8 private constant token_decimals = 18;
-  uint private constant token_initial_supply = 4 * (10 ** 5) * (10 ** uint(token_decimals));
+  uint private constant token_initial_supply = 1575 * (10 ** 5) * (10 ** uint(token_decimals));
   bool private constant token_mintable = true;
-  uint private constant sellable_tokens = 6 * (10 ** 5) * (10 ** uint(token_decimals));
+  uint private constant sellable_tokens = 525 * (10 ** 5) * (10 ** uint(token_decimals));
   
   //Sets minimum value that can be bought (TODO: configure initial value)
-  uint public minimum_buy_value = 1;
+  uint public minimum_buy_value = 6 * (10 ** 18);
   
   function Crowdsale(address team_multisig, uint start, uint end, address token_retriever, uint[] tranches)
   TokenTranchePricing(tranches) GenericCrowdsale(team_multisig, start, end) public {

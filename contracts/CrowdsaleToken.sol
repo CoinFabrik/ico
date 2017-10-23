@@ -24,9 +24,9 @@ import "./MintableToken.sol";
  */
 contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, LostAndFoundToken {
 
-  string public name = "";
+  string public name = "WorldBit Token";
 
-  string public symbol = "BANX";
+  string public symbol = "WBT";
 
   uint8 public decimals;
 

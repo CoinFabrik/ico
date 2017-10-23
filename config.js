@@ -24,32 +24,28 @@ function config_f(web3) {
   config.tests.endBlock = config.tests.startBlock + 70;
 
   //Test: start 3.5 minutes after deployment, end 25 minutes after that (similar to differences in previous implementation with Block Numbers)
-  config.tests.startTime = /*Math.round(new Date().getTime()/1000) + 210*/web3.eth.getBlock("latest").timestamp+(60*60*2);
-  config.tests.endTime = /*config.tests.startTime + 7200*/web3.eth.getBlock("latest").timestamp+(60*60*8);
+  config.tests.startTime = Math.round((new Date(2017, 10, 24)).getTime() / 1000);
   
   config.tests.multisig_owners = ["0x8ffc991fc4c4fc53329ad296c1afe41470cffbb3"];
 
-  const ether_in_eur = new BigNumber(287.31);
-  const pre_ico_tranches_quantity = 3;
-  const tranches_quantity = 11;
   const pre_ico_tranches_start = /*Math.round(Date.now()/1000)*/web3.eth.getBlock("latest").timestamp+(60*60*2);
   const pre_ico_tranches_end = /*Math.round(Date.now()/1000)*/web3.eth.getBlock("latest").timestamp+(60*60*4);
-  const ico_tranches_start = /*Math.round(Date.now()/1000)*/web3.eth.getBlock("latest").timestamp+(60*60*6);
-  const ico_tranches_end = /*Math.round(Date.now()/1000)*/web3.eth.getBlock("latest").timestamp+(60*60*8);
+  let ico_tranches_start = /*Math.round(Date.now()/1000)*/web3.eth.getBlock("latest").timestamp+(60*60*6);
+  let ico_tranches_end = /*Math.round(Date.now()/1000)*/web3.eth.getBlock("latest").timestamp+(60*60*8);
   
-  const eur_per_fulltokens = [new BigNumber(0.07), new BigNumber(0.08), new BigNumber(0.09), new BigNumber(0.10), new BigNumber(0.11), new BigNumber(0.12), new BigNumber(0.13), new BigNumber(0.14), new BigNumber(0.15), new BigNumber(0.16), new BigNumber(0.17)];
-
-  const tokens_per_wei = eur_per_fulltokens.map(function(price) {
-    return ether_in_eur.dividedToIntegerBy(price);    
-  });
+  const tokens_per_wei = [new BigNumber(410), new BigNumber(390), new BigNumber(370), new BigNumber(350),
+                          new BigNumber(340), new BigNumber(330), new BigNumber(320), new BigNumber(310),
+                          new BigNumber(300), new BigNumber(290), new BigNumber(280)];
   
-  const amounts = [new BigNumber(60000), new BigNumber(120000), new BigNumber(200000)];
+  const amounts = [new BigNumber("3500000"), new BigNumber("7000000"), new BigNumber("10500000")];
+  const pre_ico_tranches_quantity = amounts.length;
+  const tranches_quantity = amounts.length + 8;
 
   for (let i = pre_ico_tranches_quantity; i < tranches_quantity; i++) {
-    amounts.push(amounts[i-1].add(50*(10**6)));
+    amounts.push(amounts[i - 1].add(525*(10**4)));
   }
   amounts.forEach(function(amount) {
-    return amount.times(10**18);
+    return amount.times((new BigNumber(10)).toPower(18));
   });
 
   config.tranches = [];
@@ -65,8 +61,12 @@ function config_f(web3) {
     config.tranches.push(amounts[i]);
     config.tranches.push(ico_tranches_start);
     config.tranches.push(ico_tranches_end);
-    config.tranches.push(tokens_per_wei[i]);    
+    config.tranches.push(tokens_per_wei[i]);
+    ico_tranches_start = ico_tranches_end;
+    ico_tranches_end += 60*60*24;
   }
+  
+  config.tests.endTime = ico_tranches_end;
 
   return config;
 }
