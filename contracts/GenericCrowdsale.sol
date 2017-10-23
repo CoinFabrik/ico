@@ -96,7 +96,7 @@ contract GenericCrowdsale is Haltable {
 
     // Don't mess the dates
     require(start != 0 && end != 0);
-    require(block.timestamp + 1 hours < start && start + 1 hours < end);
+    require(block.timestamp < start && start < end);
     startsAt = start;
     endsAt = end;
   }
