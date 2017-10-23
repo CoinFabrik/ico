@@ -78,8 +78,8 @@ contract MultiSigWallet {
 
     modifier validRequirement(uint ownerCount, uint signersRequired) {
         require (   ownerCount <= MAX_OWNER_COUNT
-                 && required <= ownerCount
-                 && required != 0
+                 && signersRequired <= ownerCount
+                 && signersRequired != 0
                  && ownerCount != 0);
         _;
     }
@@ -98,17 +98,17 @@ contract MultiSigWallet {
      */
     /// @dev Contract constructor sets initial owners and required number of confirmations.
     /// @param init_owners List of initial owners.
-    /// @param required Number of required confirmations.
+    /// @param signers_required Number of required confirmations.
     function MultiSigWallet(address[] init_owners, uint signers_required)
         public
-        validRequirement(init_owners.length, required)
+        validRequirement(init_owners.length, signers_required)
     {
         for (uint i = 0; i < init_owners.length; i++) {
             require(!isOwner[init_owners[i]] && init_owners[i] != 0);
             isOwner[init_owners[i]] = true;
         }
         owners = init_owners;
-        required = required;
+        required = signers_required;
     }
 
     /// @dev Allows to add a new owner. Transaction has to be sent by wallet.
@@ -165,14 +165,14 @@ contract MultiSigWallet {
     }
 
     /// @dev Allows to change the number of required confirmations. Transaction has to be sent by wallet.
-    /// @param required Number of required confirmations.
+    /// @param signersRequired Number of required confirmations.
     function changeRequirement(uint signersRequired)
         public
         onlyWallet
-        validRequirement(owners.length, required)
+        validRequirement(owners.length, signersRequired)
     {
-        required = required;
-        RequirementChange(required);
+        required = signersRequired;
+        RequirementChange(signersRequired);
     }
 
     /// @dev Allows an owner to submit and confirm a transaction.
