@@ -48,7 +48,7 @@ contract TokenTranchePricing is Ownable {
     // A tranche with amount zero can never be selected and is therefore useless.
     // This check and the one inside the loop ensure no tranche can have an amount equal to zero.
     require(init_tranches[amount_offset] > 0);
-    require(init_tranches[start_offset] + 1 hours > block.timestamp);
+    require(init_tranches[start_offset] > block.timestamp);
 
     tranches.length = init_tranches.length / tranche_size;
     for (uint i = 0; i < init_tranches.length / tranche_size; i++) {
@@ -56,7 +56,7 @@ contract TokenTranchePricing is Ownable {
       uint amount = init_tranches[i * tranche_size + amount_offset];
       uint start = init_tranches[i * tranche_size + start_offset];
       uint end = init_tranches[i * tranche_size + end_offset];
-      require(block.timestamp < start && start + 1 hours <= end );
+      require(block.timestamp < start && start <= end );
       // Bail out when entering unnecessary tranches
       // This is preferably checked before deploying contract into any blockchain.
       require(i == 0 || (end >= tranches[i - 1].end && amount > tranches[i - 1].amount) ||
