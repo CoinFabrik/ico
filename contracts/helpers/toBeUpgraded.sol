@@ -1,26 +1,26 @@
 pragma solidity ^0.4.15;
 
 import '../UpgradeableToken.sol';
-import '../BasicToken.sol';
+import '../StandardToken.sol';
 
 // Mock class for testing of UpgradeableToken
-contract toBeUpgraded is UpgradeableToken, BasicToken {
+contract toBeUpgraded is UpgradeableToken, StandardToken {
     
-  bool canUp;
+  bool public canUp;
 
   //constructor
   function toBeUpgraded(uint value) public
-  UpgradeableToken(msg.sender){
+  UpgradeableToken(msg.sender) {
     mintInternal(msg.sender, value);
     setCanUp(true);
   }
 
-  function setCanUp(bool value) public{
+  function setCanUp(bool value) public {
     canUp = value;
   }
 
   //Blocked to avoid change of tokens amount except from upgrading
-  function transfer(address to, uint value) public returns (bool success) {
+  function transfer(address, uint) public returns (bool) {
     return true;
   }
 
