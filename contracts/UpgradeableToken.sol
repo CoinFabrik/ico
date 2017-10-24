@@ -6,7 +6,7 @@ pragma solidity ^0.4.15;
  * Modified by https://www.coinfabrik.com/
  */
 
-import "./ERC20Basic.sol";
+import "./EIP20Token.sol";
 import "./Burnable.sol";
 import "./UpgradeAgent.sol";
 import "./SafeMath.sol";
@@ -15,7 +15,7 @@ import "./SafeMath.sol";
  * A token upgrade mechanism where users can opt-in amount of tokens to the next smart contract revision.
  *
  */
-contract UpgradeableToken is ERC20Basic, Burnable {
+contract UpgradeableToken is EIP20Token, Burnable {
   using SafeMath for uint;
 
   /** Contract / person who can set the upgrade path. This can be the same as team multisig wallet, as what it is with its default value. */
@@ -92,7 +92,7 @@ contract UpgradeableToken is ERC20Basic, Burnable {
     // Bad interface
     require(upgradeAgent.isUpgradeAgent());
     // Make sure that token supplies match in source and target
-    require(upgradeAgent.originalSupply() == totalSupply);
+    require(upgradeAgent.originalSupply() == totalSupply());
 
     UpgradeAgentSet(upgradeAgent);
   }
