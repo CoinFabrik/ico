@@ -47,7 +47,7 @@ contract TokenTranchePricing {
     // A tranche with amount zero can never be selected and is therefore useless.
     // This check and the one inside the loop ensure no tranche can have an amount equal to zero.
     require(init_tranches[amount_offset] > 0);
-    require(init_tranches[start_offset].add(1 hours) > block.timestamp);
+    require(init_tranches[start_offset] > block.timestamp);
 
     tranches.length = init_tranches.length.div(tranche_size);
     for (uint i = 0; i < init_tranches.length.div(tranche_size); i++) {
@@ -55,7 +55,7 @@ contract TokenTranchePricing {
       uint amount = init_tranches[i.mul(tranche_size).add(amount_offset)];
       uint start = init_tranches[i.mul(tranche_size).add(start_offset)];
       uint end = init_tranches[i.mul(tranche_size).add(end_offset)];
-      require(block.timestamp < start && start.add(1 hours) <= end);
+      require(block.timestamp < start && start <= end);
       // Bail out when entering unnecessary tranches
       // This is preferably checked before deploying contract into any blockchain.
       require(i == 0 || (end >= tranches[i.sub(1)].end && amount > tranches[i.sub(1)].amount) ||
