@@ -34,9 +34,9 @@ function config_f(web3) {
   
   const amounts = [new BigNumber("3500000"), new BigNumber("7000000"), new BigNumber("10500000")];
   const pre_ico_tranches_quantity = amounts.length;
-  const ico_tranches_quantity = tokens_per_wei.length - amounts.length;
-  const tranches_quantity = amounts.length + ico_tranches_quantity;
-  let ico_tranches_end = config.tests.startTime + 60*60*24*ico_tranches_quantity;
+  const tranches_quantity = tokens_per_wei.length;
+  const ico_tranches_quantity = tranches_quantity - pre_ico_tranches_quantity;
+  let ico_tranches_end = config.tests.startTime + 60*60*24;
 
   for (let i = pre_ico_tranches_quantity; i < tranches_quantity; i++) {
     amounts.push(amounts[i - 1].add(525*(10**4)));
@@ -49,8 +49,8 @@ function config_f(web3) {
 
   for (let i = 0; i < pre_ico_tranches_quantity; i++) {
     config.tranches.push(amounts[i]);
-    config.tranches.push(config.pre_ico_tranches_start);
-    config.tranches.push(config.pre_ico_tranches_end);
+    config.tranches.push(pre_ico_tranches_start);
+    config.tranches.push(pre_ico_tranches_end);
     config.tranches.push(tokens_per_wei[i]);
   }
 
@@ -59,7 +59,7 @@ function config_f(web3) {
     config.tranches.push(ico_tranches_start);
     config.tranches.push(ico_tranches_end);
     config.tranches.push(tokens_per_wei[i]);
-    ico_tranches_start += 60*60*24; 
+    ico_tranches_end += 60*60*24; 
   }
   
   config.tests.endTime = ico_tranches_end;
