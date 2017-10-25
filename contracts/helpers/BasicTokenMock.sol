@@ -1,9 +1,9 @@
 pragma solidity ^0.4.15;
 
-import '../BasicToken.sol';
+import '../StandardToken.sol';
 
 // Mock class for BasicToken contract
-contract BasicTokenMock is BasicToken {
+contract BasicTokenMock is StandardToken {
   
   /**
    * Made public for abvailability in tests
