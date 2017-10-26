@@ -1,5 +1,9 @@
 pragma solidity ^0.4.15;
 
+/**
+ * Authored by https://www.coinfabrik.com/
+ */
+
 import "./GenericCrowdsale.sol";
 import "./CrowdsaleToken.sol";
 import "./LostAndFoundToken.sol";
@@ -16,8 +20,18 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
   //Sets minimum value that can be bought (TODO: configure initial value)
   uint public minimum_buy_value = 1;
   
-  function Crowdsale(address team_multisig, uint start, uint end, address token_retriever, uint[] tranches)
-  TokenTranchePricing(tranches) GenericCrowdsale(team_multisig, start, end) public {
+  /**
+   * Constructor for the crowdsale.
+   * Normally, the token contract is created here. That way, the minting, release and transfer agents can be set here too.
+   *
+   * @param team_multisig Address of the multisignature wallet of the team that will receive all the funds contributed in the crowdsale.
+   * @param start Block number where the crowdsale will be officially started. It should be greater than the block number in which the contract is deployed.
+   * @param end Block number where the crowdsale finishes. No tokens can be sold through this contract after this block.
+   * @param token_retriever Address that will handle tokens accidentally sent to the token contract. See the LostAndFoundToken and CrowdsaleToken contracts for further details.
+   * @param init_tranches List of serialized tranches. See config.js and TokenTranchePricing for further details.
+   */
+  function Crowdsale(address team_multisig, uint start, uint end, address token_retriever, uint[] init_tranches)
+  GenericCrowdsale(team_multisig, start, end) TokenTranchePricing(init_tranches) public {
     // Testing values
     token = new CrowdsaleToken(token_initial_supply, token_decimals, team_multisig, token_mintable, token_retriever);
 
@@ -26,13 +40,14 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
     token.setTransferAgent(address(this), true);
     token.setReleaseAgent(address(this));
 
-    //Tokens to be sold through this contract
+    // Tokens to be sold through this contract
     token.mint(address(this), sellable_tokens);
   }
 
   //Token assignation through transfer
   function assignTokens(address receiver, uint tokenAmount) internal {
     token.transfer(receiver, tokenAmount);
+
   }
 
   //Token amount calculation
@@ -50,9 +65,21 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
     }
   }
 
-  // Implements the criterion of the funding state 
+  // Implements the criterion of the funding state
   function isCrowdsaleFull() internal constant returns (bool) {
     return tokensSold >= sellable_tokens;
+  }
+
+  /**
+   * Finalize a succcesful crowdsale.
+   *
+   * The owner can trigger post-crowdsale actions, like releasing the tokens.
+   * Note that by default tokens are not in a released state.
+   */
+  function finalize() public inState(State.Success) onlyOwner stopInEmergency {
+    // Uncomment if tokens should be released.
+    // token.releaseTokenTransfer();
+    super.finalize();
   }
 
   /**
