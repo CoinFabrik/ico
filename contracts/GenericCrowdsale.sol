@@ -91,6 +91,12 @@ contract GenericCrowdsale is Haltable {
   event Finalized();
 
 
+  /**
+   * Basic constructor for the crowdsale.
+   * @param team_multisig Address of the multisignature wallet of the team that will receive all the funds contributed in the crowdsale.
+   * @param start Block number where the crowdsale will be officially started. It should be greater than the block number in which the contract is deployed.
+   * @param end Block number where the crowdsale finishes. No tokens can be sold through this contract after this block.
+   */
   function GenericCrowdsale(address team_multisig, uint start, uint end) internal {
     setMultisig(team_multisig);
 
@@ -113,7 +119,7 @@ contract GenericCrowdsale is Haltable {
   /**
    * Make an investment.
    *
-   * Crowdsale must be running for one to invest.
+   * The crowdsale must be running for one to invest.
    * We must have not pressed the emergency brake.
    *
    * @param receiver The Ethereum address who receives the tokens
@@ -157,8 +163,9 @@ contract GenericCrowdsale is Haltable {
    *
    * No money is exchanged, as the crowdsale team already have received the payment.
    *
-   * @param fullTokens tokens as full tokens - decimal places added internally
-   * @param weiPrice Price of a single full token in wei
+   * @param receiver Account that receives the tokens.
+   * @param fullTokens tokens as full tokens - decimal places are added internally.
+   * @param weiPrice Price of a single indivisible token in wei.
    *
    */
   function preallocate(address receiver, uint fullTokens, uint weiPrice) public onlyOwner notFinished {
@@ -220,7 +227,7 @@ contract GenericCrowdsale is Haltable {
   /**
    * Finalize a succcesful crowdsale.
    *
-   * The owner can trigger a call the contract that provides post-crowdsale actions, like releasing the tokens.
+   * The owner can trigger post-crowdsale actions, like releasing the tokens.
    * Note that by default tokens are not in a released state.
    */
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
@@ -276,11 +283,6 @@ contract GenericCrowdsale is Haltable {
     else if (block.number < startsAt) return State.PreFunding;
     else if (block.number <= endsAt && !isCrowdsaleFull()) return State.Funding;
     else return State.Success;
-  }
-
-  /** Interface marker. */
-  function isCrowdsale() public constant returns (bool) {
-    return true;
   }
 
   /** Internal functions that exist to provide inversion of control should they be overriden */

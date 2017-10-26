@@ -2,19 +2,20 @@
  * This smart contract code is Copyright 2017 TokenMarket Ltd. For more information see https://tokenmarket.net
  *
  * Licensed under the Apache License, version 2.0: https://github.com/TokenMarketNet/ico/blob/master/LICENSE.txt
-*/
+ *
+ * Heavily modified by https://www.coinfabrik.com/
+ */
 
 pragma solidity ^0.4.15;
 
 import "./SafeMath.sol";
 
 /// @dev Tranche based pricing.
-///      Implementing "first price" tranches, meaning, that if buyers order is
+///      Implementing "first price" tranches, meaning, that if a buyer's order is
 ///      covering more than one tranche, the price of the lowest tranche will apply
 ///      to the whole order.
 contract TokenTranchePricing {
 
-  //TODO: use SafeMath everywhere
   using SafeMath for uint;
 
   /**
@@ -40,7 +41,7 @@ contract TokenTranchePricing {
 
   Tranche[] public tranches;
 
-  /// @dev Contruction, creating a list of tranches
+  /// @dev Construction, creating a list of tranches
   /// @param init_tranches Raw array of ordered tuples: (start amount, start block, end block, price)
   function TokenTranchePricing(uint[] init_tranches) public {
     // Need to have tuples, length check
