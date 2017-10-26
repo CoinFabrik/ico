@@ -1,4 +1,4 @@
-const config = require('../config.js')(web3);
+const config = require('../config.js')(web3, "privateTestnet");
 const assertFail = require('./helpers/assertFail');
 
 const SafeMath = artifacts.require('./SafeMath.sol');
