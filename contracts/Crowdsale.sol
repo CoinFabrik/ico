@@ -72,18 +72,6 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
   }
 
   /**
-   * Finalize a succcesful crowdsale.
-   *
-   * The owner can trigger post-crowdsale actions, like releasing the tokens.
-   * Note that by default tokens are not in a released state.
-   */
-  function finalize() public inState(State.Success) onlyOwner stopInEmergency {
-    // Uncomment if tokens should be released.
-    // token.releaseTokenTransfer();
-    super.finalize();
-  }
-
-  /**
    * This function decides who handles lost tokens.
    * Do note that this function is NOT meant to be used in a token refund mechanism.
    * Its sole purpose is determining who can move around ERC20 tokens accidentally sent to this contract.
