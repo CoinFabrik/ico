@@ -22,18 +22,19 @@ function config_f(web3, network) {
 
   config.tranches = [];
 
+  //Values for testing purposes only
   if (network != "liveNet") {
-    //TODO: configure dates
-    config.startTime = 1;
-    config.endTime = 1000000000000;
-    config.MW_address = "0x878d7ed5C194349F37b18688964E8db1EB0fcCa1";
+    config.multisig_owners = ["0x8ffc991fc4c4fc53329ad296c1afe41470cffbb3"];
 
-    //TODO: configure tranche dates
-    const pre_ico_tranches_start = Math.round(Date.now()/1000);
-    const pre_ico_tranches_end = Math.round(Date.now()/1000);
-    const ico_tranches_start = Math.round(Date.now()/1000);
-    const ico_tranches_end = Math.round(Date.now()/1000);
+    const half_year = 60*60*24*182;
+    const half_day = 60*60*12;
+    const pre_ico_tranches_start = web3.eth.getBlock("latest").timestamp + half_day;
+    const pre_ico_tranches_end = pre_ico_tranches_start + half_year;
+    const ico_tranches_start = pre_ico_tranches_start;
+    const ico_tranches_end = pre_ico_tranches_start + half_year;
 
+    config.startTime = ico_tranches_start;
+    config.endTime = ico_tranches_end;
 
     for (let i = 0; i < pre_ico_tranches_quantity; i++) {
       config.tranches.push(amounts[i]);
@@ -49,19 +50,19 @@ function config_f(web3, network) {
       config.tranches.push(tokens_per_wei[i]);
     }
   }
-  //Values for testing purposes only
+  // Main net configuration
   else {
-    config.multisig_owners = ["0x8ffc991fc4c4fc53329ad296c1afe41470cffbb3"];
+    config.MW_address = "0x878d7ed5C194349F37b18688964E8db1EB0fcCa1";
+    //TODO: configure dates
+    config.startTime = 1;
+    config.endTime = 1000000000000;
 
-    const half_year = 60*60*24*182;
-    const half_day = 60*60*12;
-    const pre_ico_tranches_start = web3.eth.getBlock("latest").timestamp + half_day;
-    const pre_ico_tranches_end = pre_ico_tranches_start + half_year;
-    const ico_tranches_start = pre_ico_tranches_start;
-    const ico_tranches_end = pre_ico_tranches_start + half_year;
+    //TODO: configure tranche dates
+    const pre_ico_tranches_start = Math.round(Date.now()/1000);
+    const pre_ico_tranches_end = Math.round(Date.now()/1000);
+    const ico_tranches_start = Math.round(Date.now()/1000);
+    const ico_tranches_end = Math.round(Date.now()/1000);
 
-    config.startTime = ico_tranches_start;
-    config.endTime = ico_tranches_end;
 
     for (let i = 0; i < config.pre_ico_tranches_quantity; i++) {
       config.tranches.push(amounts[i]);
