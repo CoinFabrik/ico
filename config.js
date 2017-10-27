@@ -11,7 +11,7 @@ function config_f(web3, network) {
     return ether_in_eur.dividedToIntegerBy(price);
   });
 
-  const amounts = [new BigNumber(60000), new BigNumber(120000), new BigNumber(200000)];
+  const amounts = [new BigNumber(60000000), new BigNumber(120000000), new BigNumber(200000000)];
   const pre_ico_tranches_quantity = amounts.length;
   for (let i = pre_ico_tranches_quantity; i < tranches_quantity; i++) {
     amounts.push(amounts[i - 1].add(50*(10**6)));
@@ -53,10 +53,12 @@ function config_f(web3, network) {
   else {
     config.multisig_owners = ["0x8ffc991fc4c4fc53329ad296c1afe41470cffbb3"];
 
-    const pre_ico_tranches_start = web3.eth.getBlock("latest").timestamp+(3*60);
-    const pre_ico_tranches_end = pre_ico_tranches_start+(3*60);
-    const ico_tranches_start = pre_ico_tranches_start+(5*60);
-    const ico_tranches_end = pre_ico_tranches_start+(60*60);
+    const half_year = 60*60*24*182;
+    const half_day = 60*60*12;
+    const pre_ico_tranches_start = web3.eth.getBlock("latest").timestamp + half_day;
+    const pre_ico_tranches_end = pre_ico_tranches_start + half_year;
+    const ico_tranches_start = pre_ico_tranches_start;
+    const ico_tranches_end = pre_ico_tranches_start + half_year;
 
     config.startTime = ico_tranches_start;
     config.endTime = ico_tranches_end;
