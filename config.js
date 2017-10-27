@@ -26,10 +26,10 @@ function config_f(web3, network) {
   if (network != "liveNet") {
     config.multisig_owners = ["0xf19258256b06324c7516b00bf5c76af001ee1e95"];
     config.startTime = Math.round((new Date(2017, 10, 28)).getTime() / 1000);
-    const pre_ico_tranches_start = config.startTime - 60*60*24*3;
-    const pre_ico_tranches_end = config.startTime;
-    const ico_tranches_start = config.startTime;
-    let ico_tranches_end = config.startTime + 60*60*24;
+    const pre_ico_tranches_start = config.startTime;
+    const pre_ico_tranches_end = config.startTime + 60*60*24*3;
+    const ico_tranches_start = pre_ico_tranches_end;
+    let ico_tranches_end = ico_tranches_start + 60*60*24;
 
     for (let i = 0; i < pre_ico_tranches_quantity; i++) {
       config.tranches.push(amounts[i]);
