@@ -49,7 +49,6 @@ contract TokenTranchePricing {
     // A tranche with amount zero can never be selected and is therefore useless.
     // This check and the one inside the loop ensure no tranche can have an amount equal to zero.
     require(init_tranches[amount_offset] > 0);
-    require(init_tranches[start_offset] > block.timestamp);
 
     tranches.length = init_tranches.length.div(tranche_size);
     Tranche memory tranche;
