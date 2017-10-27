@@ -10,7 +10,7 @@ function config_f(web3, network) {
   const amounts = [new BigNumber("3500000"), new BigNumber("7000000"), new BigNumber("10500000")];
   const pre_ico_tranches_quantity = amounts.length;
   const ico_tranches_quantity = tranches_quantity - pre_ico_tranches_quantity;
-  
+
   for (let i = pre_ico_tranches_quantity; i < tranches_quantity; i++) {
     amounts.push(amounts[i - 1].add(525*(10**4)));
   }
@@ -44,7 +44,7 @@ function config_f(web3, network) {
       ico_tranches_end += 60*60*24; 
     }
 
-    config.endTime = ico_tranches_end;
+    config.endTime = config.tranches[config.tranches.length - 2];
   }
   // Main net configuration
   else {
