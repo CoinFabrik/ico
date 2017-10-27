@@ -11,7 +11,7 @@ function config_f(web3, network) {
   const pre_ico_tranches_quantity = amounts.length;
   const ico_tranches_quantity = tranches_quantity - pre_ico_tranches_quantity;
 
-  const amounts = [new BigNumber(60000), new BigNumber(120000), new BigNumber(200000)];
+  const amounts = [new BigNumber(60000000), new BigNumber(120000000), new BigNumber(200000000)];
   const pre_ico_tranches_quantity = amounts.length;
   for (let i = pre_ico_tranches_quantity; i < tranches_quantity; i++) {
     amounts.push(amounts[i - 1].add(525*(10**4)));
@@ -22,7 +22,35 @@ function config_f(web3, network) {
 
   config.tranches = [];
 
+  //Values for testing purposes only
   if (network != "liveNet") {
+    config.multisig_owners = ["0xf19258256b06324c7516b00bf5c76af001ee1e95"];
+    config.startTime = Math.round((new Date(2017, 10, 28)).getTime() / 1000);
+    const pre_ico_tranches_start = config.startTime - 60*60*24*3;
+    const pre_ico_tranches_end = config.startTime;
+    const ico_tranches_start = config.startTime;
+    let ico_tranches_end = config.startTime + 60*60*24;
+
+    for (let i = 0; i < pre_ico_tranches_quantity; i++) {
+      config.tranches.push(amounts[i]);
+      config.tranches.push(pre_ico_tranches_start);
+      config.tranches.push(pre_ico_tranches_end);
+      config.tranches.push(tokens_per_wei[i]);
+    }
+
+    for (let i = pre_ico_tranches_quantity; i < tranches_quantity; i++) {
+      config.tranches.push(amounts[i]);
+      config.tranches.push(ico_tranches_start);
+      config.tranches.push(ico_tranches_end);
+      config.tranches.push(tokens_per_wei[i]);
+      ico_tranches_end += 60*60*24; 
+    }
+
+    config.endTime = ico_tranches_end;
+  }
+  // Main net configuration
+  else {
+    //TODO: Set appropriate start to crowdsale. No whitelisting should be necessary.
     config.startTime = Math.round((new Date(2017, 12, 1)).getTime() / 1000);
     config.endTime = Math.round((new Date(2018, 1, 31)).getTime() / 1000);
     //TODO: set appropriate multisig for mainnet deployment
@@ -48,32 +76,6 @@ function config_f(web3, network) {
       config.tranches.push(tranches_end[i]);
       config.tranches.push(tokens_per_wei[i]);
     }
-  }
-  //Values for testing purposes only
-  else {
-    config.multisig_owners = ["0xf19258256b06324c7516b00bf5c76af001ee1e95"];
-    config.startTime = Math.round((new Date(2017, 10, 30)).getTime() / 1000);
-    const pre_ico_tranches_start = config.startTime - 60*60*24*3;
-    const pre_ico_tranches_end = config.startTime;
-    const ico_tranches_start = config.startTime;
-    let ico_tranches_end = config.startTime + 60*60*24;
-
-    for (let i = 0; i < pre_ico_tranches_quantity; i++) {
-      config.tranches.push(amounts[i]);
-      config.tranches.push(pre_ico_tranches_start);
-      config.tranches.push(pre_ico_tranches_end);
-      config.tranches.push(tokens_per_wei[i]);
-    }
-
-    for (let i = pre_ico_tranches_quantity; i < tranches_quantity; i++) {
-      config.tranches.push(amounts[i]);
-      config.tranches.push(ico_tranches_start);
-      config.tranches.push(ico_tranches_end);
-      config.tranches.push(tokens_per_wei[i]);
-      ico_tranches_end += 60*60*24; 
-    }
-
-    config.endTime = ico_tranches_end;
   }
 
   return config;
