@@ -1,4 +1,4 @@
-const config = require('../config.js')(web3);
+const config = require('../config.js')(web3, "notLiveNet");
 
 const advanceBlock = require('./helpers/advanceBlock');
 const advanceToBlock = require('./helpers/advanceToBlock');
