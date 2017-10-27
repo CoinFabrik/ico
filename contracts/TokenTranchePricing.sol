@@ -51,21 +51,22 @@ contract TokenTranchePricing {
     require(init_tranches[amount_offset] > 0);
 
     tranches.length = init_tranches.length.div(tranche_size);
-    for (uint i = 0; i < init_tranches.length.div(tranche_size); i++) {
+    Tranche memory tranche;
+    for (uint i = 0; i < tranches.length; i++) {
+      uint tranche_offset = i.mul(tranche_size);
+      uint amount = init_tranches[tranche_offset.add(amount_offset)];
+      uint start = init_tranches[tranche_offset.add(start_offset)];
+      uint end = init_tranches[tranche_offset.add(end_offset)];
+      uint price = init_tranches[tranche_offset.add(price_offset)];
       // No invalid steps
-      uint amount = init_tranches[i.mul(tranche_size).add(amount_offset)];
-      uint start = init_tranches[i.mul(tranche_size).add(start_offset)];
-      uint end = init_tranches[i.mul(tranche_size).add(end_offset)];
       require(block.number < start && start < end);
       // Bail out when entering unnecessary tranches
       // This is preferably checked before deploying contract into any blockchain.
-      require(i == 0 || (end >= tranches[i.sub(1)].end && amount > tranches[i.sub(1)].amount) ||
-              (end > tranches[i.sub(1)].end && amount >= tranches[i.sub(1)].amount));
+      require(i == 0 || (end >= tranche.end && amount > tranche.amount) ||
+              (end > tranche.end && amount >= tranche.amount));
 
-      tranches[i].amount = amount;
-      tranches[i].price = init_tranches[i.mul(tranche_size).add(price_offset)];
-      tranches[i].start = start;
-      tranches[i].end = end;
+      tranche = Tranche(amount, start, end, price);
+      tranches[i] = tranche;
     }
   }
 
@@ -85,7 +86,7 @@ contract TokenTranchePricing {
   /// @dev Get the current price. May revert if there is no tranche currently active.
   /// @param tokensSold total amount of tokens sold, for calculating the current tranche
   /// @return The current price
-  function getCurrentPrice(uint tokensSold) public constant returns (uint result) {
+  function getCurrentPrice(uint tokensSold) internal constant returns (uint result) {
     return getCurrentTranche(tokensSold).price;
   }
 
