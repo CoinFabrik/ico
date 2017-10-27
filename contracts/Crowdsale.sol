@@ -94,7 +94,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
    *
    * @param customerId UUIDv4 that identifies this contributor
    */
-  function buyWithSignedAddress(uint128 customerId, uint8 v, bytes32 r, bytes32 s) public payable valueIsBigEnough validCustomerId(customerId) {
+  function buyWithSignedAddress(uint128 customerId, uint8 v, bytes32 r, bytes32 s) public payable investmentIsBigEnough(msg.sender) validCustomerId(customerId) {
     super.buyWithSignedAddress(customerId, v, r, s);
   }
 
@@ -104,7 +104,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
    * 
    * @param customerId UUIDv4 that identifies this contributor
    */
-  function buyWithCustomerId(uint128 customerId) public payable valueIsBigEnough validCustomerId(customerId) unsignedBuyAllowed {
+  function buyWithCustomerId(uint128 customerId) public payable investmentIsBigEnough(msg.sender) validCustomerId(customerId) unsignedBuyAllowed {
     super.buyWithCustomerId(customerId) ;
   }
 
@@ -113,7 +113,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
    *
    * Pay for funding, get invested tokens back in the sender address.
    */
-  function buy() public payable valueIsBigEnough unsignedBuyAllowed {
+  function buy() public payable investmentIsBigEnough(msg.sender) unsignedBuyAllowed {
     super.buy();
   }
 
@@ -135,8 +135,8 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
     super.enableLostAndFound(agent, tokens, token_contract);
   }
 
-  modifier valueIsBigEnough() {
-    require(msg.value >= minimum_buy_value);
+  modifier investmentIsBigEnough(address agent) {
+    require(msg.value.add(investedAmountOf[agent]) >= minimum_buy_value);
     _;
   }
 }
