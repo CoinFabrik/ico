@@ -9,7 +9,7 @@ module.exports = {
         gasPrice: 5000000000
     },
     ropsten: {
-      host: "192.168.0.186",
+      host: "localhost",
       port: 8545,
       network_id: "3", // Match any network id
       // from: "0x485de458fbcac6a7d35227842d652641384cb333", //// Defaults to the first available account provided by your Ethereum client.
@@ -25,7 +25,7 @@ module.exports = {
       gasPrice: 20000000000
     },
     privateTestnet:{
-      host: "192.168.0.186",
+      host: "localhost",
       port: 7999,
       network_id: 666,
       //from: default,
