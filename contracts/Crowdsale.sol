@@ -125,6 +125,12 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
     super.finalize();
   }
 
+  //Change the the ending time in order to be able to finalize the crowdsale if needed.
+  function setEndingTime(uint endingTime) public onlyOwner notFinished {
+    require(endingTime > block.timestamp && endingTime > startsAt);
+    endsAt = endingTime;
+  }
+
   /**
    * Override to reject calls unless the crowdsale is finalized or
    *  the token contract is not the one corresponding to this crowdsale
