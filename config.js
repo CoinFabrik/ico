@@ -23,7 +23,7 @@ function config_f(web3, network) {
   //Values for testing purposes only
   if (network != "liveNet") {
     config.multisig_owners = ["0xf19258256b06324c7516b00bf5c76af001ee1e95"];
-    config.startTime = Math.round((new Date(2017, 10, 28)).getTime() / 1000);
+    config.startTime = Math.round((new Date(2017, 10, 2)).getTime() / 1000);
     const pre_ico_tranches_start = config.startTime;
     const pre_ico_tranches_end = config.startTime + 60*60*24*3;
     const ico_tranches_start = pre_ico_tranches_end;
@@ -49,22 +49,22 @@ function config_f(web3, network) {
   // Main net configuration
   else {
     //TODO: Set appropriate start to crowdsale. No whitelisting should be necessary.
-    config.startTime = Math.round((new Date(2017, 12, 1)).getTime() / 1000);
-    config.endTime = Math.round((new Date(2018, 1, 31)).getTime() / 1000);
+    config.startTime = Math.round((new Date(2017, 11, 1)).getTime() / 1000);
+    config.endTime = Math.round((new Date(2018, 0, 31)).getTime() / 1000);
     //TODO: set appropriate multisig for mainnet deployment
     config.MW_address = "0xe190E5cb7E5E5BE452Dc3C3B34033C7213D3B4df";
 
-    const pre_ico_tranches_start = Math.round((new Date(2017, 11, 7)).getTime() / 1000);
-    const pre_ico_tranches_end = [Math.round((new Date(2017, 11, 14)).getTime() / 1000), 
-                                  Math.round((new Date(2017, 11, 21)).getTime() / 1000),
+    const pre_ico_tranches_start = Math.round((new Date(2017, 10, 7)).getTime() / 1000);
+    const pre_ico_tranches_end = [Math.round((new Date(2017, 10, 14)).getTime() / 1000), 
+                                  Math.round((new Date(2017, 10, 21)).getTime() / 1000),
                                   config.startTime];
     const ico_tranches_start = config.startTime;
-    const ico_tranches_end = [Math.round((new Date(2017, 12, 8)).getTime() / 1000),
-                              Math.round((new Date(2017, 12, 15)).getTime() / 1000),
-                              Math.round((new Date(2017, 12, 22)).getTime() / 1000),
-                              Math.round((new Date(2017, 12, 31)).getTime() / 1000),
-                              Math.round((new Date(2018, 1, 7)).getTime() / 1000),
-                              Math.round((new Date(2018, 1, 20)).getTime() / 1000),
+    const ico_tranches_end = [Math.round((new Date(2017, 11, 8)).getTime() / 1000),
+                              Math.round((new Date(2017, 11, 15)).getTime() / 1000),
+                              Math.round((new Date(2017, 11, 22)).getTime() / 1000),
+                              Math.round((new Date(2017, 11, 31)).getTime() / 1000),
+                              Math.round((new Date(2018, 0, 7)).getTime() / 1000),
+                              Math.round((new Date(2018, 0, 20)).getTime() / 1000),
                               config.endTime];
     const tranches_end = pre_ico_tranches_end.concat(ico_tranches_end);
 
