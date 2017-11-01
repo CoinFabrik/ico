@@ -36,10 +36,10 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken {
   function assignTokens(address receiver, uint tokenAmount) internal;
 
   //TODO: implement token amount calculation
-  function calculateTokenAmount(uint weiAmount, address agent) internal constant returns (uint weiAllowed, uint tokenAmount);
+  function calculateTokenAmount(uint weiAmount, address agent) internal view returns (uint weiAllowed, uint tokenAmount);
 
   //TODO: implement to control funding state criterion
-  function isCrowdsaleFull() internal constant returns (bool full);
+  function isCrowdsaleFull() internal view returns (bool full);
 
   /**
    * Finalize a succcesful crowdsale.
@@ -58,7 +58,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken {
    * Do note that this function is NOT meant to be used in a token refund mecahnism.
    * Its sole purpose is determining who can move around ERC20 tokens accidentally sent to this contract.
    */
-  function getLostAndFoundMaster() internal constant returns (address) {
+  function getLostAndFoundMaster() internal view returns (address) {
     return owner;
   }
 

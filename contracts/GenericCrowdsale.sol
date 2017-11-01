@@ -278,7 +278,7 @@ contract GenericCrowdsale is Haltable {
    * This function has the timed transition builtin.
    * So there is no chance of the variable being stale.
    */
-  function getState() public constant returns (State) {
+  function getState() public view returns (State) {
     if (finalized) return State.Finalized;
     else if (block.number < startsAt) return State.PreFunding;
     else if (block.number <= endsAt && !isCrowdsaleFull()) return State.Funding;
@@ -293,7 +293,7 @@ contract GenericCrowdsale is Haltable {
   /**
    *  Determine if the goal was already reached in the current crowdsale
    */
-  function isCrowdsaleFull() internal constant returns (bool full);
+  function isCrowdsaleFull() internal view returns (bool full);
 
   /**
    * Returns any excess wei received
@@ -316,7 +316,7 @@ contract GenericCrowdsale is Haltable {
    *  @return weiAllowed The amount of wei accepted in this transaction.
    *  @return tokenAmount The tokens that are assigned to the agent in this transaction.
    */
-  function calculateTokenAmount(uint weiAmount, address agent) internal constant returns (uint weiAllowed, uint tokenAmount);
+  function calculateTokenAmount(uint weiAmount, address agent) internal view returns (uint weiAllowed, uint tokenAmount);
 
   //
   // Modifiers

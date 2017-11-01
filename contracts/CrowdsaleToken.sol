@@ -61,11 +61,11 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Los
   /**
    * Allow upgrade agent functionality to kick in only if the crowdsale was a success.
    */
-  function canUpgrade() public constant returns(bool) {
+  function canUpgrade() public view returns(bool) {
     return released && super.canUpgrade();
   }
 
-  function getLostAndFoundMaster() internal constant returns(address) {
+  function getLostAndFoundMaster() internal view returns(address) {
     return lost_and_found_master;
   }
 
