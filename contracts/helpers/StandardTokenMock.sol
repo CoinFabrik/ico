@@ -7,4 +7,11 @@ contract StandardTokenMock is StandardToken {
   function mint(address receiver, uint amount) public {
     mintInternal(receiver, amount);
   }
+  
+  /**
+   * Made public for abvailability in tests
+   */
+  function burnTokensMock(address account, uint value) public {
+    super.burnTokens(account, value);
+  }
 }
