@@ -17,8 +17,8 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
   bool private constant token_mintable = true;
   uint private constant sellable_tokens = 6 * (10 ** 5) * (10 ** uint(token_decimals));
   
-  //Sets minimum value that can be bought (TODO: configure initial value)
-  uint public minimum_buy_value = 1;
+  //Sets minimum value that can be bought
+  uint public minimum_buy_value = 19 * (10 ** 18);
   
   /**
    * Constructor for the crowdsale.
