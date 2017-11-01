@@ -28,7 +28,7 @@ contract toBeUpgraded is UpgradeableToken, StandardToken {
   /**
    * Overriden for testing different values
    */
-  function canUpgrade() public constant returns(bool) {
+  function canUpgrade() public view returns(bool) {
      return canUp;
   }
 }

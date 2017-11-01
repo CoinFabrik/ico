@@ -13,7 +13,7 @@ contract LostAndFoundToken {
   /**
    * @return Address of the account that handles movements.
    */
-  function getLostAndFoundMaster() internal constant returns (address);
+  function getLostAndFoundMaster() internal view returns (address);
 
   /**
    * @param agent Address that will be able to move tokens with transferFrom
