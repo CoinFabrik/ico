@@ -2,7 +2,7 @@ function config_f(web3, network) {
   const config = {};
   const BigNumber = web3.BigNumber;
 
-  const ether_in_eur = new BigNumber(287.31);
+  const ether_in_eur = new BigNumber(263.57);
   const eur_per_fulltokens = [new BigNumber(0.07), new BigNumber(0.08), new BigNumber(0.09), new BigNumber(0.10),
                               new BigNumber(0.11), new BigNumber(0.12), new BigNumber(0.13), new BigNumber(0.14),
                               new BigNumber(0.15), new BigNumber(0.16), new BigNumber(0.17)];
@@ -53,25 +53,13 @@ function config_f(web3, network) {
   // Main net configuration
   else {
     config.MW_address = "0x878d7ed5C194349F37b18688964E8db1EB0fcCa1";
-    //TODO: configure dates
-    config.startTime = 1;
-    config.endTime = 1000000000000;
+    config.startTime = Math.round((new Date(2017, 12, 6)).getTime() / 1000);
+    config.endTime = Math.round((new Date(2018, 5, 6)).getTime() / 1000);
 
-    //TODO: configure tranche dates
-    const pre_ico_tranches_start = Math.round(Date.now()/1000);
-    const pre_ico_tranches_end = Math.round(Date.now()/1000);
-    const ico_tranches_start = Math.round(Date.now()/1000);
-    const ico_tranches_end = Math.round(Date.now()/1000);
+    const ico_tranches_start = Math.round((new Date(2017, 11, 6)).getTime() / 1000);
+    const ico_tranches_end = config.endTime;
 
-
-    for (let i = 0; i < config.pre_ico_tranches_quantity; i++) {
-      config.tranches.push(amounts[i]);
-      config.tranches.push(pre_ico_tranches_start);
-      config.tranches.push(pre_ico_tranches_end);
-      config.tranches.push(tokens_per_wei[i]);
-    }
-
-    for (let i = config.pre_ico_tranches_quantity; i < config.tranches_quantity; i++) {
+    for (let i = 0; i < config.tranches_quantity; i++) {
       config.tranches.push(amounts[i]);
       config.tranches.push(ico_tranches_start);
       config.tranches.push(ico_tranches_end);
