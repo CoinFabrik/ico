@@ -127,7 +127,7 @@ contract UpgradeableToken is EIP20Token, Burnable {
   /**
    * Child contract can override to provide the condition in which the upgrade can begin.
    */
-  function canUpgrade() public constant returns(bool) {
+  function canUpgrade() public pure returns(bool) {
      return true;
   }
 
