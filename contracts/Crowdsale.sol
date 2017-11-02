@@ -125,6 +125,12 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
     super.finalize();
   }
 
+  //Change the the starting time in order to end the presale period early if needed.
+  function setStartingTime(uint startingTime) public onlyOwner inState(State.PreFunding) {
+    require(startingTime > block.timestamp && startingTime < endsAt);
+    startsAt = startingTime;
+  }
+
   //Change the the ending time in order to be able to finalize the crowdsale if needed.
   function setEndingTime(uint endingTime) public onlyOwner notFinished {
     require(endingTime > block.timestamp && endingTime > startsAt);
