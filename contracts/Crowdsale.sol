@@ -52,7 +52,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
   }
 
   //Token amount calculation
-  function calculateTokenAmount(uint weiAmount, address) internal constant returns (uint weiAllowed, uint tokenAmount){
+  function calculateTokenAmount(uint weiAmount, address) internal view returns (uint weiAllowed, uint tokenAmount){
     uint tokensPerWei = getCurrentPrice(tokensSold);
     uint maxAllowed = sellable_tokens.sub(tokensSold).div(tokensPerWei);
     weiAllowed = maxAllowed.min256(weiAmount);
@@ -67,7 +67,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
   }
 
   // Implements the criterion of the funding state
-  function isCrowdsaleFull() internal constant returns (bool) {
+  function isCrowdsaleFull() internal view returns (bool) {
     return tokensSold >= sellable_tokens;
   }
 
@@ -76,7 +76,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
    * Do note that this function is NOT meant to be used in a token refund mechanism.
    * Its sole purpose is determining who can move around ERC20 tokens accidentally sent to this contract.
    */
-  function getLostAndFoundMaster() internal constant returns (address) {
+  function getLostAndFoundMaster() internal view returns (address) {
     return owner;
   }
 

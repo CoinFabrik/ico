@@ -73,7 +73,7 @@ contract TokenTranchePricing {
   /// @dev Get the current tranche or bail out if there is no tranche defined for the current block.
   /// @param tokensSold total amount of tokens sold, for calculating the current tranche
   /// @return Returns the struct representing the current tranche
-  function getCurrentTranche(uint tokensSold) private constant returns (Tranche storage) {
+  function getCurrentTranche(uint tokensSold) private view returns (Tranche storage) {
     for (uint i = 0; i < tranches.length; i++) {
       if (tranches[i].start <= block.timestamp && block.timestamp < tranches[i].end && tokensSold < tranches[i].amount) {
         return tranches[i];
@@ -86,7 +86,7 @@ contract TokenTranchePricing {
   /// @dev Get the current price. May revert if there is no tranche currently active.
   /// @param tokensSold total amount of tokens sold, for calculating the current tranche
   /// @return The current price
-  function getCurrentPrice(uint tokensSold) internal constant returns (uint result) {
+  function getCurrentPrice(uint tokensSold) internal view returns (uint result) {
     return getCurrentTranche(tokensSold).price;
   }
 

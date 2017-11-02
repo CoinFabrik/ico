@@ -100,7 +100,7 @@ contract UpgradeableToken is EIP20Token, Burnable {
   /**
    * Get the state of the token upgrade.
    */
-  function getUpgradeState() public constant returns(UpgradeState) {
+  function getUpgradeState() public view returns(UpgradeState) {
     if (!canUpgrade()) return UpgradeState.NotAllowed;
     else if (address(upgradeAgent) == 0x00) return UpgradeState.WaitingForAgent;
     else if (totalUpgraded == 0) return UpgradeState.ReadyToUpgrade;
@@ -127,7 +127,7 @@ contract UpgradeableToken is EIP20Token, Burnable {
   /**
    * Child contract can override to provide the condition in which the upgrade can begin.
    */
-  function canUpgrade() public pure returns(bool) {
+  function canUpgrade() public view returns(bool) {
      return true;
   }
 
