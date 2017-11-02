@@ -1,4 +1,4 @@
-pragma solidity ^0.4.15;
+pragma solidity ^0.4.18;
 
 /**
  * Authored by https://www.coinfabrik.com/
@@ -123,6 +123,12 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
     uint unsoldTokens = token.balanceOf(address(this));
     token.transfer(multisigWallet, unsoldTokens);
     super.finalize();
+  }
+
+  //Change the the starting time in order to end the presale period early if needed.
+  function setStartingTime(uint startingTime) public onlyOwner inState(State.PreFunding) {
+    require(startingTime > block.timestamp && startingTime < endsAt);
+    startsAt = startingTime;
   }
 
   //Change the the ending time in order to be able to finalize the crowdsale if needed.
