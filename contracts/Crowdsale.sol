@@ -48,11 +48,10 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
   //Token assignation through transfer
   function assignTokens(address receiver, uint tokenAmount) internal {
     token.transfer(receiver, tokenAmount);
-
   }
 
   //Token amount calculation
-  function calculateTokenAmount(uint weiAmount, address) internal view returns (uint weiAllowed, uint tokenAmount){
+  function calculateTokenAmount(uint weiAmount, address) internal view returns (uint weiAllowed, uint tokenAmount) {
     uint tokensPerWei = getCurrentPrice(tokensSold);
     uint maxAllowed = sellable_tokens.sub(tokensSold).div(tokensPerWei);
     weiAllowed = maxAllowed.min256(weiAmount);
@@ -105,7 +104,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
    * @param customerId UUIDv4 that identifies this contributor
    */
   function buyWithCustomerId(uint128 customerId) public payable investmentIsBigEnough(msg.sender) validCustomerId(customerId) unsignedBuyAllowed {
-    super.buyWithCustomerId(customerId) ;
+    super.buyWithCustomerId(customerId);
   }
 
   /**
@@ -143,7 +142,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
    */
   function enableLostAndFound(address agent, uint tokens, EIP20Token token_contract) public {
     // Either the state is finalized or the token_contract is not this crowdsale token
-    require( address(token_contract) != address(token) || getState() == State.Finalized );
+    require(address(token_contract) != address(token) || getState() == State.Finalized);
     super.enableLostAndFound(agent, tokens, token_contract);
   }
 

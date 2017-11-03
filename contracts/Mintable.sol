@@ -12,6 +12,7 @@ contract Mintable {
 
   /**
    * @dev Mints tokens for an account
+   * This function should emit the Minted event.
    */
   function mintInternal(address receiver, uint amount) internal;
 
