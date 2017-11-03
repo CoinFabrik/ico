@@ -3,19 +3,6 @@ abi.Crowdsale = [
     {
       "constant": true,
       "inputs": [],
-      "name": "ownerTestValue",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint8"
-        }
-      ],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
       "name": "requireCustomerId",
       "outputs": [
         {
@@ -24,6 +11,7 @@ abi.Crowdsale = [
         }
       ],
       "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -37,19 +25,7 @@ abi.Crowdsale = [
         }
       ],
       "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "minimumFundingGoal",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -63,6 +39,7 @@ abi.Crowdsale = [
         }
       ],
       "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -81,32 +58,38 @@ abi.Crowdsale = [
         }
       ],
       "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
       "constant": true,
-      "inputs": [],
-      "name": "finalizeAgent",
-      "outputs": [
-        {
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": false,
       "inputs": [
         {
-          "name": "newCap",
+          "name": "",
           "type": "uint256"
         }
       ],
-      "name": "setFundingCap",
-      "outputs": [],
+      "name": "tranches",
+      "outputs": [
+        {
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "name": "start",
+          "type": "uint256"
+        },
+        {
+          "name": "end",
+          "type": "uint256"
+        },
+        {
+          "name": "price",
+          "type": "uint256"
+        }
+      ],
       "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -128,6 +111,35 @@ abi.Crowdsale = [
       "name": "preallocate",
       "outputs": [],
       "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "endingTime",
+          "type": "uint256"
+        }
+      ],
+      "name": "setEndingTime",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "startingTime",
+          "type": "uint256"
+        }
+      ],
+      "name": "setStartingTime",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -141,19 +153,29 @@ abi.Crowdsale = [
         }
       ],
       "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
-      "constant": true,
-      "inputs": [],
-      "name": "isCrowdsale",
-      "outputs": [
+      "constant": false,
+      "inputs": [
         {
-          "name": "",
-          "type": "bool"
+          "name": "agent",
+          "type": "address"
+        },
+        {
+          "name": "tokens",
+          "type": "uint256"
+        },
+        {
+          "name": "token_contract",
+          "type": "address"
         }
       ],
+      "name": "enableLostAndFound",
+      "outputs": [],
       "payable": false,
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -162,19 +184,7 @@ abi.Crowdsale = [
       "name": "finalize",
       "outputs": [],
       "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "weiFundingCap",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -188,6 +198,7 @@ abi.Crowdsale = [
         }
       ],
       "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -205,27 +216,21 @@ abi.Crowdsale = [
       "name": "setEarlyParticipantWhitelist",
       "outputs": [],
       "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [],
-      "name": "refund",
-      "outputs": [],
-      "payable": false,
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
       "constant": true,
       "inputs": [],
-      "name": "weiRefunded",
+      "name": "signerAddress",
       "outputs": [
         {
           "name": "",
-          "type": "uint256"
+          "type": "address"
         }
       ],
       "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -234,25 +239,13 @@ abi.Crowdsale = [
       "name": "halt",
       "outputs": [],
       "payable": false,
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
       "constant": true,
       "inputs": [],
-      "name": "pricingStrategy",
-      "outputs": [
-        {
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "loadedRefund",
+      "name": "minimum_buy_value",
       "outputs": [
         {
           "name": "",
@@ -260,19 +253,7 @@ abi.Crowdsale = [
         }
       ],
       "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "isMinimumGoalReached",
-      "outputs": [
-        {
-          "name": "reached",
-          "type": "bool"
-        }
-      ],
-      "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -286,14 +267,7 @@ abi.Crowdsale = [
       "name": "setRequireCustomerId",
       "outputs": [],
       "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [],
-      "name": "loadRefund",
-      "outputs": [],
-      "payable": true,
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -307,6 +281,7 @@ abi.Crowdsale = [
         }
       ],
       "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -320,6 +295,7 @@ abi.Crowdsale = [
         }
       ],
       "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -338,6 +314,7 @@ abi.Crowdsale = [
         }
       ],
       "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -351,6 +328,7 @@ abi.Crowdsale = [
       "name": "buyWithCustomerId",
       "outputs": [],
       "payable": true,
+      "stateMutability": "payable",
       "type": "function"
     },
     {
@@ -359,19 +337,7 @@ abi.Crowdsale = [
       "name": "buy",
       "outputs": [],
       "payable": true,
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "isFinalizerSane",
-      "outputs": [
-        {
-          "name": "sane",
-          "type": "bool"
-        }
-      ],
-      "payable": false,
+      "stateMutability": "payable",
       "type": "function"
     },
     {
@@ -385,6 +351,7 @@ abi.Crowdsale = [
         }
       ],
       "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -398,6 +365,7 @@ abi.Crowdsale = [
         }
       ],
       "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -411,19 +379,7 @@ abi.Crowdsale = [
         }
       ],
       "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "val",
-          "type": "uint8"
-        }
-      ],
-      "name": "setOwnerTestValue",
-      "outputs": [],
-      "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -442,6 +398,7 @@ abi.Crowdsale = [
         }
       ],
       "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -450,6 +407,35 @@ abi.Crowdsale = [
       "name": "unhalt",
       "outputs": [],
       "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "newValue",
+          "type": "uint256"
+        }
+      ],
+      "name": "setMinimumBuyValue",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "requiredSignedAddress",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -463,19 +449,25 @@ abi.Crowdsale = [
         }
       ],
       "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
-      "constant": true,
-      "inputs": [],
-      "name": "ceilingStrategy",
-      "outputs": [
+      "constant": false,
+      "inputs": [
         {
-          "name": "",
+          "name": "value",
+          "type": "bool"
+        },
+        {
+          "name": "signer",
           "type": "address"
         }
       ],
+      "name": "setRequireSignedAddress",
+      "outputs": [],
       "payable": false,
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -489,6 +481,33 @@ abi.Crowdsale = [
       "name": "transferOwnership",
       "outputs": [],
       "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "customerId",
+          "type": "uint128"
+        },
+        {
+          "name": "v",
+          "type": "uint8"
+        },
+        {
+          "name": "r",
+          "type": "bytes32"
+        },
+        {
+          "name": "s",
+          "type": "bytes32"
+        }
+      ],
+      "name": "buyWithSignedAddress",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
       "type": "function"
     },
     {
@@ -502,32 +521,39 @@ abi.Crowdsale = [
         }
       ],
       "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
       "inputs": [
         {
-          "name": "_multisigWallet",
+          "name": "team_multisig",
           "type": "address"
         },
         {
-          "name": "_start",
+          "name": "start",
           "type": "uint256"
         },
         {
-          "name": "_end",
+          "name": "end",
           "type": "uint256"
         },
         {
-          "name": "_minimumFundingGoal",
-          "type": "uint256"
+          "name": "token_retriever",
+          "type": "address"
+        },
+        {
+          "name": "init_tranches",
+          "type": "uint256[]"
         }
       ],
       "payable": false,
+      "stateMutability": "nonpayable",
       "type": "constructor"
     },
     {
       "payable": true,
+      "stateMutability": "payable",
       "type": "fallback"
     },
     {
@@ -562,25 +588,18 @@ abi.Crowdsale = [
       "inputs": [
         {
           "indexed": false,
-          "name": "investor",
-          "type": "address"
+          "name": "requireCId",
+          "type": "bool"
         },
         {
           "indexed": false,
-          "name": "weiAmount",
-          "type": "uint256"
-        }
-      ],
-      "name": "Refund",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
+          "name": "requireSignedAddress",
+          "type": "bool"
+        },
         {
           "indexed": false,
-          "name": "requireCId",
-          "type": "bool"
+          "name": "signer",
+          "type": "address"
         }
       ],
       "name": "InvestmentPolicyChanged",
@@ -614,153 +633,12 @@ abi.Crowdsale = [
       "inputs": [
         {
           "indexed": false,
-          "name": "newFundingCap",
-          "type": "uint256"
-        }
-      ],
-      "name": "FundingCapSet",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
           "name": "halted",
           "type": "bool"
         }
       ],
       "name": "Halted",
       "type": "event"
-    }
-  ];
-abi.FixedCeiling = [
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "weiLimitPerAddress",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "chunkedWeiMultiple",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "isCeilingStrategy",
-      "outputs": [
-        {
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "tentativeAmount",
-          "type": "uint256"
-        },
-        {
-          "name": "weiRaised",
-          "type": "uint256"
-        },
-        {
-          "name": "weiInvestedBySender",
-          "type": "uint256"
-        },
-        {
-          "name": "weiFundingCap",
-          "type": "uint256"
-        }
-      ],
-      "name": "weiAllowedToReceive",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "newCap",
-          "type": "uint256"
-        },
-        {
-          "name": "weiRaised",
-          "type": "uint256"
-        }
-      ],
-      "name": "relaxFundingCap",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "weiRaised",
-          "type": "uint256"
-        },
-        {
-          "name": "weiFundingCap",
-          "type": "uint256"
-        }
-      ],
-      "name": "isCrowdsaleFull",
-      "outputs": [
-        {
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "name": "multiple",
-          "type": "uint256"
-        },
-        {
-          "name": "limit",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "type": "constructor"
     }
   ];
 
