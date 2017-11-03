@@ -8,16 +8,15 @@ pragma solidity ^0.4.18;
 import "./Ownable.sol";
 import "./SafeMath.sol";
 import "./Mintable.sol";
-import "./EIP20Token.sol";
 
 /**
- * A token that can increase its supply by another contract.
+ * A public interface to increase the supply of a token.
  *
  * This allows uncapped crowdsale by dynamically increasing the supply when money pours in.
- * Only mint agents, contracts whitelisted by owner, can mint new tokens.
+ * Only mint agents, usually contracts whitelisted by the owner, can mint new tokens.
  *
  */
-contract MintableToken is EIP20Token, Mintable, Ownable {
+contract MintableToken is Mintable, Ownable {
 
   using SafeMath for uint;
 
@@ -35,7 +34,7 @@ contract MintableToken is EIP20Token, Mintable, Ownable {
     require(mintable || initialSupply != 0);
     // Create initially all balance on the team multisig
     if (initialSupply > 0)
-        mintInternal(multisig, initialSupply);
+      mintInternal(multisig, initialSupply);
     // No more new supply allowed after the token creation
     mintingFinished = !mintable;
   }
@@ -47,14 +46,6 @@ contract MintableToken is EIP20Token, Mintable, Ownable {
    */
   function mint(address receiver, uint amount) onlyMintAgent canMint public {
     mintInternal(receiver, amount);
-
-    // TODO: Remove this. It may be confused with anonymous transfers in the upcoming fork.
-    //       When doing so, remove the EIP20Token dependency from this contract too.
-    // This will make the mint transaction appear in EtherScan.io
-    // We can remove this after there is a standardized minting event
-    Transfer(0, receiver, amount);
-
-    Minted(receiver, amount);
   }
 
   /**

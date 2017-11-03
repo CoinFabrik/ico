@@ -132,6 +132,7 @@ contract StandardToken is EIP20Token, Burnable, Mintable {
   function burnTokens(address account, uint value) internal {
     balances[account] = balances[account].sub(value);
     total_supply = total_supply.sub(value);
+    Transfer(account, 0, value);
     Burned(account, value);
   }
 
@@ -141,18 +142,12 @@ contract StandardToken is EIP20Token, Burnable, Mintable {
   function mintInternal(address receiver, uint amount) internal {
     total_supply = total_supply.add(amount);
     balances[receiver] = balances[receiver].add(amount);
+    Minted(receiver, amount);
+
+    // Beware: Address zero may be used for special transactions in a future fork.
+    // This will make the mint transaction appear in EtherScan.io
+    // We can remove this after there is a standardized minting event
+    Transfer(0, receiver, amount);
   }
-
-
-  /**
-   * Obsolete. Removed this check based on:
-   * https://blog.coinfabrik.com/smart-contract-short-address-attack-mitigation-failure/
-   * @dev Fix for the ERC20 short address attack.
-   *
-   * modifier onlyPayloadSize(uint size) {
-   *    require(msg.data.length >= size + 4);
-   *    _;
-   * }
-   */
   
 }
