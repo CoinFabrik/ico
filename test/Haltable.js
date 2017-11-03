@@ -20,15 +20,12 @@ contract('Haltable', function() {
 
   it("Should return correct values", async function(){
     haltable = await (Haltable.new({from: web3.eth.accounts[0]}));
-    //(3).should.be.equal(3);
-    (await haltable.halted()).should.be.equal(false);
+    (await haltable.halted()).should.equal(false);
     await haltable.halt({from: web3.eth.accounts[0]});
-    //await delay_promise(5000);
-    //await (console.log(await haltable.halted()));
-    (await haltable.halted()).should.be.equal(true);
+    (await haltable.halted()).should.equal(true);
     await haltable.unhalt({from: web3.eth.accounts[0]});
-    (await haltable.halted()).should.be.equal(false);
-    await haltable.halt({from: web3.eth.accounts[1]}).should.rejected;
-    (await haltable.halted()).should.be.equal(false);
+    (await haltable.halted()).should.equal(false);
+    await haltable.halt({from: web3.eth.accounts[1]}).should.be.rejected;
+    (await haltable.halted()).should.equal(false);
   });
 });
