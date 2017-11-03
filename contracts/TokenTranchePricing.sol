@@ -51,7 +51,7 @@ contract TokenTranchePricing {
     require(init_tranches[amount_offset] > 0);
 
     tranches.length = init_tranches.length.div(tranche_size);
-    Tranche memory tranche;
+    Tranche memory last_tranche;
     for (uint i = 0; i < tranches.length; i++) {
       uint tranche_offset = i.mul(tranche_size);
       uint amount = init_tranches[tranche_offset.add(amount_offset)];
@@ -62,11 +62,11 @@ contract TokenTranchePricing {
       require(block.timestamp < start && start < end);
       // Bail out when entering unnecessary tranches
       // This is preferably checked before deploying contract into any blockchain.
-      require(i == 0 || (end >= tranche.end && amount > tranche.amount) ||
-              (end > tranche.end && amount >= tranche.amount));
+      require(i == 0 || (end >= last_tranche.end && amount > last_tranche.amount) ||
+              (end > last_tranche.end && amount >= last_tranche.amount));
 
-      tranche = Tranche(amount, start, end, price);
-      tranches[i] = tranche;
+      last_tranche = Tranche(amount, start, end, price);
+      tranches[i] = last_tranche;
     }
   }
 

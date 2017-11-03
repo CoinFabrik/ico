@@ -22,6 +22,8 @@ contract LostAndFoundToken {
    */
   function enableLostAndFound(address agent, uint tokens, EIP20Token token_contract) public {
     require(msg.sender == getLostAndFoundMaster());
+    // We use approve instead of transfer to minimize the possibility of the lost and found master
+    //  getting them stuck in another address by accident.
     token_contract.approve(agent, tokens);
   }
 }
