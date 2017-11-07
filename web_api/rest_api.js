@@ -5,7 +5,7 @@ const Web3 = require("web3");
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const fs = require('fs');
+// const fs = require('fs');
 
 // const web3 = new Web3(new Web3.providers.IpcProvider(config.ipc_file, net));
 const web3 = new Web3(new Web3.providers.HttpProvider(config.nodeIpPort));
