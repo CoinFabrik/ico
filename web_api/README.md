@@ -1,4 +1,4 @@
-The API server depends on web3, express and body-parser being installed globally through npm.
+The API server depends on web3 and express being installed globally through npm.
 To launch the API server, execute `node rest_api.js`. By default, it listens on the port 8080.
 
 
