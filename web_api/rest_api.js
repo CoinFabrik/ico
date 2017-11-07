@@ -94,7 +94,7 @@ async function init_async(object, prop_key, promise) {
 async function get_crowdsale_state(block_number) {
   // We return the amount raised, number of investors,
   // progress of the current phase and current phase number.
-  const state = { "current_block": block_number, "average_block_time": average_block_time };
+  const state = { "current_block": block_number};
   const promises = [];
 
   promises.push(init_async(state, "sold_tokens", async_call(crowdsale.tokensSold.call, block_number).then((sold) => { return web3.fromWei(sold);})));
