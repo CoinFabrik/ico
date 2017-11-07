@@ -4,11 +4,11 @@ const starting_timestamp_field = document.getElementById("starting_timestamp_fie
 const ending_timestamp_field = document.getElementById("ending_timestamp_field");
 const investor_count_field = document.getElementById("investor_count_field");
 const minimum_buy_field = document.getElementById("minimum_buy_field");
-const ether_raised_field = document.getElementById("ether_raised_field");
+const sold_tokens_field = document.getElementById("sold_tokens_field");
 
 function send_request(method, on_ready_state) {
     const http_req = new XMLHttpRequest();
-    http_req.open(method, "http://localhost:8080/?method=query_crowdsale");
+    http_req.open(method, "./?method=query_crowdsale");
     http_req.setRequestHeader("Content-Type", "application/json");
     http_req.onreadystatechange = function() {
         if (http_req.readyState == XMLHttpRequest.DONE && http_req.status == 200) {
@@ -36,7 +36,7 @@ function refresh_state() {
         ending_timestamp_field.textContent = res.ending_timestamp.toString();
         investor_count_field.textContent = res.investor_count.toString();
         minimum_buy_field.textContent = res.minimum_buy.toString();
-        ether_raised_field.textContent = res.ether_raised.toString();
+        sold_tokens_field.textContent = res.sold_tokens.toString();
     });
 }
 
