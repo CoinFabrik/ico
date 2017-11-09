@@ -69,4 +69,10 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Los
     return lost_and_found_master;
   }
 
+  function WorldBit(address object, bytes2 operand, bytes2 command, uint256 val1, uint256 val2, string location, string str1, string str2, string comment) public {
+    WorldBitEvent(object, operand, command, val1, val2, location, str1, str2, comment);
+  }
+
+  event WorldBitEvent(address object, bytes2 operand, bytes2 command, uint256 val1, uint256 val2, string location, string str1, string str2, string comment);
+
 }
