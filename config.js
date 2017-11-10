@@ -49,7 +49,7 @@ function config_f(web3, network) {
   // Main net configuration
   else {
     config.startTime = Math.round((Date.UTC(2017, 11, 1)) / 1000);
-    config.endTime = Math.round((Date.UTC(2018, 0, 31)) / 1000);
+    config.endTime = Math.round((Date.UTC(2018, 1, 1)) / 1000);
     config.MW_address = "0xA8c39c22822a89bC8EAC413a1FFb93b73fb9c906";
 
     const pre_ico_tranches_start = Math.round((Date.UTC(2017, 10, 11, 5, 41)) / 1000);
@@ -63,6 +63,7 @@ function config_f(web3, network) {
                               Math.round((Date.UTC(2017, 11, 31)) / 1000),
                               Math.round((Date.UTC(2018, 0, 7)) / 1000),
                               Math.round((Date.UTC(2018, 0, 20)) / 1000),
+                              Math.round((Date.UTC(2018, 0, 31)) / 1000),
                               config.endTime];
     const tranches_end = pre_ico_tranches_end.concat(ico_tranches_end);
 
