@@ -23,7 +23,7 @@ function config_f(web3, network) {
   //Values for testing purposes only
   if (network != "liveNet") {
     config.multisig_owners = ["0xf19258256b06324c7516b00bf5c76af001ee1e95"];
-    config.startTime = Math.round((new Date(2017, 10, 2)).getTime() / 1000);
+    config.startTime = Math.round((new Date(2017, 10, 15)).getTime() / 1000);
     const pre_ico_tranches_start = config.startTime;
     const pre_ico_tranches_end = config.startTime + 60*60*24*3;
     const ico_tranches_start = pre_ico_tranches_end;
