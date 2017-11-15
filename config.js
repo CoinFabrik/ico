@@ -11,13 +11,13 @@ function config_f(web3, network) {
     return ether_in_eur.dividedToIntegerBy(price);
   });
 
-  const amounts = [new BigNumber(60000000), new BigNumber(120000000), new BigNumber(200000000)];
+  let amounts = [new BigNumber(60000000), new BigNumber(120000000), new BigNumber(200000000)];
   const pre_ico_tranches_quantity = amounts.length;
   for (let i = pre_ico_tranches_quantity; i < tranches_quantity; i++) {
     amounts.push(amounts[i - 1].add(50*(10**6)));
   }
-  amounts.forEach(function(amount) {
-    return amount.times(10**18);
+  amounts = amounts.map(function(amount) {
+    return amount.times((new BigNumber(10)).toPower(18));
   });
 
   config.tranches = [];
