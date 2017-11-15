@@ -24,21 +24,20 @@ function config_f(web3, network) {
   if (network != "liveNet") {
     config.multisig_owners = ["0xf19258256b06324c7516b00bf5c76af001ee1e95"];
     config.startTime = Math.round((new Date(2017, 10, 15)).getTime() / 1000);
-    const pre_ico_tranches_start = config.startTime;
+    const tranches_start = config.startTime;
     const pre_ico_tranches_end = config.startTime + 60*60*24*3;
-    const ico_tranches_start = pre_ico_tranches_end;
-    let ico_tranches_end = ico_tranches_start + 60*60*24;
+    let ico_tranches_end = tranches_start + 60*60*24;
 
     for (let i = 0; i < pre_ico_tranches_quantity; i++) {
       config.tranches.push(amounts[i]);
-      config.tranches.push(pre_ico_tranches_start);
+      config.tranches.push(tranches_start);
       config.tranches.push(pre_ico_tranches_end);
       config.tranches.push(tokens_per_wei[i]);
     }
 
     for (let i = pre_ico_tranches_quantity; i < tranches_quantity; i++) {
       config.tranches.push(amounts[i]);
-      config.tranches.push(ico_tranches_start);
+      config.tranches.push(tranches_start);
       config.tranches.push(ico_tranches_end);
       config.tranches.push(tokens_per_wei[i]);
       ico_tranches_end += 60*60*24; 
@@ -48,28 +47,27 @@ function config_f(web3, network) {
   }
   // Main net configuration
   else {
-    config.startTime = Math.round((Date.UTC(2017, 11, 1)) / 1000);
-    config.endTime = Math.round((Date.UTC(2018, 1, 1)) / 1000);
+    config.startTime = Math.round((Date.UTC(2017, 10, 23)) / 1000);
+    config.endTime = Math.round((Date.UTC(2018, 1, 20)) / 1000);
     config.MW_address = "0xA8c39c22822a89bC8EAC413a1FFb93b73fb9c906";
 
-    const pre_ico_tranches_start = Math.round((Date.UTC(2017, 10, 11, 5, 41)) / 1000);
-    const pre_ico_tranches_end = [Math.round((Date.UTC(2017, 10, 14)) / 1000), 
-                                  Math.round((Date.UTC(2017, 10, 21)) / 1000),
-                                  config.startTime];
-    const ico_tranches_start = config.startTime;
-    const ico_tranches_end = [Math.round((Date.UTC(2017, 11, 8)) / 1000),
-                              Math.round((Date.UTC(2017, 11, 15)) / 1000),
-                              Math.round((Date.UTC(2017, 11, 22)) / 1000),
-                              Math.round((Date.UTC(2017, 11, 31)) / 1000),
-                              Math.round((Date.UTC(2018, 0, 7)) / 1000),
-                              Math.round((Date.UTC(2018, 0, 20)) / 1000),
-                              Math.round((Date.UTC(2018, 0, 31)) / 1000),
-                              config.endTime];
-    const tranches_end = pre_ico_tranches_end.concat(ico_tranches_end);
+    const tranches_start = Math.round((Date.UTC(2017, 10, 19)) / 1000);
+
+    const tranches_end = [ Math.round((Date.UTC(2017, 10, 30)) / 1000),
+                           Math.round((Date.UTC(2017, 11, 7)) / 1000),
+                           Math.round((Date.UTC(2017, 11, 18)) / 1000),
+                           Math.round((Date.UTC(2017, 11, 25)) / 1000),
+                           Math.round((Date.UTC(2018, 0, 1)) / 1000),
+                           Math.round((Date.UTC(2018, 0, 8)) / 1000),
+                           Math.round((Date.UTC(2018, 0, 15)) / 1000),
+                           Math.round((Date.UTC(2018, 0, 22)) / 1000),
+                           Math.round((Date.UTC(2018, 1, 2)) / 1000),
+                           Math.round((Date.UTC(2018, 1, 14)) / 1000),
+                           config.endTime];
 
     for (let i = 0; i < tranches_quantity; i++) {
       config.tranches.push(amounts[i]);
-      config.tranches.push(i < pre_ico_tranches_quantity ? pre_ico_tranches_start : ico_tranches_start);
+      config.tranches.push(tranches_start);
       config.tranches.push(tranches_end[i]);
       config.tranches.push(tokens_per_wei[i]);
     }
