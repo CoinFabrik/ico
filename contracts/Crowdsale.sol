@@ -16,10 +16,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
   uint private constant token_initial_supply = 1575 * (10 ** 5) * (10 ** uint(token_decimals));
   bool private constant token_mintable = true;
   uint private constant sellable_tokens = 525 * (10 ** 5) * (10 ** uint(token_decimals));
-  
-  //Sets minimum value that can be bought (TODO: configure initial value)
-  uint public minimum_buy_value = 6 * (10 ** 18);
-  
+
   /**
    * Constructor for the crowdsale.
    * Normally, the token contract is created here. That way, the minting, release and transfer agents can be set here too.
@@ -79,43 +76,6 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
     return owner;
   }
 
-  /**
-   * @dev Sets new minimum buy value for a transaction. Only the owner can call it.
-   */
-  function setMinimumBuyValue(uint newValue) public onlyOwner {
-    minimum_buy_value = newValue;
-  }
-
-  /**
-   * Investing function that recognizes the payer and verifies that he is allowed to invest.
-   *
-   * Overwritten to add configurable minimum value
-   *
-   * @param customerId UUIDv4 that identifies this contributor
-   */
-  function buyWithSignedAddress(uint128 customerId, uint8 v, bytes32 r, bytes32 s) public payable investmentIsBigEnough(msg.sender) validCustomerId(customerId) {
-    super.buyWithSignedAddress(customerId, v, r, s);
-  }
-
-
-  /**
-   * Investing function that recognizes the payer.
-   * 
-   * @param customerId UUIDv4 that identifies this contributor
-   */
-  function buyWithCustomerId(uint128 customerId) public payable investmentIsBigEnough(msg.sender) validCustomerId(customerId) unsignedBuyAllowed {
-    super.buyWithCustomerId(customerId);
-  }
-
-  /**
-   * The basic entry point to participate in the crowdsale process.
-   *
-   * Pay for funding, get invested tokens back in the sender address.
-   */
-  function buy() public payable investmentIsBigEnough(msg.sender) unsignedBuyAllowed {
-    super.buy();
-  }
-
   // Extended to transfer unused funds to team team_multisig and release the token
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
     token.releaseTokenTransfer();
@@ -144,10 +104,5 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
     // Either the state is finalized or the token_contract is not this crowdsale token
     require(address(token_contract) != address(token) || getState() == State.Finalized);
     super.enableLostAndFound(agent, tokens, token_contract);
-  }
-
-  modifier investmentIsBigEnough(address agent) {
-    require(msg.value.add(investedAmountOf[agent]) >= minimum_buy_value);
-    _;
   }
 }
