@@ -7,14 +7,14 @@ function config_f(web3, network) {
                           new BigNumber(300), new BigNumber(290), new BigNumber(280)];
   const tranches_quantity = tokens_per_wei.length;
   
-  const amounts = [new BigNumber("3500000"), new BigNumber("7000000"), new BigNumber("10500000")];
+  let amounts = [new BigNumber("3500000"), new BigNumber("7000000"), new BigNumber("10500000")];
   const pre_ico_tranches_quantity = amounts.length;
   const ico_tranches_quantity = tranches_quantity - pre_ico_tranches_quantity;
 
   for (let i = pre_ico_tranches_quantity; i < tranches_quantity; i++) {
     amounts.push(amounts[i - 1].add(525*(10**4)));
   }
-  amounts.forEach(function(amount) {
+  amounts = amounts.map(function(amount) {
     return amount.times((new BigNumber(10)).toPower(18));
   });
 
