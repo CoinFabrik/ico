@@ -1,4 +1,4 @@
-pragma solidity ^0.4.15
+pragma solidity ^0.4.15;
 
 // Interface for burning tokens
 contract Burnable {
