@@ -43,6 +43,8 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
 
     // Tokens to be sold through this contract
     token.mint(address(this), sellable_tokens);
+    // We don't need to mint anymore during the lifetime of the contract.
+    token.setMintAgent(address(this), false);
   }
 
   //Token assignation through transfer
