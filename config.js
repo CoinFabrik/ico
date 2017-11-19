@@ -51,7 +51,7 @@ function config_f(web3, network) {
     config.endTime = Math.round((Date.UTC(2018, 1, 20)) / 1000);
     config.MW_address = "0xA8c39c22822a89bC8EAC413a1FFb93b73fb9c906";
 
-    const tranches_start = Math.round((Date.UTC(2017, 10, 19)) / 1000);
+    const tranches_start = Math.round((Date.UTC(2017, 10, 19, 18)) / 1000);
 
     const tranches_end = [ Math.round((Date.UTC(2017, 10, 30)) / 1000),
                            Math.round((Date.UTC(2017, 11, 7)) / 1000),
