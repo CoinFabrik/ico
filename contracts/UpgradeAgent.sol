@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.15
 
 /**
  * Inspired by Lunyr.
@@ -22,7 +22,7 @@ contract UpgradeAgent {
   uint public originalSupply;
 
   /** Interface to ensure the contract is correctly configured */
-  function isUpgradeAgent() public pure returns (bool) {
+  function isUpgradeAgent() public constant returns (bool) {
     return true;
   }
 

@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.15
 
 import '../UpgradeableToken.sol';
 import '../StandardToken.sol';
@@ -28,7 +28,7 @@ contract toBeUpgraded is UpgradeableToken, StandardToken {
   /**
    * Overriden for testing different values
    */
-  function canUpgrade() public view returns(bool) {
+  function canUpgrade() public constant returns(bool) {
      return canUp;
   }
 }

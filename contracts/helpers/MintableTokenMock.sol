@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.15
 
 import "../MintableToken.sol";
 
@@ -15,7 +15,7 @@ contract MintableTokenMock is MintableToken {
     balances[receiver] = balances[receiver].add(amount);
   }
 
-  function totalSupply() public view returns (uint) { return total_supply; }
-  function balanceOf(address customer) public view returns (uint) { return balances[customer]; }
+  function totalSupply() public constant returns (uint) { return total_supply; }
+  function balanceOf(address customer) public constant returns (uint) { return balances[customer]; }
   function transfer(address, uint) public returns (bool) { revert(); }
 }

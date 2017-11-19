@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.15
 
 /**
  * Originally from https://github.com/TokenMarketNet/ico
@@ -61,11 +61,11 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Los
   /**
    * Allow upgrade agent functionality to kick in only if the crowdsale was a success.
    */
-  function canUpgrade() public view returns(bool) {
+  function canUpgrade() public constant returns(bool) {
     return released && super.canUpgrade();
   }
 
-  function getLostAndFoundMaster() internal view returns(address) {
+  function getLostAndFoundMaster() internal constant returns(address) {
     return lost_and_found_master;
   }
 
