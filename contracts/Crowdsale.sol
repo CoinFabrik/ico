@@ -41,8 +41,13 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
     token.setTransferAgent(address(this), true);
     token.setReleaseAgent(address(this));
 
+    // Allow the multisig to transfer tokens
+    token.setTransferAgent(team_multisig, true);
+
     // Tokens to be sold through this contract
     token.mint(address(this), sellable_tokens);
+    // We don't need to mint anymore during the lifetime of the contract.
+    token.setMintAgent(address(this), false);
   }
 
   //Token assignation through transfer
