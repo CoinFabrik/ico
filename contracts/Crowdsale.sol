@@ -121,11 +121,12 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
     super.buy();
   }
 
-  // Extended to transfer unused funds to team team_multisig and release the token
+  // Extended to transfer half of the unused funds to the team's multisig and release the token
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
     token.releaseTokenTransfer();
     uint unsoldTokens = token.balanceOf(address(this));
-    token.transfer(multisigWallet, unsoldTokens);
+    token.burn(unsoldTokens.div(2));
+    token.transfer(multisigWallet, unsoldTokens - unsoldTokens.div(2));
     super.finalize();
   }
 
