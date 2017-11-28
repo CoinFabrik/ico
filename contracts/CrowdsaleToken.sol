@@ -69,4 +69,12 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Los
     return lost_and_found_master;
   }
 
+  /**
+   * We allow anyone to burn their tokens if they wish to do so.
+   * We want to use this in the finalize function of the crowdsale in particular.
+   */
+  function burn(uint amount) public {
+    burnTokens(msg.sender, amount);
+  }
+
 }
