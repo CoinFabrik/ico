@@ -28,9 +28,11 @@ function config_f(web3, network) {
 
     const half_year = 60*60*24*182;
     const half_day = 60*60*12;
-    const pre_ico_tranches_start = web3.eth.getBlock("latest").timestamp + half_day;
-    const pre_ico_tranches_end = pre_ico_tranches_start + half_year;
-    const ico_tranches_start = pre_ico_tranches_start;
+    const three_minutes = 60 * 3;
+
+    const pre_ico_tranches_start = web3.eth.getBlock("latest").timestamp + three_minutes;
+    const pre_ico_tranches_end = pre_ico_tranches_start + three_minutes;
+    const ico_tranches_start = pre_ico_tranches_end;
     const ico_tranches_end = pre_ico_tranches_start + half_year;
 
     config.startTime = ico_tranches_start;

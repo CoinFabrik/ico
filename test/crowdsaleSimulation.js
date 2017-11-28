@@ -283,8 +283,8 @@ contract('Crowdsale', function(accounts) {
       randomAccountIndex = Math.round((Math.random() * (accounts.length-2)) + 1);
       await mineTransaction({"etherToSend":investment, "sender":accounts[randomAccountIndex], "operation":crowdsale.buy, "expectedResult":"success"});
       investedAmount = await crowdsale.investedAmountOf(accounts[randomAccountIndex]);
-      assert.isTrue(web3.fromWei(investedAmount).greaterThan(investmentPerAccount[radomAccountIndex]]));
-      investmentPerAccount[randomAccountIndex] = investmentPerAccount[radomAccountIndex]].plus(investment);
+      assert.isTrue(web3.fromWei(investedAmount).greaterThan(investmentPerAccount[radomAccountIndex]));
+      investmentPerAccount[randomAccountIndex] = investmentPerAccount[radomAccountIndex].plus(investment);
       available_tokens = await crowdsaleToken.balanceOf(crowdsale.address);
     } 
 
