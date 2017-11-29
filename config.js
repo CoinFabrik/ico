@@ -2,16 +2,17 @@ function config_f(web3, network) {
   const config = {};
   const BigNumber = web3.BigNumber;
 
-  const ether_in_eur = new BigNumber(263.57);
-  const eur_per_fulltokens = [new BigNumber(0.07), new BigNumber(0.08), new BigNumber(0.09), new BigNumber(0.10),
-                              new BigNumber(0.11), new BigNumber(0.12), new BigNumber(0.13), new BigNumber(0.14),
-                              new BigNumber(0.15), new BigNumber(0.16), new BigNumber(0.17)];
+  const ether_in_eur = new BigNumber(400);
+  const eur_per_fulltokens = [new BigNumber(0.10), new BigNumber(0.11),
+                              new BigNumber(0.12), new BigNumber(0.14),
+                              new BigNumber(0.17), new BigNumber(0.20),
+                              new BigNumber(0.25)];
   const tranches_quantity = eur_per_fulltokens.length;
   const tokens_per_wei = eur_per_fulltokens.map(function(price) {
     return ether_in_eur.dividedToIntegerBy(price);
   });
 
-  let amounts = [new BigNumber(60000000), new BigNumber(120000000), new BigNumber(200000000)];
+  let amounts = [new BigNumber(300000000)];
   const pre_ico_tranches_quantity = amounts.length;
   for (let i = pre_ico_tranches_quantity; i < tranches_quantity; i++) {
     amounts.push(amounts[i - 1].add(50*(10**6)));
@@ -55,10 +56,10 @@ function config_f(web3, network) {
   // Main net configuration
   else {
     config.MW_address = "0x878d7ed5C194349F37b18688964E8db1EB0fcCa1";
-    config.startTime = Math.round((new Date(2017, 11, 6)).getTime() / 1000);
-    config.endTime = Math.round((new Date(2018, 4, 6)).getTime() / 1000);
+    config.startTime = Math.round((new Date(2018, 0, 6)).getTime() / 1000);
+    config.endTime = Math.round((new Date(2018, 5, 6)).getTime() / 1000);
 
-    const ico_tranches_start = Math.round((new Date(2017, 10, 6)).getTime() / 1000);
+    const ico_tranches_start = Math.round((new Date(2017, 11, 6)).getTime() / 1000);
     const ico_tranches_end = config.endTime;
 
     for (let i = 0; i < config.tranches_quantity; i++) {
