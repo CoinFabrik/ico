@@ -36,7 +36,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken {
   function assignTokens(address receiver, uint tokenAmount) internal;
 
   //TODO: implement token amount calculation
-  function calculateTokenAmount(uint weiAmount, address agent) internal view returns (uint weiAllowed, uint tokenAmount);
+  function calculateTokenAmount(uint weiAmount, address receiver) internal view returns (uint weiAllowed, uint tokenAmount);
 
   //TODO: implement to control funding state criterion
   function isCrowdsaleFull() internal view returns (bool full);
