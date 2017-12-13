@@ -68,7 +68,7 @@ require('chai')
   async function timestamp_await(target_timestamp) {
     const actual_timestamp = await web3.eth.getBlock("latest").timestamp;
     if (actual_timestamp < target_timestamp) {
-      await delay_promise(5*1000);
+      await delay_promise(1000);
       return timestamp_await(target_timestamp);
     } else {
       return actual_timestamp;
@@ -91,6 +91,11 @@ contract('Crowdsale', function(accounts) {
   let crowdsaleToken;
   let crowdsale;
   let mulisigwallet;
+
+  // let signer = accounts[0];
+  // let signed_address = web3.eth.sign(signer, accounts[3]);
+
+
 
   const init_prom = MultiSigWallet.deployed()
   .then(function(instance) {
@@ -119,10 +124,14 @@ contract('Crowdsale', function(accounts) {
 
   async function mineTransaction({operation, sender, etherToSend, receiver, tokensToSend, expectedResult, id}) {
     let txHash;
-    if (operation == crowdsale.buy) {
+    if (operation == crowdsale.fallback) {
+
+    } else if (operation == crowdsale.buy) {
       txHash = await operation.sendTransaction({value: web3.toWei(etherToSend), gas: GAS, gasPrice: GAS_PRICE, from: sender});
     } else if (operation == crowdsale.buyWithCustomerId) {
       txHash = await operation.sendTransaction(id, {value: web3.toWei(etherToSend), gas: GAS, gasPrice: GAS_PRICE, from: sender});
+    /*} else if (operation == crowdsale.buyWithSignedAddress) {
+      txHash = await operation.sendTransaction(id, {})*/
     } else if (operation == crowdsale.halt || operation == crowdsale.unhalt || operation == crowdsale.finalize) {
       return operation();
     } else if (operation == crowdsaleToken.transfer) {
@@ -159,34 +168,46 @@ contract('Crowdsale', function(accounts) {
    
   it_synched("Checks that nobody can buy before the pre-ico starts", async function() {
     await mineTransaction({"operation":crowdsale.setEarlyParticipantWhitelist, "receiver": accounts[1]});
-    const actual_date = await web3.eth.getBlock("latest").timestamp;
-    const first_tranche = await crowdsale.tranches(0);
-    if (actual_date + minutes(1) < first_tranche[start_offset].toNumber()) {
-      await mineTransaction({"etherToSend":3, "sender":accounts[0], "operation":crowdsale.buy, "expectedResult":"failure"});
-      await mineTransaction({"etherToSend":3, "sender":accounts[1], "operation":crowdsale.buy, "expectedResult":"failure"});
-      (await crowdsaleToken.balanceOf(accounts[0])).should.be.bignumber.and.equal(0);
-      (await crowdsaleToken.balanceOf(accounts[1])).should.be.bignumber.and.equal(0);
-    } else {
-      console.log("Not tested because of start date been passed");
+    let different_buys = [{"etherToSend":3, "sender":accounts[1], "operation":crowdsale.fallback, "expectedResult":"failure"}, \
+                {"etherToSend":3, "sender":accounts[1], "operation":crowdsale.buy, "expectedResult":"failure"}, \
+                {"etherToSend":3, "sender":accounts[1], "operation":crowdsale.buyWithCustomerId, "expectedResult":"failure"}];
+    
+    let actual_date = await web3.eth.getBlock("latest").timestamp;
+    const pre_ico_start = await crowdsale.tranches(0)[start_offset].toNumber();
+    for (let i = 0; i < different_buys.length; i++) {
+      if (actual_date + seconds(10) > pre_ico_start) {
+        console.log("At least two buy cases couldn't be checked");
+        assert.isTrue(false);
+        break;
+      }
+      //Checks an specific buy funciton with a whitelisted address
+      await mineTransaction(different_buys[i]);
+      //Checks an specific buy funciton with a non-whitelisted address
+      await mineTransaction(Object.assign(different_buys[i],{"sender": accounts[2]}));
+      actual_date = await web3.eth.getBlock("latest").timestamp;
     }
   });
 
 
   it_synched("Checks that whitelisted early investors can buy during pre-ico", async function() {
-    const first_tranche = await crowdsale.tranches(0);
-    const actual_date_X = await web3.eth.getBlock("latest").timestamp;
-    const actual_date = await timestamp_await(first_tranche[start_offset].toNumber());
-    if (actual_date > first_tranche[start_offset].toNumber() && actual_date + minutes(1) < first_tranche[end_offset].toNumber()) {
-      const etherToSend = 3;
-      await mineTransaction({"etherToSend":etherToSend, "sender":accounts[1], "operation":crowdsale.buy, "expectedResult":"success"});
-      investmentPerAccount[1] = investmentPerAccount[1].plus(etherToSend);
-      const balance = await crowdsaleToken.balanceOf(accounts[1]);
-      assert.isTrue(balance.greaterThan(0));
-      (await crowdsale.investorCount()).should.be.bignumber.and.equal(1);
-    } else {
-      console.log("Not tested because of pre-ico passed");
+    let different_buys = [{"etherToSend":3, "sender":accounts[1], "operation":crowdsale.fallback, "expectedResult":"success"}, \
+                          {"etherToSend":3, "sender":accounts[1], "operation":crowdsale.buy, "expectedResult":"success"}, \
+                          {"etherToSend":3, "sender":accounts[1], "operation":crowdsale.buyWithCustomerId, "expectedResult":"success"}, \
+                          {"etherToSend":3, "sender":accounts[1], "operation":crowdsale.buyWithSignedAddress, "expectedResult":"success"}];
+    const pre_ico_start = await crowdsale.tranches(0)[start_offset].toNumber();
+    let actual_date = await timestamp_await(pre_ico_start);
+    for (let i = 0; i < different_buys.length; i++) {
+      if (actual_date + seconds(10) > pre_ico_start) {
+        console.log("At least two buy cases couldn't be checked");
+        assert.isTrue(false);
+        break;
+      }
+      //Checks an specific buy funciton with a whitelisted address
+      await mineTransaction(different_buys[i]);
+      //Checks an specific buy funciton with a non-whitelisted address
+      await mineTransaction(Object.assign(different_buys[i],{"sender": accounts[2]}));
+      actual_date = await web3.eth.getBlock("latest").timestamp;
     }
-    // let expectedBalance = web3.toBigNumber(10**decimals*web3.toWei(etherToSend)).dividedBy(tokensInWei);
   });
   
   it_synched("Checks that non-whitelisted investors cannot buy during pre-ico", async function() {
