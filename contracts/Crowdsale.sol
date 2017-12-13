@@ -8,6 +8,7 @@ import "./GenericCrowdsale.sol";
 import "./CrowdsaleToken.sol";
 import "./LostAndFoundToken.sol";
 import "./TokenTranchePricing.sol";
+import "./DeploymentInfo.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
 contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
