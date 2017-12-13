@@ -9,7 +9,7 @@ contract DeploymentInfo {
   }
 
 
-  function getDeploymentBlock() public constant {
+  function getDeploymentBlock() public constant returns (uint) {
     return deployed_on;
   }
 }
