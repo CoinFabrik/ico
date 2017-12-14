@@ -2,14 +2,15 @@ function config_f(web3, network) {
   const config = {};
   const BigNumber = web3.BigNumber;
 
-  const ether_in_eur = new BigNumber(400);
+  config.ether_in_eur = new BigNumber(679);
+  const one = new BigNumber(1);
   const eur_per_fulltokens = [new BigNumber(0.10), new BigNumber(0.11),
                               new BigNumber(0.12), new BigNumber(0.14),
                               new BigNumber(0.17), new BigNumber(0.20),
                               new BigNumber(0.25)];
   const tranches_quantity = eur_per_fulltokens.length;
-  const tokens_per_wei = eur_per_fulltokens.map(function(price) {
-    return ether_in_eur.dividedToIntegerBy(price);
+  const tokens_per_eur = eur_per_fulltokens.map(function(price) {
+    return one.dividedToIntegerBy(price);
   });
 
   let amounts = [new BigNumber(300000000)];
@@ -29,10 +30,11 @@ function config_f(web3, network) {
 
     const half_year = 60*60*24*182;
     const half_day = 60*60*12;
-    const three_minutes = 60 * 3;
+    const one_minute = 60;
+    const ten_minutes = 60 * 10;
 
-    const pre_ico_tranches_start = web3.eth.getBlock("latest").timestamp + three_minutes;
-    const pre_ico_tranches_end = pre_ico_tranches_start + three_minutes;
+    const pre_ico_tranches_start = web3.eth.getBlock("latest").timestamp + one_minute;
+    const pre_ico_tranches_end = pre_ico_tranches_start + one_minute;
     const ico_tranches_start = pre_ico_tranches_end;
     const ico_tranches_end = pre_ico_tranches_start + half_year;
 
@@ -43,14 +45,14 @@ function config_f(web3, network) {
       config.tranches.push(amounts[i]);
       config.tranches.push(pre_ico_tranches_start);
       config.tranches.push(pre_ico_tranches_end);
-      config.tranches.push(tokens_per_wei[i]);
+      config.tranches.push(tokens_per_eur[i]);
     }
 
     for (let i = pre_ico_tranches_quantity; i < tranches_quantity; i++) {
       config.tranches.push(amounts[i]);
       config.tranches.push(ico_tranches_start);
       config.tranches.push(ico_tranches_end);
-      config.tranches.push(tokens_per_wei[i]);
+      config.tranches.push(tokens_per_eur[i]);
     }
   }
   // Main net configuration
@@ -66,7 +68,7 @@ function config_f(web3, network) {
       config.tranches.push(amounts[i]);
       config.tranches.push(ico_tranches_start);
       config.tranches.push(ico_tranches_end);
-      config.tranches.push(tokens_per_wei[i]);
+      config.tranches.push(tokens_per_eur[i]);
     }
   }
 
