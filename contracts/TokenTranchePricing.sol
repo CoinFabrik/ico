@@ -41,7 +41,7 @@ contract TokenTranchePricing {
 
   Tranche[] public tranches;
 
-  function getTrancesLength() public view returns (uint) {
+  function getTranchesLength() public view returns (uint) {
     return tranches.length;
   }
 
