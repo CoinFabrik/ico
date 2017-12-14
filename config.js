@@ -2,8 +2,8 @@ function config_f(web3, network) {
   const config = {};
   const BigNumber = web3.BigNumber;
 
-  config.ether_in_eur = new BigNumber(679);
-  const one = new BigNumber(1);
+  config.ether_in_eur = new BigNumber(660);
+  const one = new BigNumber(1000);
   const eur_per_fulltokens = [new BigNumber(0.10), new BigNumber(0.11),
                               new BigNumber(0.12), new BigNumber(0.14),
                               new BigNumber(0.17), new BigNumber(0.20),
@@ -31,10 +31,11 @@ function config_f(web3, network) {
     const half_year = 60*60*24*182;
     const half_day = 60*60*12;
     const one_minute = 60;
-    const ten_minutes = 60 * 10;
+    const three_minutes = 60*3;
+    const ten_minutes = 60*10;
 
     const pre_ico_tranches_start = web3.eth.getBlock("latest").timestamp + one_minute;
-    const pre_ico_tranches_end = pre_ico_tranches_start + one_minute;
+    const pre_ico_tranches_end = pre_ico_tranches_start + ten_minutes;
     const ico_tranches_start = pre_ico_tranches_end;
     const ico_tranches_end = pre_ico_tranches_start + half_year;
 

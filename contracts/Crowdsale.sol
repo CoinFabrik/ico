@@ -20,7 +20,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
   
   //Sets minimum value that can be bought
   uint public minimum_buy_value = 19 * (10 ** 18);
-  //Eth price;
+  //Eth price multiplied by 1000;
   uint public eurs_per_eth;
 
 
@@ -68,7 +68,8 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
     weiAllowed = maxAllowed.min256(weiAmount);
 
     if (weiAmount < maxAllowed) {
-      tokenAmount = tokensPerWei.mul(weiAmount);
+      //Divided by 1000 because eth eth_price_in_eurs is multiplied by 1000
+      tokenAmount = tokensPerWei.mul(weiAmount).div(1000);
     }
     // With this case we let the crowdsale end even when there are rounding errors due to the tokens to wei ratio
     else {
