@@ -20,22 +20,28 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
   
   //Sets minimum value that can be bought
   uint public minimum_buy_value = 19 * (10 ** 18);
-  
+  //Eth price;
+  uint public eurs_per_eth;
+
+
   /**
    * Constructor for the crowdsale.
    * Normally, the token contract is created here. That way, the minting, release and transfer agents can be set here too.
    *
+   * @param eth_price_in_eurs Ether price in EUR.
    * @param team_multisig Address of the multisignature wallet of the team that will receive all the funds contributed in the crowdsale.
    * @param start Block number where the crowdsale will be officially started. It should be greater than the block number in which the contract is deployed.
    * @param end Block number where the crowdsale finishes. No tokens can be sold through this contract after this block.
    * @param token_retriever Address that will handle tokens accidentally sent to the token contract. See the LostAndFoundToken and CrowdsaleToken contracts for further details.
    * @param init_tranches List of serialized tranches. See config.js and TokenTranchePricing for further details.
    */
-  function Crowdsale(address team_multisig, uint start, uint end, address token_retriever, uint[] init_tranches)
+  function Crowdsale(uint eth_price_in_eurs, address team_multisig, uint start, uint end, address token_retriever, uint[] init_tranches)
   GenericCrowdsale(team_multisig, start, end) TokenTranchePricing(init_tranches) public {
+    InvestmentPolicyChanged(true, true, 0xC4F3C4F3C4F3C4F3C4F3C4F3C4F3C4F3C4F3C4F3);
     require(end == tranches[tranches.length.sub(1)].end);
     // Testing values
     token = new CrowdsaleToken(token_initial_supply, token_decimals, team_multisig, token_mintable, token_retriever);
+    updateEursPerEth(eth_price_in_eurs);
 
     // Set permissions to mint, transfer and release
     token.setMintAgent(address(this), true);
@@ -58,7 +64,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
 
   //Token amount calculation
   function calculateTokenAmount(uint weiAmount, address) internal view returns (uint weiAllowed, uint tokenAmount) {
-    uint tokensPerWei = getCurrentPrice(tokensSold);
+    uint tokensPerWei = getCurrentPrice(tokensSold).mul(1 ether).div(eurs_per_eth);
     uint maxAllowed = sellable_tokens.sub(tokensSold).div(tokensPerWei);
     weiAllowed = maxAllowed.min256(weiAmount);
 
@@ -152,6 +158,12 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
     require(address(token_contract) != address(token) || getState() == State.Finalized);
     super.enableLostAndFound(agent, tokens, token_contract);
   }
+
+  function updateEursPerEth (uint eurs_amount) public onlyOwner {
+    require(eurs_amount >= 1);
+    eurs_per_eth = eurs_amount;
+  }
+
 
   modifier investmentIsBigEnough(address agent) {
     require(msg.value.add(investedAmountOf[agent]) >= minimum_buy_value);
