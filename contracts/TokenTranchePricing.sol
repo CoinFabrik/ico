@@ -50,9 +50,10 @@ contract TokenTranchePricing {
     // This check and the one inside the loop ensure no tranche can have an amount equal to zero.
     require(init_tranches[amount_offset] > 0);
 
-    tranches.length = init_tranches.length.div(tranche_size);
+    // FIXME: use push instead of manually setting length
+    uint input_tranches_length = init_tranches.length.div(tranche_size);
     Tranche memory last_tranche;
-    for (uint i = 0; i < tranches.length; i++) {
+    for (uint i = 0; i < input_tranches_length; i++) {
       uint tranche_offset = i.mul(tranche_size);
       uint amount = init_tranches[tranche_offset.add(amount_offset)];
       uint start = init_tranches[tranche_offset.add(start_offset)];
@@ -66,7 +67,7 @@ contract TokenTranchePricing {
               (end > last_tranche.end && amount >= last_tranche.amount));
 
       last_tranche = Tranche(amount, start, end, price);
-      tranches[i] = last_tranche;
+      tranches.push(last_tranche);
     }
   }
 
