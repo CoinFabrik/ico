@@ -41,6 +41,10 @@ contract TokenTranchePricing {
 
   Tranche[] public tranches;
 
+  function getTrancesLength() public view returns (uint) {
+    return tranches.length;
+  }
+
   /// @dev Construction, creating a list of tranches
   /// @param init_tranches Raw array of ordered tuples: (start amount, start block, end block, price)
   function TokenTranchePricing(uint[] init_tranches) public {
@@ -50,7 +54,6 @@ contract TokenTranchePricing {
     // This check and the one inside the loop ensure no tranche can have an amount equal to zero.
     require(init_tranches[amount_offset] > 0);
 
-    // FIXME: use push instead of manually setting length
     uint input_tranches_length = init_tranches.length.div(tranche_size);
     Tranche memory last_tranche;
     for (uint i = 0; i < input_tranches_length; i++) {
