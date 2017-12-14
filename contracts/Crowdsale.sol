@@ -63,7 +63,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
 
   //Token amount calculation
   function calculateTokenAmount(uint weiAmount, address) internal view returns (uint weiAllowed, uint tokenAmount) {
-    uint tokensPerWei = getCurrentPrice(tokensSold).mul(1 ether).div(eurs_per_eth);
+    uint tokensPerWei = getCurrentPrice(tokensSold).mul(eurs_per_eth);
     uint maxAllowed = sellable_tokens.sub(tokensSold).div(tokensPerWei);
     weiAllowed = maxAllowed.min256(weiAmount);
 
