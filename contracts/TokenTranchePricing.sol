@@ -29,7 +29,7 @@ contract TokenTranchePricing {
       uint start;
       // Ending timestamp (excluded from the interval)
       uint end;
-      // How many tokens per wei you will get while this tranche is active
+      // How many tokens per asset unit you will get while this tranche is active
       uint price;
   }
   // We define offsets and size for the deserialization of ordered tuples in raw arrays
