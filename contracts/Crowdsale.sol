@@ -37,7 +37,6 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
    */
   function Crowdsale(uint eth_price_in_eurs, address team_multisig, uint start, uint end, address token_retriever, uint[] init_tranches)
   GenericCrowdsale(team_multisig, start, end) TokenTranchePricing(init_tranches) public {
-    InvestmentPolicyChanged(true, true, 0xC4F3C4F3C4F3C4F3C4F3C4F3C4F3C4F3C4F3C4F3);
     require(end == tranches[tranches.length.sub(1)].end);
     // Testing values
     token = new CrowdsaleToken(token_initial_supply, token_decimals, team_multisig, token_mintable, token_retriever);
