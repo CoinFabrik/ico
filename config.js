@@ -3,14 +3,14 @@ function config_f(web3, network) {
   const BigNumber = web3.BigNumber;
 
   config.ether_in_eur = new BigNumber(571.66);
-  const one = new BigNumber(1000);
+  const thousand = new BigNumber(1000);
   const eur_per_fulltokens = [new BigNumber(0.10), new BigNumber(0.11),
                               new BigNumber(0.12), new BigNumber(0.14),
                               new BigNumber(0.17), new BigNumber(0.20),
                               new BigNumber(0.25)];
   const tranches_quantity = eur_per_fulltokens.length;
   const tokens_per_eur = eur_per_fulltokens.map(function(price) {
-    return one.dividedToIntegerBy(price);
+    return thousand.dividedToIntegerBy(price);
   });
 
   let amounts = [new BigNumber(300000000)];
