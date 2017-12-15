@@ -14,14 +14,14 @@ import "./DeploymentInfo.sol";
 contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
   //initial supply in 400k, sold tokens from initial minting
   uint8 private constant token_decimals = 18;
-  uint private constant token_initial_supply = 4 * (10 ** 5) * (10 ** uint(token_decimals));
+  uint private constant token_initial_supply = 4 * (10 ** 8) * (10 ** uint(token_decimals));
   bool private constant token_mintable = true;
-  uint private constant sellable_tokens = 6 * (10 ** 5) * (10 ** uint(token_decimals));
+  uint private constant sellable_tokens = 6 * (10 ** 8) * (10 ** uint(token_decimals));
   
   //Sets minimum value that can be bought
   uint public minimum_buy_value = 175 * 1 ether / 100;
   //Eth price multiplied by 1000;
-  uint public eurs_per_eth;
+  uint public milieurs_per_eth;
 
 
   /**
@@ -65,13 +65,13 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
 
   //Token amount calculation
   function calculateTokenAmount(uint weiAmount, address) internal view returns (uint weiAllowed, uint tokenAmount) {
-    uint tokensPerWei = getCurrentPrice(tokensSold).mul(eurs_per_eth);
-    uint maxAllowed = sellable_tokens.sub(tokensSold).div(tokensPerWei);
-    weiAllowed = maxAllowed.min256(weiAmount);
+    uint tokensPerEth = getCurrentPrice(tokensSold).mul(milieurs_per_eth).div(1000);
+    uint maxWeiAllowed = sellable_tokens.sub(tokensSold).mul(1 ether).div(tokensPerEth);
+    weiAllowed = maxWeiAllowed.min256(weiAmount);
 
-    if (weiAmount < maxAllowed) {
+    if (weiAmount < maxWeiAllowed) {
       //Divided by 1000 because eth eth_price_in_eurs is multiplied by 1000
-      tokenAmount = tokensPerWei.mul(weiAmount).div(1000);
+      tokenAmount = tokensPerEth.mul(weiAmount).div(1 ether);
     }
     // With this case we let the crowdsale end even when there are rounding errors due to the tokens to wei ratio
     else {
@@ -161,9 +161,9 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
     super.enableLostAndFound(agent, tokens, token_contract);
   }
 
-  function updateEursPerEth (uint eurs_amount) public onlyOwner {
-    require(eurs_amount >= 100);
-    eurs_per_eth = eurs_amount;
+  function updateEursPerEth (uint milieurs_amount) public onlyOwner {
+    require(milieurs_amount >= 100);
+    milieurs_per_eth = milieurs_amount;
   }
 
 

@@ -4,13 +4,14 @@ function config_f(web3, network) {
 
   config.ether_in_eur = new BigNumber(571.66).times(1000);
   const thousand = new BigNumber(1000);
+  const ether = (new BigNumber(10)).toPower(18);
   const eur_per_fulltokens = [new BigNumber(0.10), new BigNumber(0.11),
                               new BigNumber(0.12), new BigNumber(0.14),
                               new BigNumber(0.17), new BigNumber(0.20),
                               new BigNumber(0.25)];
   const tranches_quantity = eur_per_fulltokens.length;
   const tokens_per_eur = eur_per_fulltokens.map(function(price) {
-    return thousand.dividedToIntegerBy(price);
+    return ether.dividedToIntegerBy(price);
   });
 
   let amounts = [new BigNumber(300000000)];
@@ -19,7 +20,7 @@ function config_f(web3, network) {
     amounts.push(amounts[i - 1].add(50*(10**6)));
   }
   amounts = amounts.map(function(amount) {
-    return amount.times((new BigNumber(10)).toPower(18));
+    return amount.times(ether);
   });
 
   config.tranches = [];
@@ -65,7 +66,7 @@ function config_f(web3, network) {
 
     const actual_timestamp = web3.eth.getBlock("latest").timestamp;
 
-    config.startTime = actual_timestamp + two_hours;
+    config.startTime = actual_timestamp + 60;
     config.endTime = config.startTime + half_year;
 
     const ico_tranches_start = config.startTime;
