@@ -19,7 +19,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
   uint private constant sellable_tokens = 6 * (10 ** 5) * (10 ** uint(token_decimals));
   
   //Sets minimum value that can be bought
-  uint public minimum_buy_value = 19 * (10 ** 18);
+  uint public minimum_buy_value = 175 * 1 ether / 100;
   //Eth price multiplied by 1000;
   uint public eurs_per_eth;
 
