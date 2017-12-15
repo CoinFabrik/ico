@@ -59,10 +59,16 @@ function config_f(web3, network) {
   // Main net configuration
   else {
     config.MW_address = "0x878d7ed5C194349F37b18688964E8db1EB0fcCa1";
-    config.startTime = Math.round((new Date(2018, 0, 6)).getTime() / 1000);
-    config.endTime = Math.round((new Date(2018, 5, 6)).getTime() / 1000);
 
-    const ico_tranches_start = Math.round((new Date(2017, 11, 6)).getTime() / 1000);
+    const half_year = 182*24*60*60;
+    const two_hours = 2*60*60;
+
+    const actual_timestamp = web3.eth.getBlock("latest").timestamp;
+
+    config.startTime = actual_timestamp + two_hours;
+    config.endTime = config.startTime + half_year;
+
+    const ico_tranches_start = config.startTime;
     const ico_tranches_end = config.endTime;
 
     for (let i = 0; i < tranches_quantity; i++) {
