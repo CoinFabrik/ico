@@ -66,7 +66,7 @@ function config_f(web3, network) {
 
     const actual_timestamp = web3.eth.getBlock("latest").timestamp;
 
-    config.startTime = actual_timestamp + 60;
+    config.startTime = actual_timestamp + two_hours;
     config.endTime = config.startTime + half_year;
 
     const ico_tranches_start = config.startTime;
