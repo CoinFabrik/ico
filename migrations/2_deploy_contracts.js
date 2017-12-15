@@ -14,7 +14,7 @@ module.exports = function(deployer, network, accounts) {
   if (network != "liveNet") {
     deployer.deploy(MultiSigWallet, config.multisig_owners, 1, {gas: 2000000})
     .then(async function() {
-      await deployer.deploy(Crowdsale, config.ether_in_eur, MultiSigWallet.address, config.startTime, config.endTime, accounts[0], config.tranches, {gas: 7000000});
+      await deployer.deploy(Crowdsale, config.ether_in_eur, MultiSigWallet.address, config.startTime, config.endTime, accounts[0], config.tranches, {gas: 4550000});
     });
   }
   else {
