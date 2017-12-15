@@ -65,7 +65,7 @@ function config_f(web3, network) {
     const ico_tranches_start = Math.round((new Date(2017, 11, 6)).getTime() / 1000);
     const ico_tranches_end = config.endTime;
 
-    for (let i = 0; i < config.tranches_quantity; i++) {
+    for (let i = 0; i < tranches_quantity; i++) {
       config.tranches.push(amounts[i]);
       config.tranches.push(ico_tranches_start);
       config.tranches.push(ico_tranches_end);
