@@ -40,6 +40,8 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
     require(end == tranches[tranches.length.sub(1)].end);
     // Testing values
     token = new CrowdsaleToken(token_initial_supply, token_decimals, team_multisig, token_mintable, token_retriever);
+    
+    //Set eth price in EUR (multiplied by one thousand)
     updateEursPerEth(eth_price_in_eurs);
 
     // Set permissions to mint, transfer and release
