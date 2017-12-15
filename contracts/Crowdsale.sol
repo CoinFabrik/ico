@@ -162,7 +162,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
   }
 
   function updateEursPerEth (uint eurs_amount) public onlyOwner {
-    require(eurs_amount >= 1);
+    require(eurs_amount >= 100);
     eurs_per_eth = eurs_amount;
   }
 
