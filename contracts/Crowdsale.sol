@@ -11,7 +11,7 @@ import "./TokenTranchePricing.sol";
 import "./DeploymentInfo.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
-contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing {
+contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing, DeploymentInfo {
   //initial supply in 400k, sold tokens from initial minting
   uint8 private constant token_decimals = 18;
   uint private constant token_initial_supply = 4 * (10 ** 8) * (10 ** uint(token_decimals));
