@@ -24,9 +24,9 @@ import "./MintableToken.sol";
  */
 contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, LostAndFoundToken {
 
-  string public name = "uBanX Token";
+  string public name = "Ubanx";
 
-  string public symbol = "BANX";
+  string public symbol = "Banx";
 
   uint8 public decimals;
 
