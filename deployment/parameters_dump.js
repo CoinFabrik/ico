@@ -3,6 +3,7 @@ const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
 // const web3 = new Web3(new Web3.providers.IpcProvider(config.ipc_file, net));
 const config = require("../config.js")(web3, "liveNet");
 
+console.log("Web3 version:", web3.version.api)
 
 console.log(
   "Ether in EUR:", config.ether_in_eur.toString(),
