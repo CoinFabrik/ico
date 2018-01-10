@@ -2,7 +2,7 @@ function config_f(web3, network) {
   const config = {};
   const BigNumber = web3.BigNumber;
 
-  config.ether_in_eur = new BigNumber(808.95).times(1000);
+  config.ether_in_eur = new BigNumber(1109.94).times(1000);
   const thousand = new BigNumber(1000);
   const ether = (new BigNumber(10)).toPower(18);
   const eur_per_fulltokens = [new BigNumber(0.10), new BigNumber(0.11),
@@ -62,7 +62,7 @@ function config_f(web3, network) {
     config.MW_address = "0x878d7ed5C194349F37b18688964E8db1EB0fcCa1";
 
     const half_year = 182*24*60*60;
-    const two_hours = 2*60*60;
+    const twelve_hours = 12*60*60;
 
     const actual_timestamp = web3.eth.getBlock("latest").timestamp;
 
