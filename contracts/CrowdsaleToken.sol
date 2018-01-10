@@ -26,7 +26,7 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Los
 
   string public name = "Ubanx";
 
-  string public symbol = "Banx";
+  string public symbol = "BANX";
 
   uint8 public decimals;
 
