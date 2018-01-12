@@ -6,15 +6,15 @@ const config = require("../config.js")(web3, "liveNet");
 console.log("Web3 version:", web3.version.api)
 
 console.log(
-  "Ether in EUR:", config.ether_in_eur.toString(),
+  "MiliEURs per Eth:", config.milieurs_per_eth.toString(),
   "\n\nMultisig address:", config.MW_address, 
-  "\n\nStart time:", config.startTime, 
-  "\n\nEnd time:", config.endTime, 
+  "\n\nStart time:", (new Date(config.startTime*1000)).toGMTString(),
+  "\n\nEnd time:", (new Date(config.endTime*1000)).toGMTString(),
   "\n\nToken retriever: set in the deployment script\n"
 ); 
 for(i = 0; i < config.tranches.length/4; i++) {
   console.log("Tranche #", i, " -----------------------------------------------------------------",
-    "\nTokens cap:    ", config.tranches[4*i].dividedBy(10**18).toExponential(),
+    "\nFullTokens cap:", config.tranches[4*i].dividedBy(10**18).toExponential(),
     "\nStart:         ", (new Date(config.tranches[4*i+1]*1000)).toGMTString(), 
     "\nEnd:           ", (new Date(config.tranches[4*i+2]*1000)).toGMTString(),
     "\nTokens per EUR:", config.tranches[4*i+3].toExponential()

@@ -11,7 +11,4 @@ const account = "0x54d9249C776C56520A62faeCB87A00E105E8c9Dc";
 
 // Setup contract objects
 const CS_contract = web3.eth.contract(cs_abi);
-const crowdsale = CS_contract.new(config.ether_in_eur, config.MW_address, config.startTime, config.endTime, account, config.tranches, {from: account, data: "0x" + cs_bytecode, gasPrice: 1000000000, gas: 5000000});
-crowdsale.setRequireSignedAddress(true, "0x9773cc14E40853917B9a8fB49de4ABdEa736ED1E");
-
-
+const crowdsale = CS_contract.new(config.milieurs_per_eth, config.MW_address, config.startTime, config.endTime, account, config.tranches, {from: account, data: "0x" + cs_bytecode, gasPrice: 10000000000, gas: 5000000, nonce: 1446});
