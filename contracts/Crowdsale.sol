@@ -27,7 +27,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
    * @param end Block number where the crowdsale finishes. No tokens can be sold through this contract after this block.
    * @param token_retriever Address that will handle tokens accidentally sent to the token contract. See the LostAndFoundToken and CrowdsaleToken contracts for further details.
    */
-  function Crowdsale(address team_multisig, uint start, uint end, address token_retriever) GenericCrowdsale(team_multisig, start, end) TokenTranchePricing(init_tranches) public {
+  function Crowdsale(address team_multisig, uint start, uint end, address token_retriever, uint mili_eurs_per_eth) GenericCrowdsale(team_multisig, start, end) TokenTranchePricing(init_tranches) public {
 
     require(end == tranches[tranches.length.sub(1)].end);
     // Testing values
@@ -46,6 +46,8 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
     
     //Give multisig permision to send tokens to partners
     token.setTransferAgent(address(this), true);
+
+    updateEursPerEth(mili_eurs_per_eth);
   }
 
   //Token assignation through transfer
