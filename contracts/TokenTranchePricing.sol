@@ -63,7 +63,7 @@ contract TokenTranchePricing {
       uint end = init_tranches[tranche_offset.add(end_offset)];
       uint price = init_tranches[tranche_offset.add(price_offset)];
       // No invalid steps
-      require(block.number < start && start < end);
+      require(block.timestamp < start && start < end);
       // Bail out when entering unnecessary tranches
       // This is preferably checked before deploying contract into any blockchain.
       require(i == 0 || (end >= last_tranche.end && amount > last_tranche.amount) ||
@@ -79,7 +79,7 @@ contract TokenTranchePricing {
   /// @return Returns the struct representing the current tranche
   function getCurrentTranche(uint tokensSold) private view returns (Tranche storage) {
     for (uint i = 0; i < tranches.length; i++) {
-      if (tranches[i].start <= block.number && block.number < tranches[i].end && tokensSold < tranches[i].amount) {
+      if (tranches[i].start <= block.timestamp && block.timestamp < tranches[i].end && tokensSold < tranches[i].amount) {
         return tranches[i];
       }
     }

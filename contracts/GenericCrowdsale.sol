@@ -54,7 +54,7 @@ contract GenericCrowdsale is Haltable {
    * Do we verify that contributor has been cleared on the server side (accredited investors only).
    * This method was first used in the FirstBlood crowdsale to ensure all contributors had accepted terms of sale (on the web).
    */
-  bool public requiredSignedAddress = false;
+  bool public requiredSignedAddress = true;
 
   /** Server side address that signed allowed contributors (Ethereum addresses) that can participate the crowdsale */
   address public signerAddress;
@@ -102,7 +102,7 @@ contract GenericCrowdsale is Haltable {
 
     // Don't mess the dates
     require(start != 0 && end != 0);
-    require(block.number < start && start < end);
+    require(block.timestamp < start && start < end);
     startsAt = start;
     endsAt = end;
   }
@@ -307,8 +307,8 @@ contract GenericCrowdsale is Haltable {
    */
   function getState() public view returns (State) {
     if (finalized) return State.Finalized;
-    else if (block.number < startsAt) return State.PreFunding;
-    else if (block.number <= endsAt && !isCrowdsaleFull()) return State.Funding;
+    else if (block.timestamp < startsAt) return State.PreFunding;
+    else if (block.timestamp <= endsAt && !isCrowdsaleFull()) return State.Funding;
     else return State.Success;
   }
 

@@ -1,24 +1,44 @@
 function config_f(web3, network) {
   const config = {};
+  const BigNumber = web3.BigNumber;
 
-  if (network == "liveNet") {
-    // 9/8/2017 20:56 UTC block number: 4,137,656
-    // 17/8/2017 ~0:00 UTC block number offset: 28,239 at 21.8 seconds per block on average
-    // 19/8/2017 17:58 UTC block number: 4,178,454
-    // 24/8/2017 ~15:00 UTC block number offset: 19,867 at 21 seconds per block on average
-    // 21/8/2017 19:12 UTC block number: 4,187,037
-    // 24/8/2017 ~15:00 UTC block number offset: 11,263  at 21.67 seconds per block on average
-    config.startBlock = 4187037 + 11263;
-    // We give two week's worth of blocks for the crowdsale to run its course: 55,819 at 21.67 seconds per block on average
-    config.endBlock = config.startBlock + 55819;
+  config.milieurs_per_eth = new BigNumber(835.16).times(1000);
+  
+  const thousand = new BigNumber(1000);
+  const ether = (new BigNumber(10)).toPower(18);
+  const eur_per_fulltokens = [new BigNumber(1.66666666667), new BigNumber(1.25), new BigNumber(1)];
+  const tranches_quantity = eur_per_fulltokens.length;
+  const tokens_per_eur = eur_per_fulltokens.map(function(price) {
+    return ether.dividedToIntegerBy(price);
+  });
 
-    config.MW_address = "0xe190E5cb7E5E5BE452Dc3C3B34033C7213D3B4df";
+  let amounts = [new BigNumber(150000000), new BigNumber(150000000), new BigNumber(50000000)];
+  const pre_ico_tranches_quantity = amounts.length;
+  amounts = amounts.map(function(amount) {
+    return amount.times(ether);
+  });
+
+  config.tranches = [];
+
+  config.MW_address = "0x878d7ed5C194349F37b18688964E8db1EB0fcCa1";
+
+  const half_hour = 60*30;
+
+  const actual_timestamp = web3.eth.getBlock("latest").timestamp;
+
+  config.startTime = actual_timestamp + half_hour;
+  config.endTime = (new Date(Date.UTC(2018,08,29))).getTime()/1000;
+
+  const ico_tranches_start = (new Date(Date.UTC(2018,02,29))).getTime()/1000;
+  const ico_tranches_end = config.endTime;
+
+  for (let i = 0; i < tranches_quantity; i++) {
+    config.tranches.push(amounts[i]);
+    config.tranches.push(ico_tranches_start);
+    config.tranches.push(ico_tranches_end);
+    config.tranches.push(tokens_per_eur[i]);
   }
-  else {
-    config.startBlock = web3.eth.blockNumber + 10;
-    config.endBlock = config.startBlock + 70;
-    config.multisig_owners = ["0x8ffc991fc4c4fc53329ad296c1afe41470cffbb3"];
-  }
+
   return config;
 }
 
