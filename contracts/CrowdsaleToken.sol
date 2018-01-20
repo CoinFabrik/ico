@@ -58,6 +58,10 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Los
     super.releaseTokenTransfer();
   }
 
+  function burnTokens(address account, uint value) onlyOwner public {
+    super.burnTokens(account, value);
+  }
+
   /**
    * Allow upgrade agent functionality to kick in only if the crowdsale was a success.
    */
