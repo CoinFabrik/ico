@@ -18,16 +18,16 @@ function config_f(web3, network) {
 
   config.tranches = [];
 
-  config.MW_address = "0x878d7ed5C194349F37b18688964E8db1EB0fcCa1";
+  config.MW_address = "0x36FEf0a32D493fA86D6281205b924456597aAE5d";
 
-  const half_hour = 60*30;
+  const hour = 60*60;
 
   const actual_timestamp = web3.eth.getBlock("latest").timestamp;
 
-  config.startTime = (new Date(Date.UTC(2018,3,19))).getTime()/1000;
+  config.startTime = (new Date(Date.UTC(2018,1,19))).getTime()/1000;
   config.endTime = (new Date(Date.UTC(2018,7,29))).getTime()/1000;
 
-  const ico_tranches_start = actual_timestamp + half_hour;
+  const ico_tranches_start = actual_timestamp + hour;
   const ico_tranches_end = config.endTime;
 
   for (let i = 0; i < tranches_quantity; i++) {
