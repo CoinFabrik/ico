@@ -85,7 +85,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
     token.releaseTokenTransfer();
     uint unsoldTokens = token.balanceOf(address(this));
-    token.burnTokens(address(this), unsoldTokens);
+    token.burn(address(this), unsoldTokens);
     super.finalize();
   }
 
