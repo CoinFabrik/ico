@@ -71,8 +71,8 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
     }
   }
 
-  //TODO: implement to control funding state criterion
-  function isCrowdsaleFull() internal view returns (bool full){
+  // Crowdsale is full once all sellable_tokens are sold.
+  function isCrowdsaleFull() internal view returns (bool full) {
     return tokensSold >= sellable_tokens;
   }
 
