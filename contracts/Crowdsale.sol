@@ -45,7 +45,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
     token.setMintAgent(address(this), false);
     
     //Give multisig permision to send tokens to partners
-    token.setTransferAgent(address(this), true);
+    token.setTransferAgent(team_multisig, true);
 
     updateEursPerEth(mili_eurs_per_eth);
   }
