@@ -2,7 +2,7 @@ function config_f(web3, network) {
   const config = {};
   const BigNumber = web3.BigNumber;
 
-  config.milieurs_per_eth = new BigNumber(835.16).times(1000);
+  config.milieurs_per_eth = new BigNumber(868.16).times(1000);
   
   const ether = (new BigNumber(10)).toPower(18);
   const eur_per_fulltokens = [new BigNumber(1.66666666667), new BigNumber(1.25), new BigNumber(1)];

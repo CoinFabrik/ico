@@ -24,9 +24,9 @@ import "./MintableToken.sol";
  */
 contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, LostAndFoundToken {
 
-  string public name = "BurgerKoenig";
+  string public name = "TokenHome";
 
-  string public symbol = "BK";
+  string public symbol = "TH";
 
   uint8 public decimals;
 
