@@ -13,10 +13,10 @@ import "./TokenTranchePricing.sol";
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
 contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, TokenTranchePricing{
   //
-  uint private constant token_initial_supply = 85 * (10 ** 6) * (10 ** uint(token_decimals));
+  uint private constant token_initial_supply = 805 * (10 ** 5) * (10 ** uint(token_decimals));
   uint8 private constant token_decimals = 18;
   bool private constant token_mintable = true;
-  uint private constant sellable_tokens = 340 * (10 ** 6) * (10 ** uint(token_decimals));
+  uint private constant sellable_tokens = 322 * (10 ** 6) * (10 ** uint(token_decimals));
   uint public milieurs_per_eth;
   /**
    * Constructor for the crowdsale.
@@ -85,7 +85,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
     token.releaseTokenTransfer();
     uint unsoldTokens = token.balanceOf(address(this));
-    token.burn(address(this), unsoldTokens);
+    token.burn(unsoldTokens);
     super.finalize();
   }
 

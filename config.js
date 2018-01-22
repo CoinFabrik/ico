@@ -2,7 +2,7 @@ function config_f(web3, network) {
   const config = {};
   const BigNumber = web3.BigNumber;
 
-  config.milieurs_per_eth = new BigNumber(868.16).times(1000);
+  config.milieurs_per_eth = new BigNumber(809.52).times(1000);
   
   const ether = (new BigNumber(10)).toPower(18);
   const eur_per_fulltokens = [new BigNumber(1.66666666667), new BigNumber(1.25), new BigNumber(1)];
@@ -11,7 +11,7 @@ function config_f(web3, network) {
     return ether.dividedToIntegerBy(price);
   });
 
-  let amounts = [new BigNumber(150000000), new BigNumber(300000000), new BigNumber(340000000)];
+  let amounts = [new BigNumber(150000000), new BigNumber(300000000), new BigNumber(322000000)];
   amounts = amounts.map(function(amount) {
     return amount.times(ether);
   });
