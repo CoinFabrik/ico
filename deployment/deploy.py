@@ -6,6 +6,7 @@ import time
 import os, errno
 from datetime import datetime
 from config import config_f
+from address import generate_contract_address
 
 ipcPath = '/home/coinfabrik/Programming/blockchain/node/geth.ipc'
 web3 = Web3(IPCProvider(ipcPath))
@@ -16,6 +17,7 @@ senderAccount = web3.eth.accounts[0]
 gas = 50000000
 gasPrice = 20000000000
 
+print('\n\n\nFirstNonceCalc: ' + str(web3.eth.getTransactionCount(senderAccount)))
 
 def transactionInfo(value=0):
 	return {"from": senderAccount, "value": value*(10**18), "gas": gas, "gasPrice": gasPrice}
@@ -26,7 +28,7 @@ def writeToJSONFile(path, fileName, data):
 			json.dump(data, fp, sort_keys=True, indent=4)
 
 config = config_f('privateTestnet')
-params = [config['multisig_owners'][0], config['startTime'], config['endTime'], tokenRetrieverAccount, config['tranches']]
+params = [config['multisig_owners'][0], config['startTime'], config['endTime'], tokenRetrieverAccount]
 paramsLogPath = "./paramsLog"
 config['tokenRetrieverAccount'] = tokenRetrieverAccount
 
@@ -88,10 +90,20 @@ writeToJSONFile(paramsLogPath, jsonFileName, config)
 
 crowdsale_contract = web3.eth.contract(abi=abi)
 crowdsale_contract.bytecode = bytecode
+
+print('\n\n\nSecondNonceCalc: ' + str(web3.eth.getTransactionCount(senderAccount)))
+
+nonce = web3.eth.getTransactionCount(senderAccount)
+addressAttempt = '0x' + generate_contract_address(senderAccount, nonce).hex()
+
 txHash = crowdsale_contract.deploy(transaction=transactionInfo(0), args=params)
+
+print('\n\n\nThirdNonceCalc: ' + str(web3.eth.getTransactionCount(senderAccount)))
+
+print("\nContract's address: " + addressAttempt + "\n\nLet's see if I succeeded calculating the contract's address...")
 
 time.sleep(15)
 
 receipt = web3.eth.getTransactionReceipt(txHash)
 crowdsale_contract.address = receipt.contractAddress
-print("\nCrowdsale:", crowdsale_contract.address, "\n")
+print("\n\nCrowdsale:", crowdsale_contract.address, "\n")
