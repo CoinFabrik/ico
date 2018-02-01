@@ -93,14 +93,14 @@ crowdsale_contract.bytecode = bytecode
 
 print('\n\n\nSecondNonceCalc: ' + str(web3.eth.getTransactionCount(senderAccount)))
 
+txHash = crowdsale_contract.deploy(transaction=transactionInfo(0), args=params)
+
 nonce = web3.eth.getTransactionCount(senderAccount)
 addressAttempt = '0x' + generate_contract_address(senderAccount, nonce).hex()
 
-txHash = crowdsale_contract.deploy(transaction=transactionInfo(0), args=params)
-
 print('\n\n\nThirdNonceCalc: ' + str(web3.eth.getTransactionCount(senderAccount)))
 
-print("\nContract's address: " + addressAttempt + "\n\nLet's see if I succeeded calculating the contract's address...")
+print("\nContract address: " + addressAttempt + "\n\nLet's see if I succeeded calculating the contract's address...")
 
 time.sleep(15)
 
