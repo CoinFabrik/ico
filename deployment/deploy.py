@@ -17,8 +17,6 @@ senderAccount = web3.eth.accounts[0]
 gas = 50000000
 gasPrice = 20000000000
 
-print('\n\n\nFirstNonceCalc: ' + str(web3.eth.getTransactionCount(senderAccount)))
-
 def transactionInfo(value=0):
 	return {"from": senderAccount, "value": value*(10**18), "gas": gas, "gasPrice": gasPrice}
 
@@ -91,14 +89,10 @@ writeToJSONFile(paramsLogPath, jsonFileName, config)
 crowdsale_contract = web3.eth.contract(abi=abi)
 crowdsale_contract.bytecode = bytecode
 
-print('\n\n\nSecondNonceCalc: ' + str(web3.eth.getTransactionCount(senderAccount)))
-
 txHash = crowdsale_contract.deploy(transaction=transactionInfo(0), args=params)
 
 nonce = web3.eth.getTransactionCount(senderAccount)
 addressAttempt = '0x' + generate_contract_address(senderAccount, nonce).hex()
-
-print('\n\n\nThirdNonceCalc: ' + str(web3.eth.getTransactionCount(senderAccount)))
 
 print("\nContract address: " + addressAttempt + "\n\nLet's see if I succeeded calculating the contract's address...")
 
