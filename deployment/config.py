@@ -1,5 +1,6 @@
 import time
 from datetime import datetime
+from eth_utils import to_checksum_address
 
 def config_f(network):
 
@@ -30,7 +31,7 @@ def config_f(network):
 	#Testnet configuration
 	if (network != "liveNet"):
 		
-		config['multisig_owners'] = ["0xf19258256b06324c7516b00bf5c76af001ee1e95"]
+		config['multisig_owners'] = [to_checksum_address("0xf19258256b06324c7516b00bf5c76af001ee1e95")]
 
 		config['startTime'] = int(round(time.time())) + 60 * 10
 

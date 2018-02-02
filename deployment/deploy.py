@@ -14,7 +14,6 @@ web3 = Web3(IPCProvider(ipcPath))
 tokenRetrieverAccount = "0x0F048ff7dE76B83fDC14912246AC4da5FA755cFE"
 receipt = None
 senderAccount = web3.eth.accounts[0]
-bSenderAccount = bytes(bytearray.fromhex(senderAccount[2:]))
 gas = 50000000
 gasPrice = 20000000000
 
@@ -92,7 +91,7 @@ crowdsale_contract = web3.eth.contract(abi=abi)
 crowdsale_contract.bytecode = bytecode
 
 nonce = web3.eth.getTransactionCount(senderAccount)
-addressAttempt = generate_contract_address(bSenderAccount, nonce)
+addressAttempt = generate_contract_address(senderAccount, nonce)
 
 txHash = crowdsale_contract.deploy(transaction=transactionInfo(0), args=params)
 
