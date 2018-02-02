@@ -14,6 +14,7 @@ web3 = Web3(IPCProvider(ipcPath))
 tokenRetrieverAccount = "0x0F048ff7dE76B83fDC14912246AC4da5FA755cFE"
 receipt = None
 senderAccount = web3.eth.accounts[0]
+bSenderAccount = bytes(bytearray.fromhex(senderAccount[2:]))
 gas = 50000000
 gasPrice = 20000000000
 
@@ -59,6 +60,7 @@ print("\nTransaction sender: " + senderAccount,
       "\n Gas and Gas price: " + str(gas) + " and " + str(gasPrice) + "\n"
 )
 
+
 invalidInput = True
 consent = None
 
@@ -89,15 +91,14 @@ writeToJSONFile(paramsLogPath, jsonFileName, config)
 crowdsale_contract = web3.eth.contract(abi=abi)
 crowdsale_contract.bytecode = bytecode
 
+nonce = web3.eth.getTransactionCount(senderAccount)
+addressAttempt = generate_contract_address(bSenderAccount, nonce)
+
 txHash = crowdsale_contract.deploy(transaction=transactionInfo(0), args=params)
 
-nonce = web3.eth.getTransactionCount(senderAccount)
-addressAttempt = '0x' + generate_contract_address(senderAccount, nonce).hex()
-
-print("\nContract address: " + addressAttempt + "\n\nLet's see if I succeeded calculating the contract's address...")
+print("\nContract address: " + addressAttempt + "\n")
 
 time.sleep(15)
 
 receipt = web3.eth.getTransactionReceipt(txHash)
 crowdsale_contract.address = receipt.contractAddress
-print("\n\nCrowdsale:", crowdsale_contract.address, "\n")

@@ -1,7 +1,5 @@
 import rlp
-from eth_utils import (
-	keccak,
-)
+from eth_utils import keccak, to_checksum_address
 
 def generate_contract_address(address, nonce):
-	return keccak(rlp.encode([address, nonce]))[-20:]
+	return to_checksum_address('0x' + keccak(rlp.encode([address, nonce]))[-20:].hex())
