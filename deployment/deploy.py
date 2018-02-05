@@ -28,7 +28,15 @@ def writeToJSONFile(path, fileName, data):
 config = config_f('privateTestnet')
 params = [config['multisig_owners'][0], config['startTime'], config['endTime'], tokenRetrieverAccount]
 paramsLogPath = "./paramsLog"
+buildPath = "./build"
 config['tokenRetrieverAccount'] = tokenRetrieverAccount
+
+try:
+	if not os.path.exists(buildPath):
+		os.makedirs(buildPath)
+except OSError as e:
+	if e.errno != errno.EEXIST:
+		raise
 
 with open("./build/Crowdsale.abi") as contract_abi_file:
 	abi = json.load(contract_abi_file)
