@@ -101,11 +101,11 @@ crowdsale_contract.bytecode = bytecode
 nonce = web3.eth.getTransactionCount(senderAccount)
 addressAttempt = generate_contract_address(senderAccount, nonce)
 
-txHash = crowdsale_contract.deploy(transaction=transactionInfo(0), args=params)
+txHash = crowdsale_contract.deploy(transaction=transactionInfo(0), args=None)
 
 print("\nContract address: " + addressAttempt + "\n")
 
-time.sleep(15)
+time.sleep(20)
 
 receipt = web3.eth.getTransactionReceipt(txHash)
 crowdsale_contract.address = receipt.contractAddress

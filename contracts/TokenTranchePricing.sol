@@ -46,8 +46,12 @@ contract TokenTranchePricing {
   }
 
   /// @dev Construction, creating a list of tranches
-  /// @param init_tranches Raw array of ordered tuples: (start amount, start block, end block, price)
-  function TokenTranchePricing(uint[] init_tranches) public {
+  /* @param init_tranches Raw array of ordered tuples: (start amount, start block, end block, price) */
+  function TokenTranchePricing() public {
+    
+  }
+
+  function configurationTokenTranchePricing(uint[] init_tranches) internal {
     // Need to have tuples, length check
     require(init_tranches.length % tranche_size == 0);
     // A tranche with amount zero can never be selected and is therefore useless.

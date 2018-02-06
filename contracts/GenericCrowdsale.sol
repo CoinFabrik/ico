@@ -50,6 +50,9 @@ contract GenericCrowdsale is Haltable {
   /* Do we need to have a unique contributor id for each customer */
   bool public requireCustomerId = false;
 
+  /* Has this crowdsale been configured */
+  bool public configured = false;
+
   /**
    * Do we verify that contributor has been cleared on the server side (accredited investors only).
    * This method was first used in the FirstBlood crowdsale to ensure all contributors had accepted terms of sale (on the web).
@@ -70,12 +73,13 @@ contract GenericCrowdsale is Haltable {
 
   /** State machine
    *
+   * - PendingConfiguration: Crowdsale not yet configured
    * - Prefunding: We have not reached the starting block yet
    * - Funding: Active crowdsale
    * - Success: Crowdsale ended
    * - Finalized: The finalize function has been called and succesfully executed
    */
-  enum State{Unknown, PreFunding, Funding, Success, Finalized}
+  enum State{Unknown, PendingConfiguration, PreFunding, Funding, Success, Finalized}
 
 
   // A new investment was made
@@ -91,13 +95,17 @@ contract GenericCrowdsale is Haltable {
   event Finalized();
 
 
-  /**
+  /*
    * Basic constructor for the crowdsale.
    * @param team_multisig Address of the multisignature wallet of the team that will receive all the funds contributed in the crowdsale.
    * @param start Block number where the crowdsale will be officially started. It should be greater than the block number in which the contract is deployed.
    * @param end Block number where the crowdsale finishes. No tokens can be sold through this contract after this block.
    */
-  function GenericCrowdsale(address team_multisig, uint start, uint end) internal {
+  function GenericCrowdsale() internal {
+    
+  }
+
+  function configurationGenericCrowdsale(address team_multisig, uint start, uint end) internal inState(State.PendingConfiguration) {
     setMultisig(team_multisig);
 
     // Don't mess the dates
@@ -105,6 +113,7 @@ contract GenericCrowdsale is Haltable {
     require(block.number < start && start < end);
     startsAt = start;
     endsAt = end;
+    configured = true;
   }
 
   /**
@@ -307,6 +316,7 @@ contract GenericCrowdsale is Haltable {
    */
   function getState() public view returns (State) {
     if (finalized) return State.Finalized;
+    else if (!configured) return State.PendingConfiguration;
     else if (block.number < startsAt) return State.PreFunding;
     else if (block.number <= endsAt && !isCrowdsaleFull()) return State.Funding;
     else return State.Success;
@@ -354,6 +364,11 @@ contract GenericCrowdsale is Haltable {
     _;
   }
 
+  modifier notInState(State state) {
+    require(getState() != state);
+    _;
+  }
+
   modifier unsignedBuyAllowed() {
     require(!requiredSignedAddress);
     _;
@@ -370,5 +385,4 @@ contract GenericCrowdsale is Haltable {
     require(customerId != 0);  // UUIDv4 sanity check
     _;
   }
-
 }
