@@ -26,7 +26,7 @@ def writeToJSONFile(path, fileName, data):
 			json.dump(data, fp, sort_keys=True, indent=4)
 
 config = config_f('privateTestnet')
-params = [config['multisig_owners'][0], config['startTime'], config['endTime'], tokenRetrieverAccount]
+params = [config['multisig_owners'][0], config['startTime'], config['endTime'], tokenRetrieverAccount, config['tranches']]
 paramsLogPath = "./paramsLog"
 buildPath = "./build"
 config['tokenRetrieverAccount'] = tokenRetrieverAccount
@@ -55,7 +55,7 @@ print(
 );
 
 for x in range(0,int((len(config['tranches'])/4)-1)):
-	print("Tranche #", x, " -----------------------------------------------------------------",
+	print("\n\nTranche #", x, " -----------------------------------------------------------------",
     "\nFullTokens cap:", int(config['tranches'][4*x]/(10**18)),
     "\nStart:         ", time.ctime(config['tranches'][4*x+1]),
     "\nEnd:           ", time.ctime(config['tranches'][4*x+2]),
@@ -95,15 +95,15 @@ except OSError as e:
 
 writeToJSONFile(paramsLogPath, jsonFileName, config)
 
-crowdsale_contract = web3.eth.contract(abi=abi)
-crowdsale_contract.bytecode = bytecode
-
 nonce = web3.eth.getTransactionCount(senderAccount)
-addressAttempt = generate_contract_address(senderAccount, nonce)
+generatedAddress = generate_contract_address(senderAccount, nonce)
+
+crowdsale_contract = web3.eth.contract(address=generatedAddress, abi=abi)
+crowdsale_contract.bytecode = bytecode
 
 txHash = crowdsale_contract.deploy(transaction=transactionInfo(0), args=None)
 
-print("\nContract address: " + addressAttempt + "\n")
+print("\nContract address: " + generatedAddress + "\n")
 
 time.sleep(20)
 

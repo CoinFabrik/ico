@@ -2,6 +2,7 @@
 var fs = require("fs");
 var solc = require('solc');
 var Web3 = require('web3');
+var net = require('net');
 
 //Instantiate variables
 var gasEstimated;
@@ -14,7 +15,7 @@ var mainAddress;
 var tokenRetrieverAccount = "0x0F048ff7dE76B83fDC14912246AC4da5FA755cFE";
 
 //Connect to the private node
-var web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+var web3 = new Web3(new Web3.providers.IpcProvider('/home/coinfabrik/Programming/blockchain/node/geth.ipc', net));
 
 //Import params into config variable
 var config = require("../config.js")(web3, "privateTestnet");
@@ -22,21 +23,6 @@ var config = require("../config.js")(web3, "privateTestnet");
 //Read abi and bytecode from files
 var abi = require("./Crowdsale.abi.js");
 var bytecode = require("./Crowdsale.bin.js");
-
-//Create contract instance
-var crowdsaleContract = new web3.eth.Contract(abi, tokenRetrieverAccount, {
-   from: mainAddress,
-   gasPrice: 2000000000000000000,
-   gas: 4700000,
-   data: bytecode
- });
-
-//Find estimated gas price for operation
-web3.eth.getGasPrice().then((averageGasPrice) => {
-  console.log("Average gas price: " + averageGasPrice);
-  gasPriceEstimated = averageGasPrice;
-}).catch(console.error);
-
 
 function getAccount(){
   web3.eth.getAccounts(function(error, result) {
@@ -48,6 +34,22 @@ function getAccount(){
     }
   })
 }
+
+getAccount();
+
+//Create contract instance
+var crowdsaleContract = new web3.eth.Contract(abi, {
+   from: mainAddress,
+   gasPrice: 2000000000000000000,
+   gas: 4700000,
+   data: bytecode
+ });
+
+//Find estimated gas price for operation
+web3.eth.getGasPrice().then((averageGasPrice) => {
+  console.log("Average gas price: " + averageGasPrice);
+  gasPriceEstimated = averageGasPrice;
+}).catch(console.error);
 
 function deployContract(){
 
@@ -67,7 +69,5 @@ function deployContract(){
       contractAddress = instance.options.address;
   });
 }
-
-getAccount();
 
 setTimeout(deployContract, 20);

@@ -43,13 +43,19 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
   }
 
   //TODO: implement token assignation (e.g. through minting or transfer)
-  function assignTokens(address receiver, uint tokenAmount) internal;
+  function assignTokens(address receiver, uint tokenAmount) internal {
+
+  }
 
   //TODO: implement token amount calculation
-  function calculateTokenAmount(uint weiAmount, address receiver) internal view returns (uint weiAllowed, uint tokenAmount);
+  function calculateTokenAmount(uint weiAmount, address receiver) internal view returns (uint weiAllowed, uint tokenAmount) {
+
+  }
 
   //TODO: implement to control funding state criterion
-  function isCrowdsaleFull() internal view returns (bool full);
+  function isCrowdsaleFull() internal view returns (bool full){
+    
+  }
 
   /**
    * Finalize a succcesful crowdsale.
