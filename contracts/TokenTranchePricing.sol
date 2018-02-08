@@ -6,7 +6,7 @@
  * Heavily modified by https://www.coinfabrik.com/
  */
 
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.15;
 
 import "./SafeMath.sol";
 
@@ -24,10 +24,10 @@ contract TokenTranchePricing {
   struct Tranche {
       // Amount in tokens when this tranche becomes inactive
       uint amount;
-      // Block interval [start, end)
-      // Starting block (included in the interval)
+      // Time interval [start, end)
+      // Starting timestamp (included in the interval)
       uint start;
-      // Ending block (excluded from the interval)
+      // Ending timestamp (excluded from the interval)
       uint end;
       // How many tokens per wei you will get while this tranche is active
       uint price;
@@ -44,9 +44,8 @@ contract TokenTranchePricing {
   function getTranchesLength() public view returns (uint) {
     return tranches.length;
   }
-
   /// @dev Construction, creating a list of tranches
-  /// @param init_tranches Raw array of ordered tuples: (start amount, start block, end block, price)
+  /// @param init_tranches Raw array of ordered tuples: (end amount, start timestamp, end timestamp, price)
   function TokenTranchePricing(uint[] init_tranches) public {
     // Need to have tuples, length check
     require(init_tranches.length % tranche_size == 0);
@@ -54,32 +53,32 @@ contract TokenTranchePricing {
     // This check and the one inside the loop ensure no tranche can have an amount equal to zero.
     require(init_tranches[amount_offset] > 0);
 
-    uint input_tranches_length = init_tranches.length.div(tranche_size);
+    tranches.length = init_tranches.length.div(tranche_size);
     Tranche memory last_tranche;
-    for (uint i = 0; i < input_tranches_length; i++) {
+    for (uint i = 0; i < tranches.length; i++) {
       uint tranche_offset = i.mul(tranche_size);
       uint amount = init_tranches[tranche_offset.add(amount_offset)];
       uint start = init_tranches[tranche_offset.add(start_offset)];
       uint end = init_tranches[tranche_offset.add(end_offset)];
       uint price = init_tranches[tranche_offset.add(price_offset)];
       // No invalid steps
-      require(block.number < start && start < end);
+      require(block.timestamp < start && start < end);
       // Bail out when entering unnecessary tranches
       // This is preferably checked before deploying contract into any blockchain.
       require(i == 0 || (end >= last_tranche.end && amount > last_tranche.amount) ||
               (end > last_tranche.end && amount >= last_tranche.amount));
 
       last_tranche = Tranche(amount, start, end, price);
-      tranches.push(last_tranche);
+      tranches[i] = last_tranche;
     }
   }
 
   /// @dev Get the current tranche or bail out if there is no tranche defined for the current block.
   /// @param tokensSold total amount of tokens sold, for calculating the current tranche
   /// @return Returns the struct representing the current tranche
-  function getCurrentTranche(uint tokensSold) private view returns (Tranche storage) {
+  function getCurrentTranche(uint tokensSold) private constant returns (Tranche storage) {
     for (uint i = 0; i < tranches.length; i++) {
-      if (tranches[i].start <= block.number && block.number < tranches[i].end && tokensSold < tranches[i].amount) {
+      if (tranches[i].start <= block.timestamp && block.timestamp < tranches[i].end && tokensSold < tranches[i].amount) {
         return tranches[i];
       }
     }
@@ -90,7 +89,7 @@ contract TokenTranchePricing {
   /// @dev Get the current price. May revert if there is no tranche currently active.
   /// @param tokensSold total amount of tokens sold, for calculating the current tranche
   /// @return The current price
-  function getCurrentPrice(uint tokensSold) internal view returns (uint result) {
+  function getCurrentPrice(uint tokensSold) internal constant returns (uint result) {
     return getCurrentTranche(tokensSold).price;
   }
 

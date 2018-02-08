@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.15;
 
 /**
  * Originally from https://github.com/TokenMarketNet/ico
@@ -29,10 +29,10 @@ contract GenericCrowdsale is Haltable {
   /* ether will be transferred to this address */
   address public multisigWallet;
 
-  /* the starting block number of the crowdsale */
+  /* the starting time of the crowdsale */
   uint public startsAt;
 
-  /* the ending block number of the crowdsale */
+  /* the ending time of the crowdsale */
   uint public endsAt;
 
   /* the number of tokens already sold through this contract*/
@@ -70,7 +70,7 @@ contract GenericCrowdsale is Haltable {
 
   /** State machine
    *
-   * - Prefunding: We have not reached the starting block yet
+   * - Prefunding: We have not reached the starting time yet
    * - Funding: Active crowdsale
    * - Success: Crowdsale ended
    * - Finalized: The finalize function has been called and succesfully executed
@@ -102,7 +102,7 @@ contract GenericCrowdsale is Haltable {
 
     // Don't mess the dates
     require(start != 0 && end != 0);
-    require(block.number < start && start < end);
+    require(block.timestamp < start && start < end);
     startsAt = start;
     endsAt = end;
   }
@@ -130,12 +130,12 @@ contract GenericCrowdsale is Haltable {
     // Determine if it's a good time to accept investment from this participant
     if (getState() == State.PreFunding) {
       // Are we whitelisted for early deposit
-      require(earlyParticipantWhitelist[msg.sender]);
+      require(earlyParticipantWhitelist[receiver]);
     }
 
     uint weiAmount;
     uint tokenAmount;
-    (weiAmount, tokenAmount) = calculateTokenAmount(msg.value, receiver);
+    (weiAmount, tokenAmount) = calculateTokenAmount(msg.value, msg.sender);
     // Sanity check against bad implementation.
     assert(weiAmount <= msg.value);
     
@@ -194,42 +194,14 @@ contract GenericCrowdsale is Haltable {
   }
 
   /**
-   * Investing function that recognizes the receiver and verifies he is allowed to invest.
-   *
-   * @param customerId UUIDv4 that identifies this contributor
-   */
-  function buyOnBehalfWithSignedAddress(address receiver, uint128 customerId, uint8 v, bytes32 r, bytes32 s) public payable validCustomerId(customerId) {
-    bytes32 hash = sha256(receiver);
-    require(ecrecover(hash, v, r, s) == signerAddress);
-    investInternal(receiver, customerId);
-  }
-
-  /**
-   * Investing function that recognizes the receiver.
-   * 
-   * @param customerId UUIDv4 that identifies this contributor
-   */
-  function buyOnBehalfWithCustomerId(address receiver, uint128 customerId) public payable validCustomerId(customerId) unsignedBuyAllowed {
-    investInternal(receiver, customerId);
-  }
-
-  /**
-   * Buys tokens on behalf of an address.
-   *
-   * Pay for funding, get invested tokens back in the receiver address.
-   */
-  function buyOnBehalf(address receiver) public payable unsignedBuyAllowed {
-    require(!requireCustomerId); // Crowdsale needs to track participants for thank you email
-    investInternal(receiver, 0);
-  }
-
-  /**
    * Investing function that recognizes the payer and verifies he is allowed to invest.
    *
    * @param customerId UUIDv4 that identifies this contributor
    */
-  function buyWithSignedAddress(uint128 customerId, uint8 v, bytes32 r, bytes32 s) public payable {
-    buyOnBehalfWithSignedAddress(msg.sender, customerId, v, r, s);
+  function buyWithSignedAddress(uint128 customerId, uint8 v, bytes32 r, bytes32 s) public payable validCustomerId(customerId) {
+    bytes32 hash = sha256(msg.sender);
+    require(ecrecover(hash, v, r, s) == signerAddress);
+    investInternal(msg.sender, customerId);
   }
 
 
@@ -238,8 +210,8 @@ contract GenericCrowdsale is Haltable {
    * 
    * @param customerId UUIDv4 that identifies this contributor
    */
-  function buyWithCustomerId(uint128 customerId) public payable {
-    buyOnBehalfWithCustomerId(msg.sender, customerId);
+  function buyWithCustomerId(uint128 customerId) public payable validCustomerId(customerId) unsignedBuyAllowed {
+    investInternal(msg.sender, customerId);
   }
 
   /**
@@ -247,8 +219,9 @@ contract GenericCrowdsale is Haltable {
    *
    * Pay for funding, get invested tokens back in the sender address.
    */
-  function buy() public payable {
-    buyOnBehalf(msg.sender);
+  function buy() public payable unsignedBuyAllowed {
+    require(!requireCustomerId); // Crowdsale needs to track participants for thank you email
+    investInternal(msg.sender, 0);
   }
 
   /**
@@ -305,10 +278,10 @@ contract GenericCrowdsale is Haltable {
    * This function has the timed transition builtin.
    * So there is no chance of the variable being stale.
    */
-  function getState() public view returns (State) {
+  function getState() public constant returns (State) {
     if (finalized) return State.Finalized;
-    else if (block.number < startsAt) return State.PreFunding;
-    else if (block.number <= endsAt && !isCrowdsaleFull()) return State.Funding;
+    else if (block.timestamp < startsAt) return State.PreFunding;
+    else if (block.timestamp <= endsAt && !isCrowdsaleFull()) return State.Funding;
     else return State.Success;
   }
 
@@ -320,16 +293,16 @@ contract GenericCrowdsale is Haltable {
   /**
    *  Determine if the goal was already reached in the current crowdsale
    */
-  function isCrowdsaleFull() internal view returns (bool full);
+  function isCrowdsaleFull() internal constant returns (bool full);
 
   /**
    * Returns any excess wei received
    * 
    * This function can be overriden to provide a different refunding method.
    */
-  function returnExcedent(uint excedent, address receiver) internal {
+  function returnExcedent(uint excedent, address agent) internal {
     if (excedent > 0) {
-      receiver.transfer(excedent);
+      agent.transfer(excedent);
     }
   }
 
@@ -341,9 +314,9 @@ contract GenericCrowdsale is Haltable {
    *  This is worked around in the current design using an appropriate amount of decimals in the FractionalERC20 standard.
    *  The workaround is good enough for most use cases, hence the simplified function signature.
    *  @return weiAllowed The amount of wei accepted in this transaction.
-   *  @return tokenAmount The tokens that are assigned to the receiver in this transaction.
+   *  @return tokenAmount The tokens that are assigned to the agent in this transaction.
    */
-  function calculateTokenAmount(uint weiAmount, address receiver) internal view returns (uint weiAllowed, uint tokenAmount);
+  function calculateTokenAmount(uint weiAmount, address agent) internal constant returns (uint weiAllowed, uint tokenAmount);
 
   //
   // Modifiers

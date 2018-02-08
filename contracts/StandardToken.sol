@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.15;
 
 /**
  * Originally from https://github.com/OpenZeppelin/zeppelin-solidity
@@ -22,7 +22,7 @@ contract StandardToken is EIP20Token, Burnable, Mintable {
   mapping(address => mapping (address => uint)) private allowed;
 
 
-  function totalSupply() public view returns (uint) {
+  function totalSupply() public constant returns (uint) {
     return total_supply;
   }
 
@@ -43,7 +43,7 @@ contract StandardToken is EIP20Token, Burnable, Mintable {
    * @param account The address whose balance is to be queried.
    * @return An uint representing the amount owned by the passed address.
    */
-  function balanceOf(address account) public view returns (uint balance) {
+  function balanceOf(address account) public constant returns (uint balance) {
     return balances[account];
   }
 
@@ -91,7 +91,7 @@ contract StandardToken is EIP20Token, Burnable, Mintable {
    * @param spender address The address which will spend the funds.
    * @return A uint specifing the amount of tokens still avaible for the spender.
    */
-  function allowance(address account, address spender) public view returns (uint remaining) {
+  function allowance(address account, address spender) public constant returns (uint remaining) {
     return allowed[account][spender];
   }
 

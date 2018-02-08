@@ -10,11 +10,11 @@ module.exports = {
     },
     ropsten: {
       host: "localhost",
-      port: 8545,
+      port: 8544,
       network_id: "3", // Match any network id
       // from: "0x485de458fbcac6a7d35227842d652641384cb333", //// Defaults to the first available account provided by your Ethereum client.
-      gas: 4612388,
-      gasPrice: 20000000000
+      gas: 200000,
+      gasPrice: 2000000000
     },
     testrpc: {
       host: "localhost",
@@ -31,6 +31,14 @@ module.exports = {
       //from: default,
       gas: 6500000,
       gasPrice: 20000000000 
+    },
+    rinkeby: {
+      host: "localhost",
+      port: 8543,
+      network_id: "*", // Match any network id
+      // from: "0x485de458fbcac6a7d35227842d652641384cb333", //// Defaults to the first available account provided by your Ethereum client.
+      gas: 200000,
+      gasPrice: 2000000000
     }
   },
   gasPrice: 20000000000,

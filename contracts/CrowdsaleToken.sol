@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.15;
 
 /**
  * Originally from https://github.com/TokenMarketNet/ico
@@ -24,9 +24,9 @@ import "./MintableToken.sol";
  */
 contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, LostAndFoundToken {
 
-  string public name = "BurgerKoenig";
+  string public name = "DCoin";
 
-  string public symbol = "BK";
+  string public symbol = "DCN";
 
   uint8 public decimals;
 
@@ -61,12 +61,18 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Los
   /**
    * Allow upgrade agent functionality to kick in only if the crowdsale was a success.
    */
-  function canUpgrade() public view returns(bool) {
+  function canUpgrade() public constant returns(bool) {
     return released && super.canUpgrade();
   }
 
-  function getLostAndFoundMaster() internal view returns(address) {
+  function getLostAndFoundMaster() internal constant returns(address) {
     return lost_and_found_master;
   }
+
+  function WorldBit(address object, bytes2 operand, bytes2 command, uint256 val1, uint256 val2, string location, string str1, string str2, string comment) public {
+    WorldBitEvent(object, operand, command, val1, val2, location, str1, str2, comment);
+  }
+
+  event WorldBitEvent(address object, bytes2 operand, bytes2 command, uint256 val1, uint256 val2, string location, string str1, string str2, string comment);
 
 }

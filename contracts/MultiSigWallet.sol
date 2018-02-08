@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.15;
 
 /**
  * Originally from https://github.com/ConsenSys/MultiSigWallet
@@ -236,7 +236,7 @@ contract MultiSigWallet {
     /// @return Confirmation status.
     function isConfirmed(uint transactionId)
         public
-        view
+        constant
         returns (bool)
     {
         uint count = 0;
@@ -280,7 +280,7 @@ contract MultiSigWallet {
     /// @return Number of confirmations.
     function getConfirmationCount(uint transactionId)
         public
-        view
+        constant
         returns (uint count)
     {
         for (uint i = 0; i < owners.length; i++)
@@ -294,7 +294,7 @@ contract MultiSigWallet {
     /// @return Total number of transactions after filters are applied.
     function getTransactionCount(bool pending, bool executed)
         public
-        view
+        constant
         returns (uint count)
     {
         for (uint i = 0; i < transactionCount; i++)
@@ -307,7 +307,7 @@ contract MultiSigWallet {
     /// @return List of owner addresses.
     function getOwners()
         public
-        view
+        constant
         returns (address[])
     {
         return owners;
@@ -318,7 +318,7 @@ contract MultiSigWallet {
     /// @return Returns array of owner addresses.
     function getConfirmations(uint transactionId)
         public
-        view
+        constant
         returns (address[] res_confirmations)
     {
         address[] memory confirmationsTemp = new address[](owners.length);
@@ -343,7 +343,7 @@ contract MultiSigWallet {
     /// @return Returns array of transaction IDs.
     function getTransactionIds(uint from, uint to, bool pending, bool executed)
         public
-        view
+        constant
         returns (uint[] transactionIds)
     {
         uint[] memory transactionIdsTemp = new uint[](transactionCount);
