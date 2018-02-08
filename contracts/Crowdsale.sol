@@ -15,6 +15,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
   uint private constant token_initial_supply = 1;
   uint8 private constant token_decimals = 15;
   bool private constant token_mintable = true;
+  uint private constant sellable_tokens = 525 * (10 ** 5) * (10 ** uint(token_decimals));
 
   /*
    * Constructor for the crowdsale.
@@ -44,17 +45,27 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
 
   //TODO: implement token assignation (e.g. through minting or transfer)
   function assignTokens(address receiver, uint tokenAmount) internal {
-
+    token.transfer(receiver, tokenAmount)
   }
 
   //TODO: implement token amount calculation
   function calculateTokenAmount(uint weiAmount, address receiver) internal view returns (uint weiAllowed, uint tokenAmount) {
+    uint tokensPerWei = getCurrentPrice(tokensSold);
+    uint maxAllowed = sellable_tokens.sub(tokensSold).div(tokensPerWei);
+    weiAllowed = maxAllowed.min256(weiAmount);
 
+    if (weiAmount < maxAllowed) {
+      tokenAmount = tokensPerWei.mul(weiAmount);
+    }
+    // With this case we let the crowdsale end even when there are rounding errors due to the tokens to wei ratio
+    else {
+      tokenAmount = sellable_tokens.sub(tokensSold);
+    }
   }
 
   //TODO: implement to control funding state criterion
-  function isCrowdsaleFull() internal view returns (bool full){
-    
+  function isCrowdsaleFull() internal view returns (bool full) {
+    return tokensSold >= sellable_tokens;
   }
 
   /**

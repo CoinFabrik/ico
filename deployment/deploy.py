@@ -14,6 +14,7 @@ web3 = Web3(IPCProvider(ipcPath))
 tokenRetrieverAccount = "0x0F048ff7dE76B83fDC14912246AC4da5FA755cFE"
 receipt = None
 senderAccount = web3.eth.accounts[0]
+secondAccount = web3.eth.accounts[1]
 gas = 50000000
 gasPrice = 20000000000
 
@@ -68,15 +69,15 @@ print("\nTransaction sender: " + senderAccount,
 )
 
 
-invalidInput = True
+pendingInput = True
 consent = None
 
-while invalidInput:
+while pendingInput:
 
 	consent = input('\nDo you agree with the information? [yes/no]: ')
 
 	if(consent == 'yes' or consent == 'no'):
-		invalidInput = False
+		pendingInput = False
 	else:
 		print("\nPlease enter 'yes' or 'no'\n")
 
@@ -98,8 +99,7 @@ writeToJSONFile(paramsLogPath, jsonFileName, config)
 nonce = web3.eth.getTransactionCount(senderAccount)
 generatedAddress = generate_contract_address(senderAccount, nonce)
 
-crowdsale_contract = web3.eth.contract(address=generatedAddress, abi=abi)
-crowdsale_contract.bytecode = bytecode
+crowdsale_contract = web3.eth.contract(address=generatedAddress, abi=abi, bytecode=bytecode)
 
 txHash = crowdsale_contract.deploy(transaction=transactionInfo(0), args=None)
 
@@ -108,4 +108,6 @@ print("\nContract address: " + generatedAddress + "\n")
 time.sleep(20)
 
 receipt = web3.eth.getTransactionReceipt(txHash)
-crowdsale_contract.address = receipt.contractAddress
+
+hash_configured = crowdsale_contract.functions.configurationCrowdsale(params[0], params[1], params[2], params[3], params[4]).transact({'from': senderAccount})
+

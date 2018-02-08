@@ -39,5 +39,4 @@ contract Haltable is Ownable {
     halted = false;
     Halted(false);
   }
-
 }
