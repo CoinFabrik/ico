@@ -68,5 +68,4 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Los
   function getLostAndFoundMaster() internal view returns(address) {
     return lost_and_found_master;
   }
-
 }

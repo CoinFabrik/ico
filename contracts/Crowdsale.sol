@@ -45,7 +45,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
 
   //TODO: implement token assignation (e.g. through minting or transfer)
   function assignTokens(address receiver, uint tokenAmount) internal {
-    token.transfer(receiver, tokenAmount)
+    token.transfer(receiver, tokenAmount);
   }
 
   //TODO: implement token amount calculation

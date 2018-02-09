@@ -18,19 +18,23 @@ secondAccount = web3.eth.accounts[1]
 gas = 50000000
 gasPrice = 20000000000
 
-def transactionInfo(value=0):
-	return {"from": senderAccount, "value": value*(10**18), "gas": gas, "gasPrice": gasPrice}
-
-def writeToJSONFile(path, fileName, data):
-		filePathNameWExt = path + '/' + fileName + '.json'
-		with open(filePathNameWExt, 'w') as fp:
-			json.dump(data, fp, sort_keys=True, indent=4)
-
 config = config_f('privateTestnet')
-params = [config['multisig_owners'][0], config['startTime'], config['endTime'], tokenRetrieverAccount, config['tranches']]
+config['tokenRetrieverAccount'] = tokenRetrieverAccount
+params = [config['multisig_owners'][0], config['startTime'], config['endTime'], config['tokenRetrieverAccount'], config['tranches']]
 paramsLogPath = "./paramsLog"
 buildPath = "./build"
-config['tokenRetrieverAccount'] = tokenRetrieverAccount
+
+pendingInput = True
+consent = None
+
+
+def transactionInfo(from_index=0, value=0):
+	return {"from": web3.eth.accounts[from_index], "value": value*(10**18), "gas": gas, "gasPrice": gasPrice}
+
+def writeToJSONFile(path, fileName, data):
+	filePathNameWExt = path + '/' + fileName + '.json'
+	with open(filePathNameWExt, 'w') as fp:
+		json.dump(data, fp, sort_keys=True, indent=4)
 
 try:
 	if not os.path.exists(buildPath):
@@ -40,19 +44,25 @@ except OSError as e:
 		raise
 
 with open("./build/Crowdsale.abi") as contract_abi_file:
-	abi = json.load(contract_abi_file)
+	crowdsale_abi = json.load(contract_abi_file)
 
 with open("./build/Crowdsale.bin") as contract_bin_file:
-	bytecode = '0x' + contract_bin_file.read()
+	crowdsale_bytecode = '0x' + contract_bin_file.read()
+
+with open("./build/CrowdsaleToken.abi") as token_abi_file:
+	token_abi = json.load(token_abi_file)
+
+with open("./build/Crowdsale.bin") as contract_bin_file:
+	token_bytecode = '0x' + contract_bin_file.read()
 
 
-print("\nWeb3 version:", web3.version.api)
+print("\n\nWeb3 version:", web3.version.api)
 
 print(
   "\n\nMultisig address:", config['multisig_owners'][0], 
   "\n\nStart time:", time.ctime(config['startTime']),
   "\n\nEnd time:", time.ctime(config['endTime']),
-  "\n\nToken retriever: " + tokenRetrieverAccount + "\n"
+  "\n\nToken retriever: " + tokenRetrieverAccount
 );
 
 for x in range(0,int((len(config['tranches'])/4)-1)):
@@ -64,13 +74,10 @@ for x in range(0,int((len(config['tranches'])/4)-1)):
   )
 
 print("------------------------------------------------------------------------------");
-print("\nTransaction sender: " + senderAccount,
-      "\n Gas and Gas price: " + str(gas) + " and " + str(gasPrice) + "\n"
+print("\n\nTransaction sender: " + senderAccount,
+      "\nGas and Gas price: " + str(gas) + " and " + str(gasPrice) + "\n"
 )
 
-
-pendingInput = True
-consent = None
 
 while pendingInput:
 
@@ -79,9 +86,9 @@ while pendingInput:
 	if(consent == 'yes' or consent == 'no'):
 		pendingInput = False
 	else:
-		print("\nPlease enter 'yes' or 'no'\n")
+		print("\n\nPlease enter 'yes' or 'no'\n")
 
-deployName = input('\nEnter name of deployment: ')
+deployName = input('\n\nEnter name of deployment: ')
 
 localTime = datetime.now()
 
@@ -96,18 +103,69 @@ except OSError as e:
 
 writeToJSONFile(paramsLogPath, jsonFileName, config)
 
-nonce = web3.eth.getTransactionCount(senderAccount)
-generatedAddress = generate_contract_address(senderAccount, nonce)
 
-crowdsale_contract = web3.eth.contract(address=generatedAddress, abi=abi, bytecode=bytecode)
+nonceCrowdsale = web3.eth.getTransactionCount(senderAccount)
+generatedAddressCrowdsale = generate_contract_address(senderAccount, nonceCrowdsale)
 
-txHash = crowdsale_contract.deploy(transaction=transactionInfo(0), args=None)
+crowdsale_contract = web3.eth.contract(address=generatedAddressCrowdsale, abi=crowdsale_abi, bytecode=token_bytecode)
 
-print("\nContract address: " + generatedAddress + "\n")
+txHashCrowdsale = crowdsale_contract.deploy(transaction=transactionInfo(0), args=None)
 
-time.sleep(20)
+print("\n\nCrowdsale address: " + generatedAddressCrowdsale)
 
-receipt = web3.eth.getTransactionReceipt(txHash)
 
-hash_configured = crowdsale_contract.functions.configurationCrowdsale(params[0], params[1], params[2], params[3], params[4]).transact({'from': senderAccount})
+time.sleep(2)
 
+
+nonceToken = web3.eth.getTransactionCount(senderAccount)
+generatedAddressToken = generate_contract_address(senderAccount, nonceToken)
+
+token_contract = web3.eth.contract(address=generatedAddressToken, abi=token_abi, bytecode=token_bytecode)
+
+#txHashToken = crowdsale_contract.deploy(transaction=transactionInfo(0), args=None)
+
+#print("\n\nCrowdsaleToken address: " + generatedAddressToken + "\n")
+
+
+def configurateCall():
+	hashConfiguredCall = crowdsale_contract.functions.configurationCrowdsale(params[0], params[1], params[2], params[3], params[4]).call(transactionInfo())
+
+def configurateTransact():
+	hashConfiguredTransact = crowdsale_contract.functions.configurationCrowdsale(params[0], params[1], params[2], params[3], params[4]).transact(transactionInfo())
+
+
+def status(tx_receipt):
+	time.sleep(2)
+	return web3.eth.getTransactionReceipt(tx_receipt)["status"]
+
+def addAddress():
+	#receipt = eth.getTransactionReceipt(dHash)
+	crowdsale_contract.address = generatedAddress
+	print("Crowdsale:", contract.address)
+	token_contract.address = token()
+	print("Token:", token_contract.address)
+
+def balance(investor):
+	if isinstance(investor, str):
+		return token_contract.balanceOf(investor).call(transactionInfo())
+	else:
+		return token_contract.balanceOf(web3.eth.accounts[investor]).call(transactionInfo())
+
+def buy(buyer_index, value):
+	return status(crowdsale_contract.buy().transact(transactionInfo(buyer_index, value)))
+
+def end_now():
+	new_ending = int(time.time()) + 5
+	print(status(crowdsale_contract.setEndingTime(new_ending).transact(transactionInfo())))
+	time.sleep(2)
+	print(status(crowdsale_contract.finalize().transact(transactionInfo())))
+
+def tokenCall():
+	return contract.token().call()
+
+def stateCall():
+	return contract.getState().call()
+
+def balances():
+	for i in range(len(web3.eth.accounts)):
+		print(balance(i))

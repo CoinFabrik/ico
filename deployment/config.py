@@ -39,7 +39,7 @@ def config_f(network):
 
 		pre_ico_tranches_end = config['startTime'] + 60 * 60 * 24
 
-		ico_tranches_end = tranches_start + 60*60*24*2
+		ico_tranches_end = tranches_start + 60 * 60 * 24 * 2
 
 		for x in range(0,pre_ico_tranches_quantity - 1):
 			config['tranches'].append(amounts[x])
