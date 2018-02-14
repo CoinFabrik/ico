@@ -101,6 +101,7 @@ except OSError as e:
 	if e.errno != errno.EEXIST:
 		raise
 
+
 writeToJSONFile(paramsLogPath, jsonFileName, config)
 
 
@@ -111,10 +112,12 @@ crowdsale_contract = web3.eth.contract(address=generatedAddressCrowdsale, abi=cr
 
 txHashCrowdsale = crowdsale_contract.deploy(transaction=transactionInfo(0), args=None)
 
-print("\n\nCrowdsale address: " + generatedAddressCrowdsale)
+print("\n\nCrowdsale address: " + generatedAddressCrowdsale + "\n")
 
 
-time.sleep(2)
+time.sleep(10)
+
+receipt = web3.eth.getTransactionReceipt(txHashCrowdsale)
 
 
 nonceToken = web3.eth.getTransactionCount(senderAccount)
@@ -127,45 +130,50 @@ token_contract = web3.eth.contract(address=generatedAddressToken, abi=token_abi,
 #print("\n\nCrowdsaleToken address: " + generatedAddressToken + "\n")
 
 
+def status(tx_receipt):
+	while web3.eth.getTransactionReceipt(tx_receipt) is None:
+		time.sleep(1)
+	return web3.eth.getTransactionReceipt(tx_receipt).status
+
 def configurateCall():
 	hashConfiguredCall = crowdsale_contract.functions.configurationCrowdsale(params[0], params[1], params[2], params[3], params[4]).call(transactionInfo())
+	print("\ntx hash: " + hashConfiguredCall.hex() + "\n")
+	return status(hashConfiguredCall)
 
 def configurateTransact():
 	hashConfiguredTransact = crowdsale_contract.functions.configurationCrowdsale(params[0], params[1], params[2], params[3], params[4]).transact(transactionInfo())
-
-
-def status(tx_receipt):
-	time.sleep(2)
-	return web3.eth.getTransactionReceipt(tx_receipt)["status"]
+	print("\ntx hash: " + hashConfiguredTransact.hex() + "\n")
+	return status(hashConfiguredTransact)
 
 def addAddress():
-	#receipt = eth.getTransactionReceipt(dHash)
+	#receipt = web3.eth.getTransactionReceipt(txHashCrowdsale)
 	crowdsale_contract.address = generatedAddress
-	print("Crowdsale:", contract.address)
-	token_contract.address = token()
-	print("Token:", token_contract.address)
+	print("Crowdsale: ", contract.address)
+	token_contract.address = tokenCall()
+	print("Token: ", token_contract.address)
 
 def balance(investor):
 	if isinstance(investor, str):
-		return token_contract.balanceOf(investor).call(transactionInfo())
+		return crowdsale_contract.functions.balanceOf(investor).call(transactionInfo())
 	else:
-		return token_contract.balanceOf(web3.eth.accounts[investor]).call(transactionInfo())
+		return crowdsale_contract.functions.balanceOf(web3.eth.accounts[investor]).call(transactionInfo())
 
 def buy(buyer_index, value):
-	return status(crowdsale_contract.buy().transact(transactionInfo(buyer_index, value)))
+	return status(crowdsale_contract.functions.buy().transact(transactionInfo(buyer_index, value)))
 
 def end_now():
 	new_ending = int(time.time()) + 5
-	print(status(crowdsale_contract.setEndingTime(new_ending).transact(transactionInfo())))
+	print(status(crowdsale_contract.functions.setEndingTime(new_ending).transact(transactionInfo())))
 	time.sleep(2)
-	print(status(crowdsale_contract.finalize().transact(transactionInfo())))
+	print(status(crowdsale_contract.functions.finalize().transact(transactionInfo())))
 
 def tokenCall():
-	return contract.token().call()
+	return crowdsale_contract.functions.token().call()
 
 def stateCall():
-	return contract.getState().call()
+	return crowdsale_contract.functions.getState().call()
 
 def balances():
 	for i in range(len(web3.eth.accounts)):
 		print(balance(i))
+

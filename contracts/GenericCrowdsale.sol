@@ -364,11 +364,6 @@ contract GenericCrowdsale is Haltable {
     _;
   }
 
-  modifier notInState(State state) {
-    require(getState() != state);
-    _;
-  }
-
   modifier unsignedBuyAllowed() {
     require(!requiredSignedAddress);
     _;
