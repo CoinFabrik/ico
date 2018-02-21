@@ -96,15 +96,22 @@ contract GenericCrowdsale is Haltable {
 
 
   /*
-   * Basic constructor for the crowdsale.
-   * @param team_multisig Address of the multisignature wallet of the team that will receive all the funds contributed in the crowdsale.
-   * @param start Block number where the crowdsale will be officially started. It should be greater than the block number in which the contract is deployed.
-   * @param end Block number where the crowdsale finishes. No tokens can be sold through this contract after this block.
+   * The configuration from the constructor was moved to the configurationGenericCrowdsale function.
    */
+
   function GenericCrowdsale() internal {
     
   }
 
+  /*
+   * The configuration from the constructor was moved to the configurationGenericCrowdsale function.
+   *
+   * @param team_multisig Address of the multisignature wallet of the team that will receive all the funds contributed in the crowdsale.
+   * @param start Block number where the crowdsale will be officially started. It should be greater than the block number in which the contract is deployed.
+   * @param end Block number where the crowdsale finishes. No tokens can be sold through this contract after this block.
+   *
+   * configurationGenericCrowdsale can only be called when in State.PendingConfiguration because of the inState modifier.
+   */
   function configurationGenericCrowdsale(address team_multisig, uint start, uint end) internal inState(State.PendingConfiguration) {
     setMultisig(team_multisig);
 

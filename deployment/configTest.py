@@ -6,20 +6,15 @@ def config_f(network):
 
 	config = {}
 
-	tokens_per_wei = [410, 390, 370, 350, 340, 330, 320, 310, 300, 290, 280]
+	tokens_per_wei = [350, 300]
 	
 	tranches_quantity = len(tokens_per_wei)
 
-	amounts = [3500000, 7000000, 10500000]
+	amounts = [3500000, 10500000]
 
-	pre_ico_tranches_quantity = len(amounts)
+	pre_ico_tranches_quantity = 1
 
 	ico_tranches_quantity = tranches_quantity - pre_ico_tranches_quantity
-
-	auxNum = 525*(10**4)
-
-	for x in range(pre_ico_tranches_quantity,(tranches_quantity-1)):
-		amounts.append(amounts[x - 1] + auxNum)
 
 	def mulByTenToTheEighteenth(x):
 		return x*(10**18)
@@ -33,7 +28,7 @@ def config_f(network):
 		
 		config['multisig_owners'] = [to_checksum_address("0xf19258256b06324c7516b00bf5c76af001ee1e95")]
 
-		config['startTime'] = int(round(time.time())) + 60 * 10
+		config['startTime'] = int(round(time.time())) + 30
 
 		tranches_start = config['startTime']
 

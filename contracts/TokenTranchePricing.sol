@@ -45,12 +45,15 @@ contract TokenTranchePricing {
     return tranches.length;
   }
 
-  /// @dev Construction, creating a list of tranches
-  /* @param init_tranches Raw array of ordered tuples: (start amount, start block, end block, price) */
   function TokenTranchePricing() public {
     
   }
-
+  
+  // The configuration from the constructor was moved to the configurationTokenTranchePricing function.
+  //
+  /// @dev Construction, creating a list of tranches
+  /* @param init_tranches Raw array of ordered tuples: (start amount, start block, end block, price) */
+  //
   function configurationTokenTranchePricing(uint[] init_tranches) internal {
     // Need to have tuples, length check
     require(init_tranches.length % tranche_size == 0);

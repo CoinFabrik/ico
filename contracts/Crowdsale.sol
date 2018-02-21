@@ -15,20 +15,19 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
   uint private constant token_initial_supply = 1;
   uint8 private constant token_decimals = 15;
   bool private constant token_mintable = true;
-  uint private constant sellable_tokens = 525 * (10 ** 5) * (10 ** uint(token_decimals));
+  uint private constant sellable_tokens = 525 * (10 ** 5) * (10 ** uint(token_decimals)); // Remove later
 
   /*
-   * Constructor for the crowdsale.
-   * Normally, the token contract is created here. That way, the minting, release and transfer agents can be set here too.
+   * The constructor for the crowdsale was removed given it didn't receive any arguments nor had any body.
+   *
+   * The configuration from the constructor was moved to the configurationCrowdsale function which creates the token contract and also calls the configuration functions from GenericCrowdsale and TokenTranchePricing.
+   * 
    *
    * @param team_multisig Address of the multisignature wallet of the team that will receive all the funds contributed in the crowdsale.
    * @param start Block number where the crowdsale will be officially started. It should be greater than the block number in which the contract is deployed.
    * @param end Block number where the crowdsale finishes. No tokens can be sold through this contract after this block.
    * @param token_retriever Address that will handle tokens accidentally sent to the token contract. See the LostAndFoundToken and CrowdsaleToken contracts for further details.
    */
-  function Crowdsale() GenericCrowdsale() TokenTranchePricing() public {
-      
-  }
 
   function configurationCrowdsale(address team_multisig, uint start, uint end, address token_retriever, uint[] init_tranches) public {
       // Testing values
@@ -38,18 +37,20 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
       // Necessary if finalize is overriden to release the tokens for public trading.
       // token.setReleaseAgent(address(this));
 
-      configurationGenericCrowdsale(team_multisig, start, end);
+      // Configuration functionality for GenericCrowdsale. Uncomment when using this contract.
+      configurationGenericCrowdsale(team_multisig, start, end); //Comment later
 
-      configurationTokenTranchePricing(init_tranches);
+      // Configuration functionality for TokenTranchePricing. Uncomment when using this contract.
+      configurationTokenTranchePricing(init_tranches); //Comment later
   }
 
   //TODO: implement token assignation (e.g. through minting or transfer)
-  function assignTokens(address receiver, uint tokenAmount) internal {
+  function assignTokens(address receiver, uint tokenAmount) internal { // Remove implementation later
     token.transfer(receiver, tokenAmount);
   }
 
   //TODO: implement token amount calculation
-  function calculateTokenAmount(uint weiAmount, address receiver) internal view returns (uint weiAllowed, uint tokenAmount) {
+  function calculateTokenAmount(uint weiAmount, address receiver) internal view returns (uint weiAllowed, uint tokenAmount) { // Remove implementation later
     uint tokensPerWei = getCurrentPrice(tokensSold);
     uint maxAllowed = sellable_tokens.sub(tokensSold).div(tokensPerWei);
     weiAllowed = maxAllowed.min256(weiAmount);
@@ -64,12 +65,12 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
   }
 
   //TODO: implement to control funding state criterion
-  function isCrowdsaleFull() internal view returns (bool full) {
+  function isCrowdsaleFull() internal view returns (bool full) { // Remove implementation later
     return tokensSold >= sellable_tokens;
   }
 
   /**
-   * Finalize a succcesful crowdsale.
+   * Finalize a succesful crowdsale.
    *
    * The owner can trigger post-crowdsale actions, like releasing the tokens.
    * Note that by default tokens are not in a released state.
