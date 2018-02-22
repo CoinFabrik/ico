@@ -2,7 +2,7 @@ import time
 from datetime import datetime
 from eth_utils import to_checksum_address
 
-def config_f(network):
+def config_t(network):
 
 	config = {}
 
@@ -16,10 +16,10 @@ def config_f(network):
 
 	ico_tranches_quantity = tranches_quantity - pre_ico_tranches_quantity
 
-	def mulByTenToTheEighteenth(x):
+	def toWei(x):
 		return x*(10**18)
 
-	amounts = list(map(mulByTenToTheEighteenth, amounts))
+	amounts = list(map(toWei, amounts))
 
 	config['tranches'] = []
 

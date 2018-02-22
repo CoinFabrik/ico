@@ -21,10 +21,10 @@ def config_f(network):
 	for x in range(pre_ico_tranches_quantity,(tranches_quantity-1)):
 		amounts.append(amounts[x - 1] + auxNum)
 
-	def mulByTenToTheEighteenth(x):
+	def toWei(x):
 		return x*(10**18)
 
-	amounts = list(map(mulByTenToTheEighteenth, amounts))
+	amounts = list(map(toWei, amounts))
 
 	config['tranches'] = []
 
