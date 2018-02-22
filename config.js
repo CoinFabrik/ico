@@ -5,16 +5,15 @@ function config_f(web3, network) {
   config.milieurs_per_eth = new BigNumber(1044.33).times(1000);
   const thousand = new BigNumber(1000);
   const ether = (new BigNumber(10)).toPower(18);
-  const eur_per_fulltokens = [new BigNumber(0.10), new BigNumber(0.11),
-                              new BigNumber(0.12), new BigNumber(0.14),
-                              new BigNumber(0.17), new BigNumber(0.20),
-                              new BigNumber(0.25)];
+  const eur_per_fulltokens = [new BigNumber(0.10), new BigNumber(0.12),
+                              new BigNumber(0.14), new BigNumber(0.17),
+                              new BigNumber(0.20), new BigNumber(0.25)];
   const tranches_quantity = eur_per_fulltokens.length;
   const tokens_per_eur = eur_per_fulltokens.map(function(price) {
     return ether.dividedToIntegerBy(price);
   });
 
-  let amounts = [new BigNumber(300000000)];
+  let amounts = [new BigNumber(350000000)];
   const pre_ico_tranches_quantity = amounts.length;
   for (let i = pre_ico_tranches_quantity; i < tranches_quantity; i++) {
     amounts.push(amounts[i - 1].add(50*(10**6)));
