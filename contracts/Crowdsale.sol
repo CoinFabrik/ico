@@ -12,15 +12,15 @@ import "./DeploymentInfo.sol";
 
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
 contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing, DeploymentInfo {
-  //initial supply in 400k, sold tokens from initial minting
   uint8 private constant token_decimals = 18;
+  // Initial supply is 400k, tokens put up on sale are obtained from the initial minting
   uint private constant token_initial_supply = 4 * (10 ** 8) * (10 ** uint(token_decimals));
   bool private constant token_mintable = true;
   uint private constant sellable_tokens = 6 * (10 ** 8) * (10 ** uint(token_decimals));
   
-  //Sets minimum value that can be bought
+  // Sets minimum value that can be bought
   uint public minimum_buy_value = 18 * 1 ether / 1000;
-  //Eth price multiplied by 1000;
+  // Eth price multiplied by 1000;
   uint public milieurs_per_eth;
 
 
