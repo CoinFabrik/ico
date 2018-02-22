@@ -22,7 +22,8 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing, 
   uint public minimum_buy_value = 18 * 1 ether / 1000;
   // Eth price multiplied by 1000;
   uint public milieurs_per_eth;
-
+  // Address allowed to update eth price.
+  address rate_admin;
 
   /**
    * Constructor for the crowdsale.
@@ -160,9 +161,14 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, TokenTranchePricing, 
     super.enableLostAndFound(agent, tokens, token_contract);
   }
 
-  function updateEursPerEth (uint milieurs_amount) public onlyOwner {
+  function updateEursPerEth(uint milieurs_amount) public {
+    require(msg.sender == owner || msg.sender == rate_admin);
     require(milieurs_amount >= 100);
     milieurs_per_eth = milieurs_amount;
+  }
+
+  function setRateAdmin(address admin) public onlyOwner {
+    rate_admin = admin;
   }
 
 
