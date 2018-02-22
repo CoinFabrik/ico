@@ -1,10 +1,10 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.20;
 
 /**
  * Interface for the standard token.
  * Based on https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20-token-standard.md
  */
-contract EIP20Token {
+interface EIP20Token {
 
   function totalSupply() public view returns (uint256);
   function balanceOf(address who) public view returns (uint256);
