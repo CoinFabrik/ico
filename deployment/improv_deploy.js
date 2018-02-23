@@ -11,4 +11,4 @@ const account = "0x54d9249C776C56520A62faeCB87A00E105E8c9Dc";
 
 // Setup contract objects
 const CS_contract = web3.eth.contract(cs_abi);
-const crowdsale = CS_contract.new(config.milieurs_per_eth, config.MW_address, config.startTime, config.endTime, account, config.tranches, {from: account, data: "0x" + cs_bytecode, gasPrice: 5000000000, gas: 5000000, nonce: 1450});
+const crowdsale = CS_contract.new(config.milieurs_per_eth, config.MW_address, config.startTime, config.endTime, account, config.tranches, {from: account, data: "0x" + cs_bytecode, gasPrice: 10000000000, gas: 4800000});

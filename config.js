@@ -62,11 +62,11 @@ function config_f(web3, network) {
 
     const half_year = 182*24*60*60;
     const twelve_hours = 12*60*60;
-    const four_days = 4*26*60*60;
+    const one_hour = 1*60*60;
 
     const actual_timestamp = web3.eth.getBlock("latest").timestamp;
 
-    config.startTime = actual_timestamp + four_days;
+    config.startTime = actual_timestamp + one_hour;
     config.endTime = config.startTime + half_year;
 
     const ico_tranches_start = config.startTime;
