@@ -10,7 +10,7 @@ crowdsale_contract = None
 accounts = None
 params = None
 
-# Custom functions
+# Custom functions-------------------------------------------------------------------------
 def add_token_address():
 	token_contract.address = token()
 	print("Token Address Added: " + token_contract.address)
@@ -34,20 +34,14 @@ def transaction_info(sender, value=0):
 
 def wait():
 	block_number = web3.eth.blockNumber
-	while web3.eth.blockNumber <= (block_number + 2):
+	while web3.eth.blockNumber <= (block_number + 4):
 		time.sleep(1)
 
-# Contracts functions
-def balance_of(investor):
-	if isinstance(investor, str):
-		return token_contract.functions.balanceOf(investor).call()
-	else:
-		return token_contract.functions.balanceOf(web3.eth.accounts[investor]).call()
-
+# Crowdsale Contract's functions-----------------------------------------------------------
 def buy(buyer, value):
 	return status(crowdsale_contract.functions.buy().transact(transaction_info(buyer, value)))
 
-def buy_on_behalf():
+def buy_on_behalf(receiver, value):
 	pass
 
 def buy_on_behalf_with_customer_id():
@@ -73,7 +67,7 @@ def configured():
 def early_participant_whitelist():
 	pass
 
-def enable_lost_and_found():
+def enable_lost_and_found_crowdsale():
 	pass
 
 def ends_at():
@@ -159,6 +153,46 @@ def unhalt():
 
 def wei_raised():
 	pass
+
+
+# Token Contract's functions---------------------------------------------------------------
+
+def add_approval():
+	pass
+
+def allowance():
+	pass
+
+def approve():
+	pass
+
+def balance_of(investor):
+	if isinstance(investor, str):
+		return token_contract.functions.balanceOf(investor).call()
+	else:
+		return token_contract.functions.balanceOf(web3.eth.accounts[investor]).call()
+
+def can_upgrade():
+	pass
+
+def change_upgrade_master():
+	pass
+
+def decimals():
+	pass
+
+def enable_lost_and_found_token():
+	pass
+
+def get_upgrade_state():
+	pass
+
+
+
+
+
+
+
 
 
 

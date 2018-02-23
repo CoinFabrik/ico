@@ -18,7 +18,7 @@ def config_f(network):
 
 	auxNum = 525*(10**4)
 
-	for x in range(pre_ico_tranches_quantity,(tranches_quantity-1)):
+	for x in range(pre_ico_tranches_quantity, tranches_quantity):
 		amounts.append(amounts[x - 1] + auxNum)
 
 	def toWei(x):
@@ -41,13 +41,13 @@ def config_f(network):
 
 		ico_tranches_end = tranches_start + 60 * 60 * 24 * 2
 
-		for x in range(0,pre_ico_tranches_quantity - 1):
+		for x in range(0, pre_ico_tranches_quantity):
 			config['tranches'].append(amounts[x])
 			config['tranches'].append(tranches_start)
 			config['tranches'].append(pre_ico_tranches_end)
 			config['tranches'].append(tokens_per_wei[x])
 
-		for x in range(pre_ico_tranches_quantity,(tranches_quantity-1)):
+		for x in range(pre_ico_tranches_quantity, tranches_quantity):
 			config['tranches'].append(amounts[x])
 			config['tranches'].append(tranches_start)
 			config['tranches'].append(ico_tranches_end)
@@ -75,7 +75,7 @@ def config_f(network):
 		                int(datetime(2018, 2, 14).timestamp()),
 		                config['endTime']]
 
-		for x in range(0,(tranches_quantity-1)):
+		for x in range(0, tranches_quantity):
 			config['tranches'].append(amounts[x])
 			config['tranches'].append(tranches_start)
 			config['tranches'].append(tranches_end[x])

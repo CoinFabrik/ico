@@ -8,7 +8,7 @@ import unlock
 import os, errno
 import time
 from datetime import datetime
-import setConfig
+#import setConfig
 
 # Change ipcPath if needed
 ipc_path = '/home/coinfabrik/Programming/blockchain/node/geth.ipc'
@@ -20,14 +20,15 @@ accounts = web3.eth.accounts
 sender_account = accounts[0]
 gas = 50000000
 gas_price = 20000000000
-params_log_path = "./params_log"
+address_log_path = "./address_log"
 unlock.web3 = web3
-setConfig.miner = miner
-setConfig.web3 = web3
-setConfig.gas = gas
-setConfig.gas_price = gas_price
-setConfig.accounts = accounts
+# setConfig.miner = miner
+# setConfig.web3 = web3
+# setConfig.gas = gas
+# setConfig.gas_price = gas_price
+# setConfig.accounts = accounts
 token_contract = None
+token_address = None
 
 # Get Crowdsale ABI
 with open("./build/Crowdsale.abi") as contract_abi_file:
@@ -58,30 +59,31 @@ while web3.eth.blockNumber <= (block_number + 2):
 	time.sleep(1)
 
 # Write json file with crowdsale contract's address if it's a test -------------------------
-if __name__ != '__main__':
+if __name__ == '__main__':
 	deployment_name = input('\n\nEnter name of deployment: ')
 	
 	local_time = datetime.now()
 	
-	json_file_name = "Crowdsale" + '-' + local_time.strftime('%Y-%m-%d--%H-%M-%S') + '--' + deployment_name
+	json_file_name = "address"  # "crowdsale_address" + '-' + local_time.strftime('%Y-%m-%d--%H-%M-%S') + '--' + deployment_name
 	
 	try:
-		if not os.path.exists(params_log_path):
-			os.makedirs(params_log_path)
+		if not os.path.exists(address_log_path):
+			os.makedirs(address_log_path)
 	except OSError as e:
 		if e.errno != errno.EEXIST:
 			raise
 	
 	# Writing configuration parameters into json file for logging purposes
-	file_path_name_w_ext = params_log_path + '/' + json_file_name + '.json'
+	file_path_name_w_ext = address_log_path + '/' + json_file_name + '.json'
 	address_for_file = {'crowdsale_address': crowdsale_address}
 	with open(file_path_name_w_ext, 'w') as fp:
 		json.dump(address_for_file, fp, sort_keys=True, indent=4)
 # ------------------------------------------------------------------------------------------
 
-setConfig.crowdsale_contract = crowdsale_contract
+#setConfig.crowdsale_contract = crowdsale_contract
 
-def configurate():
-	setConfig.dump()
-	setConfig.configurate()
-	token_contract = setConfig.token_contract
+#print('\nRun configurate() to configurate the Crowdsale Contract\n')
+
+# def configurate():
+# 	setConfig.dump()
+# 	(token_address, token_contract) = setConfig.configurate()

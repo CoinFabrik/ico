@@ -2,8 +2,6 @@
 
 from deploy import *
 
-
-
 #Assigning testing module functions and variables to local variables
 transaction_info = setConfig.testing.transaction_info
 wait = setConfig.testing.wait
@@ -17,5 +15,6 @@ get_state = setConfig.testing.get_state
 balances = setConfig.testing.balances
 add_token_address = setConfig.testing.add_token_address
 
-#token_address = crowdsale_contract.functions.token().call()
+
+
 

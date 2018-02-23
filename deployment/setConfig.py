@@ -1,17 +1,18 @@
+#!/usr/bin/python3 -i
+
 import sys
-
-if len(sys.argv) == 1:
-	from config import config_f
-elif sys.argv[1] == 'test':
-	from configTest import config_t as config_f
-else:
-	sys.exit("Unknown argument: " + sys.argv[1])
-
 from datetime import datetime
 import json
 import time
 import os, errno
 import testing
+
+if __name__ == '__main__':
+	from web3 import Web3, IPCProvider
+	from config import config_f
+else:
+	from configTest import config_t as config_f
+
 
 crowdsale_contract = None
 web3 = None
@@ -28,6 +29,36 @@ config = config_f('privateTestnet')
 config['token_retriever_account'] = token_retriever_account
 params = [config['multisig_owners'][0], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches']]
 params_log_path = "./params_log"
+
+
+
+# Change ipcPath if needed
+ipc_path = '/home/coinfabrik/Programming/blockchain/node/geth.ipc'
+# web3.py instance
+web3 = Web3(IPCProvider(ipc_path))
+miner = web3.miner
+accounts = web3.eth.accounts
+sender_account = accounts[0]
+gas = 50000000
+gas_price = 20000000000
+
+# Get Crowdsale ABI
+with open("./build/Crowdsale.abi") as contract_abi_file:
+	crowdsale_abi = json.load(contract_abi_file)
+
+# Get Crowdsale Bytecode
+with open("./build/Crowdsale.bin") as contract_bin_file:
+	crowdsale_bytecode = '0x' + contract_bin_file.read()
+
+with open("./address_log/address.json") as contract_address_file:
+	crowdsale_address_json = json.load(contract_address_file)
+
+crowdsale_address = crowdsale_address_json['crowdsale_address']
+
+# Crowdsale instance creation
+crowdsale_contract = web3.eth.contract(address=crowdsale_address, abi=crowdsale_abi, bytecode=crowdsale_bytecode)
+
+
 
 # Get CrowdsaleToken ABI
 with open("./build/CrowdsaleToken.abi") as token_abi_file:
@@ -99,8 +130,9 @@ def configurate():
 	testing.accounts = accounts
 	testing.params = params
 	testing.crowdsale_contract = crowdsale_contract
-	testing.configuration_crowdsale(params)
-	testing.wait()
+	statusConfig = testing.configuration_crowdsale(params)
+	print(statusConfig == 1)
 	token_address = testing.token()
 	token_contract = web3.eth.contract(address=token_address, abi=token_abi)
 	testing.token_contract = token_contract
+	return (token_address, token_contract)
