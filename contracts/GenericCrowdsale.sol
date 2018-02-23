@@ -102,7 +102,7 @@ contract GenericCrowdsale is Haltable {
 
     // Don't mess the dates
     require(start != 0 && end != 0);
-    require(block.number < start && start < end);
+    require(block.timestamp < start && start < end);
     startsAt = start;
     endsAt = end;
   }
@@ -307,8 +307,8 @@ contract GenericCrowdsale is Haltable {
    */
   function getState() public view returns (State) {
     if (finalized) return State.Finalized;
-    else if (block.number < startsAt) return State.PreFunding;
-    else if (block.number <= endsAt && !isCrowdsaleFull()) return State.Funding;
+    else if (block.timestamp < startsAt) return State.PreFunding;
+    else if (block.timestamp <= endsAt && !isCrowdsaleFull()) return State.Funding;
     else return State.Success;
   }
 
