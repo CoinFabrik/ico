@@ -5,6 +5,7 @@ import time
 gas = 50000000
 gas_price = 20000000000
 web3 = None
+miner = None
 token_contract = None
 crowdsale_contract = None
 accounts = None
@@ -134,6 +135,7 @@ def starts_at():
 	pass
 
 def token():
+	print("Crowdsale instance in testing is None? " + str(crowdsale_contract == None))
 	return crowdsale_contract.functions.token().call()
 
 def token_amount_of():

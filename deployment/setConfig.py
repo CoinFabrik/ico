@@ -6,6 +6,7 @@ import json
 import time
 import os, errno
 import testing
+import unlock
 
 if __name__ == '__main__':
 	from web3 import Web3, IPCProvider
@@ -19,8 +20,6 @@ web3 = None
 gas = None
 gas_price = None
 accounts = None
-token_address = None
-token_contract = None
 miner = None
 
 # Dict of configuration parameters
@@ -29,7 +28,6 @@ config = config_f('privateTestnet')
 config['token_retriever_account'] = token_retriever_account
 params = [config['multisig_owners'][0], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches']]
 params_log_path = "./params_log"
-
 
 
 # Change ipcPath if needed
@@ -41,6 +39,8 @@ accounts = web3.eth.accounts
 sender_account = accounts[0]
 gas = 50000000
 gas_price = 20000000000
+unlock.web3 = web3
+unlock.unlock()
 
 # Get Crowdsale ABI
 with open("./build/Crowdsale.abi") as contract_abi_file:
@@ -57,7 +57,6 @@ crowdsale_address = crowdsale_address_json['crowdsale_address']
 
 # Crowdsale instance creation
 crowdsale_contract = web3.eth.contract(address=crowdsale_address, abi=crowdsale_abi, bytecode=crowdsale_bytecode)
-
 
 
 # Get CrowdsaleToken ABI
@@ -125,14 +124,17 @@ def dump():
 	with open(file_path_name_w_ext, 'w') as fp:
 		json.dump(config, fp, sort_keys=True, indent=4)
 
+testing.web3 = web3
+testing.accounts = accounts
+testing.params = params
+testing.crowdsale_contract = crowdsale_contract
+testing.miner = miner
+
 def configurate():
-	testing.web3 = web3
-	testing.accounts = accounts
-	testing.params = params
-	testing.crowdsale_contract = crowdsale_contract
+	testing.miner.start(1)
 	statusConfig = testing.configuration_crowdsale(params)
 	print(statusConfig == 1)
 	token_address = testing.token()
 	token_contract = web3.eth.contract(address=token_address, abi=token_abi)
-	testing.token_contract = token_contract
+	testing.miner.stop()
 	return (token_address, token_contract)
