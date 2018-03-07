@@ -8,7 +8,6 @@ import unlock
 import os, errno
 import time
 from datetime import datetime
-#import setConfig
 
 # Change ipcPath if needed
 ipc_path = '/home/coinfabrik/Programming/blockchain/node/geth.ipc'
@@ -22,11 +21,6 @@ gas = 50000000
 gas_price = 20000000000
 address_log_path = "./address_log"
 unlock.web3 = web3
-# setConfig.miner = miner
-# setConfig.web3 = web3
-# setConfig.gas = gas
-# setConfig.gas_price = gas_price
-# setConfig.accounts = accounts
 token_contract = None
 token_address = None
 
@@ -38,8 +32,8 @@ with open("./build/Crowdsale.abi") as contract_abi_file:
 with open("./build/Crowdsale.bin") as contract_bin_file:
 	crowdsale_bytecode = '0x' + contract_bin_file.read()
 
-nonce_crowdsale = web3.eth.getTransactionCount(accounts[0])
-crowdsale_address = generate_contract_address(accounts[0], nonce_crowdsale)
+nonce_crowdsale = web3.eth.getTransactionCount(sender_account)
+crowdsale_address = generate_contract_address(sender_account, nonce_crowdsale)
 
 # Crowdsale instance creation
 crowdsale_contract = web3.eth.contract(address=crowdsale_address, abi=crowdsale_abi, bytecode=crowdsale_bytecode)
@@ -59,12 +53,12 @@ while web3.eth.blockNumber <= (block_number + 2):
 	time.sleep(1)
 
 # Write json file with crowdsale contract's address if it's a test -------------------------
-if __name__ == '__main__':
+if __name__ != '__main__':
 	deployment_name = input('\n\nEnter name of deployment: ')
 	
 	local_time = datetime.now()
 	
-	json_file_name = "address"  # "crowdsale_address" + '-' + local_time.strftime('%Y-%m-%d--%H-%M-%S') + '--' + deployment_name
+	json_file_name = "Crowdsale-Address" + '--' + local_time.strftime('%Y-%m-%d--%H-%M-%S') + '--' + deployment_name
 	
 	try:
 		if not os.path.exists(address_log_path):
@@ -79,11 +73,3 @@ if __name__ == '__main__':
 	with open(file_path_name_w_ext, 'w') as fp:
 		json.dump(address_for_file, fp, sort_keys=True, indent=4)
 # ------------------------------------------------------------------------------------------
-
-#setConfig.crowdsale_contract = crowdsale_contract
-
-#print('\nRun configurate() to configurate the Crowdsale Contract\n')
-
-# def configurate():
-# 	setConfig.dump()
-# 	(token_address, token_contract) = setConfig.configurate()
