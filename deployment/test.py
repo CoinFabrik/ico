@@ -1,20 +1,24 @@
 #!/usr/bin/python3 -i
 
-from deploy import *
+import deploy
+import setConfig
+import testing_helpers
 
 #Assigning testing module functions and variables to local variables
-transaction_info = setConfig.testing.transaction_info
-wait = setConfig.testing.wait
-status = setConfig.testing.status
-get_transaction_receipt = setConfig.testing.get_transaction_receipt
-balance_of = setConfig.testing.balance_of
-buy = setConfig.testing.buy
-finalize = setConfig.testing.finalize
-token = setConfig.testing.token
-get_state = setConfig.testing.get_state
-balances = setConfig.testing.balances
-add_token_address = setConfig.testing.add_token_address
+transaction_info = testing_helpers.transaction_info
+wait = testing_helpers.wait
+status = testing_helpers.status
+get_transaction_receipt = testing_helpers.get_transaction_receipt
+balance_of = testing_helpers.balance_of
+buy = testing_helpers.buy
+finalize = testing_helpers.finalize
+token = testing_helpers.token
+get_state = testing_helpers.get_state
+balances = testing_helpers.balances
+add_token_address = testing_helpers.add_token_address
 
+configurate = setConfig.configurate
 
+miner = deploy.miner
 
-
+miner.stop()

@@ -5,22 +5,16 @@ from datetime import datetime
 import json
 import time
 import os, errno
-import testing
+import glob
 import unlock
+import testing_helpers
+from web3 import Web3, IPCProvider
 
 if __name__ == '__main__':
-	from web3 import Web3, IPCProvider
 	from config import config_f
 else:
 	from configTest import config_t as config_f
 
-
-crowdsale_contract = None
-web3 = None
-gas = None
-gas_price = None
-accounts = None
-miner = None
 
 # Dict of configuration parameters
 token_retriever_account = "0x0F048ff7dE76B83fDC14912246AC4da5FA755cFE"
@@ -28,7 +22,6 @@ config = config_f('privateTestnet')
 config['token_retriever_account'] = token_retriever_account
 params = [config['multisig_owners'][0], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches']]
 params_log_path = "./params_log"
-
 
 # Change ipcPath if needed
 ipc_path = '/home/coinfabrik/Programming/blockchain/node/geth.ipc'
@@ -50,7 +43,11 @@ with open("./build/Crowdsale.abi") as contract_abi_file:
 with open("./build/Crowdsale.bin") as contract_bin_file:
 	crowdsale_bytecode = '0x' + contract_bin_file.read()
 
-with open("./address_log/address.json") as contract_address_file:
+file_list = glob.glob('./address_log/*')
+latest_file = max(file_list, key=os.path.getctime)
+
+# Get Syndicatev2 address
+with open(latest_file) as contract_address_file:
 	crowdsale_address_json = json.load(contract_address_file)
 
 crowdsale_address = crowdsale_address_json['crowdsale_address']
@@ -124,17 +121,14 @@ def dump():
 	with open(file_path_name_w_ext, 'w') as fp:
 		json.dump(config, fp, sort_keys=True, indent=4)
 
-testing.web3 = web3
-testing.accounts = accounts
-testing.params = params
-testing.crowdsale_contract = crowdsale_contract
-testing.miner = miner
+print("\n\nEnter 'configurate()' to configurate Crowdsale. Returns (token_address, token_contract) tuple.")
 
 def configurate():
-	testing.miner.start(1)
-	statusConfig = testing.configuration_crowdsale(params)
-	print(statusConfig == 1)
-	token_address = testing.token()
+	dump()
+	miner.start(1)
+	hash_configured_transact = crowdsale_contract.functions.configurationCrowdsale(params[0], params[1], params[2], params[3], params[4]).transact({"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price})
+	print("\n\nConfiguration Tx Hash: " + hash_configured_transact.hex() + "\n")
+	testing_helpers.wait()
+	token_address = crowdsale_contract.functions.token().call()
 	token_contract = web3.eth.contract(address=token_address, abi=token_abi)
-	testing.miner.stop()
 	return (token_address, token_contract)
