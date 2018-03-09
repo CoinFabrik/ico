@@ -133,10 +133,10 @@ def halted():
 	return crowdsale_contract.functions.halted().call()
 
 def invested_amount_of():
-	pass
+	return crowdsale_contract.functions.investedAmountOf().call()
 
 def investor_count():
-	pass
+	return crowdsale_contract.functions.investorCount().call()
 
 def multisig_wallet():
 	return crowdsale_contract.functions.multisigWallet().call()
@@ -144,8 +144,8 @@ def multisig_wallet():
 def owner():
 	return crowdsale_contract.functions.owner().call()
 
-def preallocate():
-	pass
+def preallocate(receiver, fullTokens, weiPrice):
+	return status(crowdsale_contract.functions.preallocate(receiver, fullTokens, weiPrice).transact(transaction_info(sender_account)))
 
 def require_customer_id():
 	return crowdsale_contract.functions.requireCustomerId().call()

@@ -21,4 +21,10 @@ configurate = setConfig.configurate
 
 miner = deploy.miner
 
+
+# Testing start
+
+
+
+
 miner.stop()
