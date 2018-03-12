@@ -40,11 +40,10 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Los
    * @param initial_supply How many tokens we start with.
    * @param token_decimals Number of decimal places.
    * @param team_multisig Address of the multisig that receives the initial supply and is set as the upgrade master.
-   * @param mintable Are new tokens created over the crowdsale or do we distribute only the initial supply? Note that when the token becomes transferable the minting always ends.
    * @param token_retriever Address of the account that handles ERC20 tokens that were accidentally sent to this contract.
    */
-  function CrowdsaleToken(uint initial_supply, uint8 token_decimals, address team_multisig, bool mintable, address token_retriever) public
-  UpgradeableToken(team_multisig) MintableToken(initial_supply, team_multisig, mintable) {
+  function CrowdsaleToken(uint initial_supply, uint8 token_decimals, address team_multisig, address token_retriever) public
+  UpgradeableToken(team_multisig) MintableToken(initial_supply, team_multisig, true) {
     require(token_retriever != address(0));
     decimals = token_decimals;
     lost_and_found_master = token_retriever;

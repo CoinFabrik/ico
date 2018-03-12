@@ -20,7 +20,7 @@ else:
 token_retriever_account = "0x0F048ff7dE76B83fDC14912246AC4da5FA755cFE"
 config = config_f('privateTestnet')
 config['token_retriever_account'] = token_retriever_account
-params = [config['multisig_owners'][0], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches']]
+params = [config['multisig_owners'][0], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], 1, 15, 525 * (10 ** 5) * (10 ** 15)]
 params_log_path = "./params_log"
 
 # Change ipcPath if needed
@@ -119,14 +119,14 @@ def dump():
 	# Writing configuration parameters into json file for logging purposes
 	file_path_name_w_ext = params_log_path + '/' + json_file_name + '.json'
 	with open(file_path_name_w_ext, 'w') as fp:
-		json.dump(config, fp, sort_keys=True, indent=4)
+		json.dump(config, fp, sort_keys=True, indent=2)
 
 print("\n\nEnter 'configurate()' to configurate Crowdsale. Returns (token_address, token_contract) tuple.")
 
 def configurate():
 	dump()
 	miner.start(1)
-	hash_configured_transact = crowdsale_contract.functions.configurationCrowdsale(params[0], params[1], params[2], params[3], params[4]).transact({"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price})
+	hash_configured_transact = crowdsale_contract.functions.configurationCrowdsale(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]).transact({"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price})
 	print("\n\nConfiguration Tx Hash: " + hash_configured_transact.hex() + "\n")
 	testing_helpers.wait()
 	token_address = crowdsale_contract.functions.token().call()
