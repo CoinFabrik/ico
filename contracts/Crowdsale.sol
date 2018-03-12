@@ -77,7 +77,12 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
    */
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
     // Uncomment if tokens should be released.
-    // token.releaseTokenTransfer();
+    uint sold = tokensSold.add(  12075000);
+    uint toShare = sold.mul(17).div(83).mul(10**uint(token.decimals()));
+    token.setMintAgent(address(this), true);
+    token.mint(multisigWallet, toShare);
+    token.setMintAgent(address(this), false);
+    token.releaseTokenTransfer();
     super.finalize();
   }
 
