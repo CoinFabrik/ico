@@ -29,10 +29,10 @@ contract GenericCrowdsale is Haltable {
   /* ether will be transferred to this address */
   address public multisigWallet;
 
-  /* the starting block number of the crowdsale */
+  /* the starting timestamp of the crowdsale */
   uint public startsAt;
 
-  /* the ending block number of the crowdsale */
+  /* the ending timestamp of the crowdsale */
   uint public endsAt;
 
   /* the number of tokens already sold through this contract*/
@@ -74,7 +74,7 @@ contract GenericCrowdsale is Haltable {
   /** State machine
    *
    * - PendingConfiguration: Crowdsale not yet configured
-   * - Prefunding: We have not reached the starting block yet
+   * - Prefunding: We have not reached the starting timestamp yet
    * - Funding: Active crowdsale
    * - Success: Crowdsale ended
    * - Finalized: The finalize function has been called and succesfully executed
@@ -107,8 +107,8 @@ contract GenericCrowdsale is Haltable {
    * The configuration from the constructor was moved to the configurationGenericCrowdsale function.
    *
    * @param team_multisig Address of the multisignature wallet of the team that will receive all the funds contributed in the crowdsale.
-   * @param start Block number where the crowdsale will be officially started. It should be greater than the block number in which the contract is deployed.
-   * @param end Block number where the crowdsale finishes. No tokens can be sold through this contract after this block.
+   * @param start Timestamp where the crowdsale will be officially started. It should be greater than the timestamp in which the contract is deployed.
+   * @param end Timestamp where the crowdsale finishes. No tokens can be sold through this contract after this timestamp.
    *
    * configurationGenericCrowdsale can only be called when in State.PendingConfiguration because of the inState modifier.
    */
@@ -117,7 +117,7 @@ contract GenericCrowdsale is Haltable {
 
     // Don't mess the dates
     require(start != 0 && end != 0);
-    require(block.number < start && start < end);
+    require(now < start && start < end);
     startsAt = start;
     endsAt = end;
     configured = true;
@@ -324,8 +324,8 @@ contract GenericCrowdsale is Haltable {
   function getState() public view returns (State) {
     if (finalized) return State.Finalized;
     else if (!configured) return State.PendingConfiguration;
-    else if (block.number < startsAt) return State.PreFunding;
-    else if (block.number <= endsAt && !isCrowdsaleFull()) return State.Funding;
+    else if (now < startsAt) return State.PreFunding;
+    else if (now <= endsAt && !isCrowdsaleFull()) return State.Funding;
     else return State.Success;
   }
 

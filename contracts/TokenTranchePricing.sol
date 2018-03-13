@@ -24,10 +24,10 @@ contract TokenTranchePricing {
   struct Tranche {
       // Amount in tokens when this tranche becomes inactive
       uint amount;
-      // Block interval [start, end)
-      // Starting block (included in the interval)
+      // Timestamp interval [start, end)
+      // Starting timestamp (included in the interval)
       uint start;
-      // Ending block (excluded from the interval)
+      // Ending timestamp (excluded from the interval)
       uint end;
       // How many tokens per wei you will get while this tranche is active
       uint price;
@@ -52,7 +52,7 @@ contract TokenTranchePricing {
   // The configuration from the constructor was moved to the configurationTokenTranchePricing function.
   //
   /// @dev Construction, creating a list of tranches
-  /* @param init_tranches Raw array of ordered tuples: (start amount, start block, end block, price) */
+  /* @param init_tranches Raw array of ordered tuples: (start amount, start timestamp, end timestamp, price) */
   //
   function configurationTokenTranchePricing(uint[] init_tranches) internal {
     // Need to have tuples, length check
@@ -70,7 +70,7 @@ contract TokenTranchePricing {
       uint end = init_tranches[tranche_offset.add(end_offset)];
       uint price = init_tranches[tranche_offset.add(price_offset)];
       // No invalid steps
-      require(block.number < start && start < end);
+      require(now < start && start < end);
       // Bail out when entering unnecessary tranches
       // This is preferably checked before deploying contract into any blockchain.
       require(i == 0 || (end >= last_tranche.end && amount > last_tranche.amount) ||
@@ -81,12 +81,12 @@ contract TokenTranchePricing {
     }
   }
 
-  /// @dev Get the current tranche or bail out if there is no tranche defined for the current block.
+  /// @dev Get the current tranche or bail out if there is no tranche defined for the current timestamp.
   /// @param tokensSold total amount of tokens sold, for calculating the current tranche
   /// @return Returns the struct representing the current tranche
   function getCurrentTranche(uint tokensSold) private view returns (Tranche storage) {
     for (uint i = 0; i < tranches.length; i++) {
-      if (tranches[i].start <= block.number && block.number < tranches[i].end && tokensSold < tranches[i].amount) {
+      if (tranches[i].start <= now && now < tranches[i].end && tokensSold < tranches[i].amount) {
         return tranches[i];
       }
     }

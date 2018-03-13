@@ -21,8 +21,8 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
    * 
    *
    * @param team_multisig Address of the multisignature wallet of the team that will receive all the funds contributed in the crowdsale.
-   * @param start Block number where the crowdsale will be officially started. It should be greater than the block number in which the contract is deployed.
-   * @param end Block number where the crowdsale finishes. No tokens can be sold through this contract after this block.
+   * @param start Timestamp where the crowdsale will be officially started. It should be greater than the timestamp in which the contract is deployed.
+   * @param end Timestamp where the crowdsale finishes. No tokens can be sold through this contract after this timestamp.
    * @param token_retriever Address that will handle tokens accidentally sent to the token contract. See the LostAndFoundToken and CrowdsaleToken contracts for further details.
    */
 
@@ -89,15 +89,15 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
     return owner;
   }
 
-  // These two setters are present only to correct block numbers if they are off from their target date by more than, say, a day
+  // These two setters are present only to correct timestamps if they are off from their target date by more than, say, a day
   // Uncomment only if necessary
-  // function setStartingBlock(uint startingBlock) public onlyOwner inState(State.PreFunding) {
-  //     require(startingBlock > block.number && startingBlock < endsAt);
-  //     startsAt = startingBlock;
+  // function setStartingTime(uint startingTime) public onlyOwner inState(State.PreFunding) {
+  //     require(startingTime > now && startingTime < endsAt);
+  //     startsAt = startingTime;
   // }
 
-  // function setEndingBlock(uint endingBlock) public onlyOwner notFinished {
-  //     require(endingBlock > block.number && endingBlock > startsAt);
-  //     endsAt = endingBlock;
+  // function setEndingTime(uint endingTime) public onlyOwner notFinished {
+  //     require(endingTime > now && endingTime > startsAt);
+  //     endsAt = endingTime;
   // }
 }
