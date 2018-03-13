@@ -2,29 +2,52 @@
 
 import deploy
 import setConfig
-import testing_helpers
+from testing_helpers import Crowdsale, Token
 
-#Assigning testing module functions and variables to local variables
-transaction_info = testing_helpers.transaction_info
-wait = testing_helpers.wait
-status = testing_helpers.status
-get_transaction_receipt = testing_helpers.get_transaction_receipt
-balance_of = testing_helpers.balance_of
-buy = testing_helpers.buy
-finalize = testing_helpers.finalize
-token = testing_helpers.token
-get_state = testing_helpers.get_state
-balances = testing_helpers.balances
-add_token_address = testing_helpers.add_token_address
 
+# Assign configuration function to local variable
 configurate = setConfig.configurate
 
-miner = deploy.miner
+# Dict with the states for comparison
+states = {"Unknown": 0, "PendingConfiguration": 1, "PreFunding": 2, "Funding": 3, "Success": 4, "Finalized": 5}
+
+addressZero = '0x0000000000000000000000000000000000000000'
 
 
 # Testing start
 
+# Pre-configuration testing
+
+crowdsale = Crowdsale(deploy.crowdsale_contract.address)
+
+
+# Configuration
+(token_address2, token_contract2) = configurate()
+
+crowdsale.buy(crowdsale.accounts[1], 1000)
+
+setConfig.wait()
+
+token = Token(crowdsale.contract)
+
+state = crowdsale.getState()
+
+print(state == states["Unknown"])
+
+print(state == states["PendingConfiguration"])
+
+print(state == states["PreFunding"])
+
+print(state == states["Funding"])
+
+print(state == states["Success"])
+
+print(state == states["Finalized"])
+
+assert token.balance_of(token.accounts[1]) > 0
+
+# Post-configuration testing
 
 
 
-miner.stop()
+deploy.miner.stop()

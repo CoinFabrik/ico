@@ -7,7 +7,6 @@ import time
 import os, errno
 import glob
 import unlock
-import testing_helpers
 from web3 import Web3, IPCProvider
 
 if __name__ == '__main__':
@@ -59,6 +58,11 @@ crowdsale_contract = web3.eth.contract(address=crowdsale_address, abi=crowdsale_
 # Get CrowdsaleToken ABI
 with open("./build/CrowdsaleToken.abi") as token_abi_file:
 	token_abi = json.load(token_abi_file)
+
+def wait():
+	block_number = web3.eth.blockNumber
+	while web3.eth.blockNumber <= (block_number + 1):
+		time.sleep(1)
 
 # Display configuration parameters, confirm them, write them to json file
 def dump():
@@ -121,14 +125,17 @@ def dump():
 	with open(file_path_name_w_ext, 'w') as fp:
 		json.dump(config, fp, sort_keys=True, indent=2)
 
-print("\n\nEnter 'configurate()' to configurate Crowdsale. Returns (token_address, token_contract) tuple.")
+if __name__ == '__main__':
+	print("\n\nEnter 'configurate()' to configurate Crowdsale. Returns (token_address, token_contract) tuple.")
 
 def configurate():
-	dump()
+	if __name__ == '__main__':
+		dump()
 	miner.start(1)
 	hash_configured_transact = crowdsale_contract.functions.configurationCrowdsale(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]).transact({"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price})
 	print("\n\nConfiguration Tx Hash: " + hash_configured_transact.hex() + "\n")
-	testing_helpers.wait()
+	wait()
+	print(web3.eth.getTransactionReceipt(hash_configured_transact))
 	token_address = crowdsale_contract.functions.token().call()
 	token_contract = web3.eth.contract(address=token_address, abi=token_abi)
 	return (token_address, token_contract)
