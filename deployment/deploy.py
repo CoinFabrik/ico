@@ -47,12 +47,15 @@ tx_hash_crowdsale = crowdsale_contract.deploy(transaction={"from": sender_accoun
 print("\n\nCrowdsale address: " + crowdsale_address + "\n")
 
 block_number = web3.eth.blockNumber
-while web3.eth.blockNumber <= (block_number + 2):
+while web3.eth.blockNumber <= (block_number + 1):
 	time.sleep(1)
 
 
 # Write json file with crowdsale contract's address into address_log folder -------------------------
-deployment_name = input('\n\nEnter name of deployment: ')
+if __name__ == "__main__":
+	deployment_name = input('\n\nEnter name of deployment: ')
+else:
+	deployment_name = "test"
 
 local_time = datetime.now()
 
@@ -69,5 +72,5 @@ except OSError as e:
 file_path_name_w_ext = address_log_path + '/' + json_file_name + '.json'
 address_for_file = {'crowdsale_address': crowdsale_address}
 with open(file_path_name_w_ext, 'w') as fp:
-	json.dump(address_for_file, fp, sort_keys=True, indent=4)
+	json.dump(address_for_file, fp, sort_keys=True, indent=2)
 # ------------------------------------------------------------------------------------------
