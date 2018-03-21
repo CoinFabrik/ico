@@ -42,13 +42,20 @@ unlock.unlock()
 miner.start(1)
 
 # Crowdsale contract deployment
+print("\nDeploying Crowdsale contract")
 tx_hash_crowdsale = crowdsale_contract.deploy(transaction={"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price}, args=None)
-
-print("\n\nCrowdsale address: " + crowdsale_address + "\n")
 
 block_number = web3.eth.blockNumber
 while web3.eth.blockNumber <= (block_number + 1):
-	time.sleep(1)
+  time.sleep(1)
+
+receipt = web3.eth.getTransactionReceipt(tx_hash_crowdsale)
+
+print("\nDeployment successful: " + str(receipt.status == 1))
+
+print("\nCrowdsale address: " + crowdsale_address)
+
+print("\nGas used: " + str(receipt.gasUsed))
 
 
 # Write json file with crowdsale contract's address into address_log folder -------------------------

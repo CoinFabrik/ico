@@ -19,7 +19,7 @@ else:
 token_retriever_account = "0x0F048ff7dE76B83fDC14912246AC4da5FA755cFE"
 config = config_f('privateTestnet')
 config['token_retriever_account'] = token_retriever_account
-params = [config['multisig_owners'][0], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], 1, 15, 525 * (10 ** 5) * (10 ** 15)]
+params = [config['multisig_owners'][0], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], 525 * (10 ** 5) * (10 ** 18), 525 * (10 ** 5) * (10 ** 18), 18, 525 * (10 ** 5) * (10 ** 18)]
 params_log_path = "./params_log"
 
 # Change ipcPath if needed
@@ -71,7 +71,7 @@ def dump():
 	consent = None
 	
 	# Displaying configuration parameters ----------------------------------------------------------------------------------
-	print("\n\nWeb3 version:", web3.version.api)
+	print("\nWeb3 version:", web3.version.api)
 	
 	print(
 	  "\n\nMultisig address:", config['multisig_owners'][0], 
@@ -81,7 +81,7 @@ def dump():
 	);
 	
 	for x in range(0,int((len(config['tranches'])/4)-1)):
-		print("\n\nTranche #", x, " -----------------------------------------------------------------",
+		print("\nTranche #", x, " -----------------------------------------------------------------",
 	    "\nFullTokens cap:", int(config['tranches'][4*x]/(10**18)),
 	    "\nStart:         ", time.ctime(config['tranches'][4*x+1]),
 	    "\nEnd:           ", time.ctime(config['tranches'][4*x+2]),
@@ -89,7 +89,7 @@ def dump():
 	  )
 	
 	print("------------------------------------------------------------------------------");
-	print("\n\nTransaction sender: " + accounts[0],
+	print("\nTransaction sender: " + accounts[0],
 	      "\nGas and Gas price: " + str(gas) + " and " + str(gas_price) + "\n"
 	)
 	
@@ -105,9 +105,9 @@ def dump():
 		elif consent == 'no':
 			sys.exit("Aborted")
 		else:
-			print("\n\nPlease enter 'yes' or 'no'\n")
+			print("\nPlease enter 'yes' or 'no'\n")
 	
-	deployment_name = input('\n\nEnter name of deployment: ')
+	deployment_name = input('\nEnter name of deployment: ')
 	
 	local_time = datetime.now()
 	
@@ -133,9 +133,11 @@ def configurate():
 		dump()
 	miner.start(1)
 	hash_configured_transact = crowdsale_contract.functions.configurationCrowdsale(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]).transact({"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price})
-	print("\n\nConfiguration Tx Hash: " + hash_configured_transact.hex() + "\n")
+	print("\nConfiguration Tx Hash: " + hash_configured_transact.hex())
 	wait()
-	print(web3.eth.getTransactionReceipt(hash_configured_transact))
+	receipt = web3.eth.getTransactionReceipt(hash_configured_transact)
+	print("\nConfiguration successful: " + receipt.status == 1)
+	print("\n" + receipt)
 	token_address = crowdsale_contract.functions.token().call()
 	token_contract = web3.eth.contract(address=token_address, abi=token_abi)
 	return (token_address, token_contract)
