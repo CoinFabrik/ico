@@ -6,7 +6,7 @@
  * Heavily modified by https://www.coinfabrik.com/
  */
 
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.21;
 
 import "./SafeMath.sol";
 
@@ -44,10 +44,6 @@ contract TokenTranchePricing {
   function getTranchesLength() public view returns (uint) {
     return tranches.length;
   }
-
-  function TokenTranchePricing() public {
-    
-  }
   
   // The configuration from the constructor was moved to the configurationTokenTranchePricing function.
   //
@@ -70,7 +66,7 @@ contract TokenTranchePricing {
       uint end = init_tranches[tranche_offset.add(end_offset)];
       uint price = init_tranches[tranche_offset.add(price_offset)];
       // No invalid steps
-      require(now < start && start < end);
+      require(start < end && now < end);
       // Bail out when entering unnecessary tranches
       // This is preferably checked before deploying contract into any blockchain.
       require(i == 0 || (end >= last_tranche.end && amount > last_tranche.amount) ||

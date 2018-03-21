@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.21;
 
 /**
  * Authored by https://www.coinfabrik.com/
@@ -26,14 +26,18 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
    * @param token_retriever Address that will handle tokens accidentally sent to the token contract. See the LostAndFoundToken and CrowdsaleToken contracts for further details.
    */
 
-  function configurationCrowdsale(address team_multisig, uint start, uint end, address token_retriever, uint[] init_tranches, uint token_initial_supply, uint8 token_decimals, uint max_tokens_to_sell) public {
+  function configurationCrowdsale(address team_multisig, uint start, uint end, address token_retriever, uint[] init_tranches, uint multisig_supply, uint crowdsale_supply, uint8 token_decimals, uint max_tokens_to_sell) public onlyOwner {
       // Testing values
-      token = new CrowdsaleToken(token_initial_supply, token_decimals, team_multisig, token_retriever);
+      token = new CrowdsaleToken(multisig_supply, token_decimals, team_multisig, token_retriever);
       // Necessary if assignTokens mints
-      // token.setMintAgent(address(this), true);
+      token.setMintAgent(address(this), true);
       // Necessary if finalize is overriden to release the tokens for public trading.
-      // token.setReleaseAgent(address(this));
-      
+      token.setReleaseAgent(address(this));
+      // Necessary for the execution of buy function and of the subsequent CrowdsaleToken's transfer function. 
+      token.setTransferAgent(address(this), true);
+      // Crowdsale mints to himself the initial supply
+      token.mint(address(this), crowdsale_supply);
+
       sellable_tokens = max_tokens_to_sell;
 
       // Configuration functionality for GenericCrowdsale.
@@ -69,7 +73,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
   }
 
   /**
-   * Finalize a succesful crowdsale.
+   * Finalize a successful crowdsale.
    *
    * The owner can trigger post-crowdsale actions, like releasing the tokens.
    * Note that by default tokens are not in a released state.
