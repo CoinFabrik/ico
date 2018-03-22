@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.21;
 
 /**
  * Originally from https://github.com/TokenMarketNet/ico
@@ -77,7 +77,7 @@ contract GenericCrowdsale is Haltable {
    * - Prefunding: We have not reached the starting timestamp yet
    * - Funding: Active crowdsale
    * - Success: Crowdsale ended
-   * - Finalized: The finalize function has been called and succesfully executed
+   * - Finalized: The finalize function has been called and successfully executed
    */
   enum State{Unknown, PendingConfiguration, PreFunding, Funding, Success, Finalized}
 
@@ -93,15 +93,6 @@ contract GenericCrowdsale is Haltable {
 
   // Crowdsale's finalize function has been called
   event Finalized();
-
-
-  /*
-   * The configuration from the constructor was moved to the configurationGenericCrowdsale function.
-   */
-
-  function GenericCrowdsale() internal {
-    
-  }
 
   /*
    * The configuration from the constructor was moved to the configurationGenericCrowdsale function.
@@ -206,7 +197,7 @@ contract GenericCrowdsale is Haltable {
 
     assignTokens(receiver, tokenAmount);
     // Tell us that the investment was completed successfully
-    Invested(receiver, weiAmount, tokenAmount, customerId);
+    emit Invested(receiver, weiAmount, tokenAmount, customerId);
   }
 
   /**
@@ -268,14 +259,14 @@ contract GenericCrowdsale is Haltable {
   }
 
   /**
-   * Finalize a succcesful crowdsale.
+   * Finalize a successful crowdsale.
    *
    * The owner can trigger post-crowdsale actions, like releasing the tokens.
    * Note that by default tokens are not in a released state.
    */
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
     finalized = true;
-    Finalized();
+    emit Finalized();
   }
 
   /**
@@ -284,7 +275,7 @@ contract GenericCrowdsale is Haltable {
    */
   function setRequireCustomerId(bool value) public onlyOwner {
     requireCustomerId = value;
-    InvestmentPolicyChanged(requireCustomerId, requiredSignedAddress, signerAddress);
+    emit InvestmentPolicyChanged(requireCustomerId, requiredSignedAddress, signerAddress);
   }
 
   /**
@@ -296,7 +287,7 @@ contract GenericCrowdsale is Haltable {
   function setRequireSignedAddress(bool value, address signer) public onlyOwner {
     requiredSignedAddress = value;
     signerAddress = signer;
-    InvestmentPolicyChanged(requireCustomerId, requiredSignedAddress, signerAddress);
+    emit InvestmentPolicyChanged(requireCustomerId, requiredSignedAddress, signerAddress);
   }
 
   /**
@@ -304,7 +295,7 @@ contract GenericCrowdsale is Haltable {
    */
   function setEarlyParticipantWhitelist(address addr, bool status) public onlyOwner notFinished stopInEmergency {
     earlyParticipantWhitelist[addr] = status;
-    Whitelisted(addr, status);
+    emit Whitelisted(addr, status);
   }
 
   /**
