@@ -6,25 +6,27 @@ def config_f(network):
 
 	config = {}
 
-	tokens_per_wei = [410, 390, 370, 350, 340, 330, 320, 310, 300, 290, 280]
+	ether = 10 ** 18
+
+	eur_per_fulltokens = [0.03, 0.04, 0.05, 0.07, 0.08, 0.1, 0.12, 0.15, 0.2]
+
+	def to_divided(price):
+		return int(ether/price);
+
+	tokens_per_eur = list(map(to_divided, ))
 	
 	tranches_quantity = len(tokens_per_wei)
 
-	amounts = [3500000, 7000000, 10500000]
+	amounts = [200000000, 400000000, 600000000, 900000000, 1200000000, 1500000000, 1800000000, 2100000000, 2166000000]
 
-	pre_ico_tranches_quantity = len(amounts)
-
-	ico_tranches_quantity = tranches_quantity - pre_ico_tranches_quantity
-
-	auxNum = 525*(10**4)
-
-	for x in range(pre_ico_tranches_quantity, tranches_quantity):
-		amounts.append(amounts[x - 1] + auxNum)
+	ico_tranches_quantity = len(amounts)
 
 	def toWei(x):
 		return x*(10**18)
 
 	amounts = list(map(toWei, amounts))
+
+	assert len(amounts) == len(eur_per_fulltokens),  "Fails lengths"
 
 	config['tranches'] = []
 
@@ -37,17 +39,9 @@ def config_f(network):
 
 		tranches_start = config['startTime']
 
-		pre_ico_tranches_end = config['startTime'] + 60 * 60 * 24
-
 		ico_tranches_end = tranches_start + 60 * 60 * 24 * 2
 
-		for x in range(0, pre_ico_tranches_quantity):
-			config['tranches'].append(amounts[x])
-			config['tranches'].append(tranches_start)
-			config['tranches'].append(pre_ico_tranches_end)
-			config['tranches'].append(tokens_per_wei[x])
-
-		for x in range(pre_ico_tranches_quantity, tranches_quantity):
+		for x in range(0,  tranches_quantity):
 			config['tranches'].append(amounts[x])
 			config['tranches'].append(tranches_start)
 			config['tranches'].append(ico_tranches_end)
@@ -61,7 +55,7 @@ def config_f(network):
 		config['endTime'] = int(datetime(2018, 2, 20).timestamp())
 		config['MW_address'] = "0xA8c39c22822a89bC8EAC413a1FFb93b73fb9c906"
 
-		tranches_start = int(datetime(2017, 11, 19, 18).timestamp())
+		tranches_start = [int(datetime(2017, 11, 19, 18).timestamp())]																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																							
 
 		tranches_end = [int(datetime(2017, 11, 30).timestamp()),
 		                int(datetime(2017, 12, 7).timestamp()),

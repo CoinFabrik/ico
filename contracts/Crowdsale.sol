@@ -13,6 +13,8 @@ import "./TokenTranchePricing.sol";
 // This contract has the sole objective of providing a sane concrete instance of the Crowdsale contract.
 contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, TokenTranchePricing {
   uint public sellable_tokens;
+  uint public initial_tokens;
+  uint public milieurs_per_eth; 
 
   /*
    * The constructor for the crowdsale was removed given it didn't receive any arguments nor had any body.
@@ -29,11 +31,12 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
   function configurationCrowdsale(address team_multisig, uint start, uint end, address token_retriever, uint[] init_tranches, uint token_initial_supply, uint8 token_decimals, uint max_tokens_to_sell) public {
       // Testing values
       token = new CrowdsaleToken(token_initial_supply, token_decimals, team_multisig, token_retriever);
-      // Necessary if assignTokens mints
-      // token.setMintAgent(address(this), true);
-      // Necessary if finalize is overriden to release the tokens for public trading.
-      // token.setReleaseAgent(address(this));
+      token.setReleaseAgent(address(this));
+      token.setTransferAgent(address(this), true);
+
       
+      initial_tokens = token_initial_supply;  
+
       sellable_tokens = max_tokens_to_sell;
 
       // Configuration functionality for GenericCrowdsale.
@@ -43,19 +46,20 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
       configurationTokenTranchePricing(init_tranches);
   }
 
-  //TODO: implement token assignation (e.g. through minting or transfer)
+  //token assignation
   function assignTokens(address receiver, uint tokenAmount) internal {
     token.transfer(receiver, tokenAmount);
   }
 
-  //TODO: implement token amount calculation
+  //token amount calculation
   function calculateTokenAmount(uint weiAmount, address) internal view returns (uint weiAllowed, uint tokenAmount) {
-    uint tokensPerWei = getCurrentPrice(tokensSold);
-    uint maxAllowed = sellable_tokens.sub(tokensSold).div(tokensPerWei);
-    weiAllowed = maxAllowed.min256(weiAmount);
+    uint tokensPerEth = getCurrentPrice(tokensSold).mul(milieurs_per_eth).div(1000);
+    uint maxWeiAllowed = sellable_tokens.sub(tokensSold).mul(1 ether).div(tokensPerEth);
+    weiAllowed = maxWeiAllowed.min256(weiAmount);
 
-    if (weiAmount < maxAllowed) {
-      tokenAmount = tokensPerWei.mul(weiAmount);
+    if (weiAmount < maxWeiAllowed) {
+      //Divided by 1000 because eth eth_price_in_eurs is multiplied by 1000
+      tokenAmount = tokensPerEth.mul(weiAmount).div(1 ether);
     }
     // With this case we let the crowdsale end even when there are rounding errors due to the tokens to wei ratio
     else {
@@ -75,9 +79,9 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
    * Note that by default tokens are not in a released state.
    */
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
-    // Uncomment if tokens should be released.
-    uint sold = tokensSold.add(  12075000);
-    uint toShare = sold.mul(17).div(83).mul(10**uint(token.decimals()));
+    //Tokens sold + bounties represent 75% of the total, the other 25% goes ti the multisig to the partners and to regulate market 
+    uint sold = tokensSold.add(  initial_tokens);
+    uint toShare = sold.mul(25).div(75).mul(10**uint(token.decimals()));
     token.setMintAgent(address(this), true);
     token.mint(multisigWallet, toShare);
     token.setMintAgent(address(this), false);
@@ -92,17 +96,24 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
    */
   function getLostAndFoundMaster() internal view returns (address) {
     return owner;
+
   }
 
   // These two setters are present only to correct timestamps if they are off from their target date by more than, say, a day
-  // Uncomment only if necessary
-  // function setStartingTime(uint startingTime) public onlyOwner inState(State.PreFunding) {
-  //     require(startingTime > now && startingTime < endsAt);
-  //     startsAt = startingTime;
-  // }
+  function setStartingTime(uint startingTime) public onlyOwner inState(State.PreFunding) {
+      require(startingTime > now && startingTime < endsAt);
+      startsAt = startingTime;
+  }
 
-  // function setEndingTime(uint endingTime) public onlyOwner notFinished {
-  //     require(endingTime > now && endingTime > startsAt);
-  //     endsAt = endingTime;
-  // }
+  function setEndingTime(uint endingTime) public onlyOwner notFinished {
+       require(endingTime > now && endingTime > startsAt);
+       endsAt = endingTime;
+  }
+
+
+
+  function updateEursPerEth (uint milieurs_amount) public onlyOwner {
+    require(milieurs_amount >= 100);
+    milieurs_per_eth = milieurs_amount;
+  }
 }
