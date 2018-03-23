@@ -1,4 +1,4 @@
-#!/usr/bin/python3 -i
+#!/usr/bin/env python3
 
 import time
 from web3 import Web3, IPCProvider
@@ -60,7 +60,14 @@ class Crowdsale:
     return self.get_transaction_receipt(self.web3.eth.sendTransaction({'from': account, 'to': self.contract.address, 'value': value, 'gas': 100000000}))
 
   def start_ico(self):
+    print("ETA for ICO: " + str(round(self.starts_at()-time.time())) + " seconds.")
     time.sleep(max(0,self.starts_at()-time.time()))
+    print("ICO STARTS")
+
+  def end_ico(self):
+    print("ETA for ICO's end: " + str(round(self.ends_at()-time.time())) + " seconds.")
+    time.sleep(max(0,self.ends_at()-time.time()))
+    print("ICO ENDS")
 
   # Crowdsale Contract's functions-----------------------------------------------------------
   def buy(self, buyer, value):
@@ -69,17 +76,17 @@ class Crowdsale:
   def buy_on_behalf(self, buyer, receiver, value):
     return self.get_transaction_receipt(self.contract.functions.buyOnBehalf(receiver).transact(self.transaction_info(buyer, value)))
   
-  def buy_on_behalf_with_customer_id(self, receiver, customerId, value):
-    return self.get_transaction_receipt(self.contract.functions.buyOnBehalfWithCustomerId(receiver, customerId).transact(self.transaction_info(receiver, value)))
+  def buy_on_behalf_with_customer_id(self, buyer, receiver, customerId, value):
+    return self.get_transaction_receipt(self.contract.functions.buyOnBehalfWithCustomerId(receiver, customerId).transact(self.transaction_info(buyer, value)))
   
-  def buy_on_behalf_with_signed_address(self, receiver, customerId, v, r, s, value):
-    return self.get_transaction_receipt(self.contract.functions.buyOnBehalfWithSignedAddress(receiver, customerId, v, r, s).transact(self.transaction_info(receiver, value)))
+  def buy_on_behalf_with_signed_address(self, buyer, receiver, customerId, v, r, s, value):
+    return self.get_transaction_receipt(self.contract.functions.buyOnBehalfWithSignedAddress(receiver, customerId, v, r, s).transact(self.transaction_info(buyer, value)))
   
-  def buy_with_customer_id(self, customerId, receiver, value):
-    return self.get_transaction_receipt(self.contract.functions.buyWithCustomerId(customerId).transact(self.transaction_info(receiver, value)))
+  def buy_with_customer_id(self, customerId, buyer, value):
+    return self.get_transaction_receipt(self.contract.functions.buyWithCustomerId(customerId).transact(self.transaction_info(buyer, value)))
   
-  def buy_with_signed_address(self, customerId, v, r, s, receiver, value):
-    return self.get_transaction_receipt(self.contract.functions.buyWithSignedAddress(customerId, v, r, s).transact(self.transaction_info(receiver, value)))
+  def buy_with_signed_address(self, customerId, v, r, s, buyer, value):
+    return self.get_transaction_receipt(self.contract.functions.buyWithSignedAddress(customerId, v, r, s).transact(self.transaction_info(buyer, value)))
   
   def configuration_crowdsale(self):
     return self.get_transaction_receipt(self.contract.functions.configurationCrowdsale(self.params[0], self.params[1], self.params[2], self.params[3], self.params[4], self.params[5], self.params[6], self.params[7], self.params[8]).transact({"from": self.sender_account, "value": 0, "gas": self.gas, "gasPrice": self.gas_price}))
@@ -94,9 +101,6 @@ class Crowdsale:
     return self.contract.functions.endsAt().call()
   
   def finalize(self):
-    #new_ending = int(time.time()) + 5
-    #print(self.get_transaction_receipt(self.contract.functions.setEndingTime(new_ending).transact(self.transaction_info(self.sender_account))))
-    #time.sleep(2)
     return self.get_transaction_receipt(self.contract.functions.finalize().transact(self.transaction_info(self.sender_account)))
   
   def finalized(self):
@@ -207,7 +211,7 @@ class Token:
   def get_transaction_receipt(self, tx_hash):
     self.wait()
     return self.web3.eth.getTransactionReceipt(tx_hash)
-    
+
   # Transaction parameter
   def transaction_info(self, sender, value=0):
     return {"from": sender, "value": value*(10**18), "gas": self.gas, "gasPrice": self.gas_price}
