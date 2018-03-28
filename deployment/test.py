@@ -2,823 +2,249 @@
 
 import deploy
 from setConfig import wait, dump, time, params, miner, accounts, web3
-from testing_helpers import Crowdsale, Token
+from crowdsale_checker import CrowdsaleChecker
 
-def to_32byte_hex(val):
-  return web3.toHex(web3.toBytes(val).rjust(32, b'\0'))
 
+crowdsale_checker = CrowdsaleChecker(params)
 
-def fails(message, tx_receipt):
-  print(message, end='')
-  try:
-    assert tx_receipt.status == 0
-  except Exception as e:
-    print(" ✗✘")
-    raise "Transaction expected to fail succeeded"
-  else:
-    print(" ✓✔")
+# Pre-ico before configuration stage --------------------------------------------------------
 
-def succeeds(message, tx_receipt):
-  print(message, end='')
-  try:
-    assert tx_receipt.status == 1
-  except Exception as e:
-    print(" ✗✘")
-    raise "Transaction expected to succeed failed"
-  else:
-    print(" ✓✔")
+crowdsale_checker.check_state()
 
+crowdsale_checker.try_buys()
 
-# Dict with the states for comparison
+crowdsale_checker.try_finalize()
 
+crowdsale_checker.try_preallocate()
 
-address_zero = '0x0000000000000000000000000000000000000000'
+# -- Halt stage
 
-message = "[Etherscan.io 26/02/2018 19:26:08] I, hereby verify that the information provided is accurate and I am the owner/creator of the token contract address 0xF87F0D9153fea549c728Ad61cb801595a68b73de"
-hashed_message = web3.sha3(text=message)
+crowdsale_checker.halt()
 
-signer = accounts[0]
-address_to_sign = accounts[1]
+crowdsale_checker.check_state()
 
-signature_hexbytes = web3.eth.sign(signer, text=message)
+crowdsale_checker.try_buys()
 
-signature = signature_hexbytes.hex()
+crowdsale_checker.try_finalize()
 
-r = signature[:66]
-s = '0x' + signature[66:130]
-v = '0x' + signature[130:132]
-v = web3.toInt(hexstr=v)
+crowdsale_checker.try_preallocate()
 
-tokens_to_preallocate = 10
+# ---- Require Customer ID stage
 
-whitelisted_address1 = accounts[1]
-whitelisted_address2 = accounts[3]
-non_whitelisted_address1 = accounts[2]
-non_whitelisted_address2 = accounts[4]
+crowdsale_checker.require_customer_id()
 
+crowdsale_checker.check_state()
 
+crowdsale_checker.try_buys()
 
+crowdsale_checker.try_finalize()
 
+crowdsale_checker.try_preallocate()
 
+crowdsale_checker.unrequire_customer_id()
 
-# Testing start ----------------------------------------------------------
+# ---- End Require Customer ID stage
 
+crowdsale_checker.unhalt()
 
+# -- End Halt stage
 
+# -- Require Customer ID stage
 
+crowdsale_checker.require_customer_id()
 
+crowdsale_checker.check_state()
 
-# Pre-configuration testing
+crowdsale_checker.try_buys()
 
+crowdsale_checker.try_finalize()
 
-print("\nCreating crowdsale object")
-crowdsale = Crowdsale(params) 
-print("Crowdsale object created.")
+crowdsale_checker.try_preallocate()
 
-assert states['PendingConfiguration'] == crowdsale.get_state(), "State should be PendingConfiguration"
+crowdsale_checker.unrequire_customer_id()
 
+# -- End Require Customer ID stage
 
+# End Pre-ico before configuration stage -----------------------------------------------
 
-fails("Failed preallocation of tokens with non-whitelisted address",
-  crowdsale.preallocate(non_whitelisted_address1, tokens_to_preallocate, 350))
+crowdsale_checker.try_configuration_crowdsale()
 
-fails("Failed preallocation of tokens with whitelisted address",
-  crowdsale.preallocate(whitelisted_address2, tokens_to_preallocate, 350))
+# Pre-ico after configuration stage ---------------------------------------------------------
 
+crowdsale_checker.check_state()
 
+crowdsale_checker.try_buys()
 
-fails("Failed crowdsale finalization", crowdsale.finalize())
-assert crowdsale.finalized() == False
+crowdsale_checker.try_finalize()
 
+crowdsale_checker.try_preallocate()
 
+# -- Halt stage
 
-succeeds("Configurate Crowdsale",
-  crowdsale.configuration_crowdsale())
+crowdsale_checker.halt()
 
-assert states['PreFunding'] == crowdsale.get_state(), "State should be PreFunding"
-print("ESTAMOS EN PRE-ICO!")
+crowdsale_checker.check_state()
 
+crowdsale_checker.try_buys()
 
-fails("Failed Crowdsale configuration",
-  crowdsale.configuration_crowdsale())
+crowdsale_checker.try_finalize()
 
+crowdsale_checker.try_preallocate()
 
-fails("Failed crowdsale finalization", crowdsale.finalize())
-assert crowdsale.finalized() == False
+# ---- Require Customer ID stage
 
+crowdsale_checker.require_customer_id()
 
+crowdsale_checker.check_state()
 
-tranches = crowdsale.contract.functions.tranches(0).call()
-time.sleep(max(tranches[1] - time.time(), 0))
+crowdsale_checker.try_buys()
 
+crowdsale_checker.try_finalize()
 
-# Post-configuration testing
+crowdsale_checker.try_preallocate()
 
+crowdsale_checker.unrequire_customer_id()
 
-# Token object creation
-print("Creating token object")
-token = Token(crowdsale.contract)
-print("Token object created.")
+# ---- End Require Customer ID stage
 
-# Testing getTranchesLength function
-print("Get tranches length:", end=' ')
-result = crowdsale.get_tranches_length()
-print(str(result))
+crowdsale_checker.unhalt()
 
+# -- End Halt stage
 
+# -- Require Customer ID stage
 
-succeeds("Set signer address but does not require sign.",
-  crowdsale.set_require_signed_address(False, signer))
+crowdsale_checker.require_customer_id()
 
+crowdsale_checker.check_state()
 
+crowdsale_checker.try_buys()
 
-succeeds("Whitelists an address.",
-  crowdsale.set_early_participant_whitelist(whitelisted_address1, True))
+crowdsale_checker.try_finalize()
 
-succeeds("Whitelists another address.",
-  crowdsale.set_early_participant_whitelist(whitelisted_address2, True))
+crowdsale_checker.try_preallocate()
 
+crowdsale_checker.unrequire_customer_id()
 
+# -- End Require Customer ID stage
 
-print("Reading earlyParticipantWhitelist mapping for whitelisted_address1: ",
-  str(crowdsale.early_participant_whitelist(whitelisted_address1)))
+crowdsale_checker.start_ico()
 
-print("Reading earlyParticipantWhitelist mapping for whitelisted_address2: ",
-  str(crowdsale.early_participant_whitelist(whitelisted_address2)))
+# ICO stage ---------------------------------------------------------------------------------
 
+crowdsale_checker.check_state()
 
+crowdsale_checker.try_buys()
 
-print("Reading transferAgents mapping for Crowdsale Address: ",
-  str(token.transfer_agents(crowdsale.contract.address)))
+crowdsale_checker.try_finalize()
 
+crowdsale_checker.try_preallocate()
 
+# -- Halt stage
 
+crowdsale_checker.halt()
 
+crowdsale_checker.check_state()
 
+crowdsale_checker.try_buys()
 
-# Testing buying functions
-balance = token.balance_of(whitelisted_address1)
-succeeds("Buys using a whitelisted address through fallback function.",
-  crowdsale.send_ether_to_crowdsale(whitelisted_address1, 2))
-assert token.balance_of(whitelisted_address1) > balance
+crowdsale_checker.try_finalize()
 
-balance = token.balance_of(non_whitelisted_address1)
-fails("Buys using a non-whitelisted address through fallback function.",
-  crowdsale.send_ether_to_crowdsale(non_whitelisted_address1, 2))
-assert token.balance_of(non_whitelisted_address1) == balance
+crowdsale_checker.try_preallocate()
 
+# ---- Require Customer ID stage
 
+crowdsale_checker.require_customer_id()
 
-balance = token.balance_of(whitelisted_address1)
-succeeds("Buys using a whitelisted address through buy.",
-  crowdsale.buy(whitelisted_address1, 2))
-assert token.balance_of(whitelisted_address1) > balance
+crowdsale_checker.check_state()
 
-balance = token.balance_of(non_whitelisted_address1)
-fails("Buys using a non-whitelisted address through buy.",
-  crowdsale.buy(non_whitelisted_address1, 2))
-assert token.balance_of(non_whitelisted_address1) == balance
+crowdsale_checker.try_buys()
 
+crowdsale_checker.try_finalize()
 
+crowdsale_checker.try_preallocate()
 
-balance = token.balance_of(whitelisted_address1)
-succeeds("Buys on behalf of themself using a whitelisted address through buyOnBehalf.",
-  crowdsale.buy_on_behalf(whitelisted_address1, whitelisted_address1, 2))
-assert token.balance_of(whitelisted_address1) > balance
+crowdsale_checker.unrequire_customer_id()
 
-balance = token.balance_of(non_whitelisted_address1)
-fails("Buys on behalf of themself using a non-whitelisted address through buyOnBehalf.",
-  crowdsale.buy_on_behalf(non_whitelisted_address1, non_whitelisted_address1, 2))
-assert token.balance_of(non_whitelisted_address1) == balance
+# ---- End Require Customer ID stage
 
-balance = token.balance_of(whitelisted_address2)
-succeeds("Buys on behalf of another whitelisted address using a whitelisted address through buyOnBehalf.",
-  crowdsale.buy_on_behalf(whitelisted_address1, whitelisted_address2, 2))
-assert token.balance_of(whitelisted_address2) > balance
+crowdsale_checker.unhalt()
 
-balance = token.balance_of(non_whitelisted_address1)
-succeeds("Buys on behalf of a non-whitelisted address using a whitelisted address through buyOnBehalf.",
-  crowdsale.buy_on_behalf(whitelisted_address1, non_whitelisted_address1, 2))
-assert token.balance_of(non_whitelisted_address1) > balance
+# -- End Halt stage
 
-balance = token.balance_of(whitelisted_address1)
-fails("Buys on behalf of a whitelisted address using a non-whitelisted address through buyOnBehalf.",
-  crowdsale.buy_on_behalf(non_whitelisted_address1, whitelisted_address1, 2))
-assert token.balance_of(whitelisted_address1) == balance
+# -- Require Customer ID stage
 
-balance = token.balance_of(non_whitelisted_address2)
-fails("Buys on behalf of a non-whitelisted address using a non-whitelisted address through buyOnBehalf.",
-  crowdsale.buy_on_behalf(non_whitelisted_address1, non_whitelisted_address2, 2))
-assert token.balance_of(non_whitelisted_address2) == balance
+crowdsale_checker.require_customer_id()
 
+crowdsale_checker.check_state()
 
+crowdsale_checker.try_buys()
 
-balance = token.balance_of(whitelisted_address1)
-succeeds("Buys on behalf of themself using a whitelisted address with valid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(whitelisted_address1, whitelisted_address1, 1, 2))
-assert token.balance_of(whitelisted_address1) > balance
+crowdsale_checker.try_finalize()
 
-balance = token.balance_of(non_whitelisted_address1)
-fails("Buys on behalf of themself using a non-whitelisted address with valid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(non_whitelisted_address1, non_whitelisted_address1, 1, 2))
-assert token.balance_of(non_whitelisted_address1) == balance
+crowdsale_checker.try_preallocate()
 
-balance = token.balance_of(whitelisted_address2)
-succeeds("Buys on behalf of another whitelisted address using a whitelisted address with valid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(whitelisted_address1, whitelisted_address2, 1, 2))
-assert token.balance_of(whitelisted_address2) > balance
+crowdsale_checker.unrequire_customer_id()
 
-balance = token.balance_of(non_whitelisted_address1)
-succeeds("Buys on behalf of a non-whitelisted address using a whitelisted address with valid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(whitelisted_address1, non_whitelisted_address1, 1, 2))
-assert token.balance_of(non_whitelisted_address1) > balance
+# -- End Require Customer ID stage
 
-balance = token.balance_of(whitelisted_address1)
-fails("Buys on behalf of a whitelisted address using a non-whitelisted address with valid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(non_whitelisted_address1, whitelisted_address1, 1, 2))
-assert token.balance_of(whitelisted_address1) == balance
+crowdsale_checker.end_ico()
 
-balance = token.balance_of(non_whitelisted_address2)
-fails("Buys on behalf of a non-whitelisted address using a non-whitelisted address with valid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(non_whitelisted_address1, non_whitelisted_address2, 1, 2))
-assert token.balance_of(non_whitelisted_address2) == balance
+# End ICO stage -----------------------------------------------------------------------------
 
-
-balance = token.balance_of(whitelisted_address1)
-fails("Buys on behalf of themself using a whitelisted address with invalid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(whitelisted_address1, whitelisted_address1, 0, 2))
-assert token.balance_of(whitelisted_address1) == balance
-
-balance = token.balance_of(non_whitelisted_address1)
-fails("Buys on behalf of themself using a non-whitelisted address with invalid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(non_whitelisted_address1, non_whitelisted_address1, 0, 2))
-assert token.balance_of(non_whitelisted_address1) == balance
-
-balance = token.balance_of(whitelisted_address2)
-fails("Buys on behalf of another whitelisted address using a whitelisted address with invalid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(whitelisted_address1, whitelisted_address2, 0, 2))
-assert token.balance_of(whitelisted_address2) == balance
-
-balance = token.balance_of(non_whitelisted_address1)
-fails("Buys on behalf of a non-whitelisted address using a whitelisted address with invalid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(whitelisted_address1, non_whitelisted_address1, 0, 2))
-assert token.balance_of(non_whitelisted_address1) == balance
-
-balance = token.balance_of(whitelisted_address1)
-fails("Buys on behalf of a whitelisted address using a non-whitelisted address with invalid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(non_whitelisted_address1, whitelisted_address1, 0, 2))
-assert token.balance_of(whitelisted_address1) == balance
-
-balance = token.balance_of(non_whitelisted_address2)
-fails("Buys on behalf of a non-whitelisted address using a non-whitelisted address with invalid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(non_whitelisted_address1, non_whitelisted_address2, 0, 2))
-assert token.balance_of(non_whitelisted_address2) == balance
-
-
-
-#balance = token.balance_of(whitelisted_address1)
-#succeeds("Buys with whitelisted address on behalf of a whitelisted, signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address2, whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) > balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with whitelisted address on behalf of a whitelisted, non-signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address2, whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#succeeds("Buys with whitelisted address on behalf of a non-whitelisted, signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address2, non_whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address1) > balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys with whitelisted address on behalf of a non-whitelisted, non-signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address2, non_whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with non-whitelisted address on behalf of a whitelisted, signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with non-whitelisted address on behalf of a whitelisted, non-signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address2)
-#fails("Buys with non-whitelisted address on behalf of a non-whitelisted, signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, non_whitelisted_address2, 1, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address2) == balance
-#
-#balance = token.balance_of(non_whitelisted_address2)
-#fails("Buys with non-whitelisted address on behalf of a non-whitelisted, non-signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, non_whitelisted_address2, 1, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address2) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#succeeds("Buys on behalf of themself with a whitelisted, signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address1, whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) > balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys on behalf of themself with a whitelisted, non-signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address1, whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys on behalf of themself with a non-whitelisted, signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, non_whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys on behalf of themself with a non-whitelisted, non-signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, non_whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with whitelisted address on behalf of a whitelisted, signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address2, whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with whitelisted address on behalf of a whitelisted, non-signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address2, whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys with whitelisted address on behalf of a non-whitelisted, signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address2, non_whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys with whitelisted address on behalf of a non-whitelisted, non-signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address2, non_whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with non-whitelisted address on behalf of a whitelisted, signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with non-whitelisted address on behalf of a whitelisted, non-signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address2)
-#fails("Buys with non-whitelisted address on behalf of a non-whitelisted, signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, non_whitelisted_address2, 0, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address2) == balance
-#
-#balance = token.balance_of(non_whitelisted_address2)
-#fails("Buys with non-whitelisted address on behalf of a non-whitelisted, non-signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, non_whitelisted_address2, 0, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address2) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys on behalf of themself with a whitelisted, signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address1, whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys on behalf of themself with a whitelisted, non-signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address1, whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys on behalf of themself with a non-whitelisted, signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, non_whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys on behalf of themself with a non-whitelisted, non-signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, non_whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-
-
-
-balance = token.balance_of(whitelisted_address1)
-succeeds("Buys with whitelisted address and valid customerId with buyWithCustomerId.",
-  crowdsale.buy_with_customer_id(1, whitelisted_address1, 2))
-assert token.balance_of(whitelisted_address1) > balance
-
-balance = token.balance_of(whitelisted_address1)
-fails("Buys with whitelisted address and invalid customerId with buyWithCustomerId.",
-  crowdsale.buy_with_customer_id(0, whitelisted_address1, 2))
-assert token.balance_of(whitelisted_address1) == balance
-
-balance = token.balance_of(non_whitelisted_address1)
-fails("Buys with non-whitelisted address and valid customerId with buyWithCustomerId.",
-  crowdsale.buy_with_customer_id(1, non_whitelisted_address1, 2))
-assert token.balance_of(non_whitelisted_address1) == balance
-
-balance = token.balance_of(non_whitelisted_address1)
-fails("Buys with non-whitelisted address and invalid customerId with buyWithCustomerId.",
-  crowdsale.buy_with_customer_id(0, non_whitelisted_address1, 2))
-assert token.balance_of(non_whitelisted_address1) == balance
-
-
-
-#balance = token.balance_of(whitelisted_address1)
-#succeeds("Buys with whitelisted and signed address and valid customerId with buyWithSignedAddress",
-#  crowdsale.buy_with_signed_address(1, v, r, s, whitelisted_address1, 2))
-#assert token.balance_of(whitelisted_address1) > balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with whitelisted and signed address and invalid customerId with buyWithSignedAddress",
-#  crowdsale.buy_with_signed_address(0, v, r, s, whitelisted_address1, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with whitelisted and unsigned address and valid customerId with buyWithSignedAddress",
-#  crowdsale.buy_with_signed_address(1, v, r, s, whitelisted_address1, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with whitelisted and unsigned address and invalid customerId with buyWithSignedAddress",
-#  crowdsale.buy_with_signed_address(0, v, r, s, whitelisted_address1, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys with non-whitelisted and signed address and valid customerId with buyWithSignedAddress",
-#  crowdsale.buy_with_signed_address(1, v, r, s, non_whitelisted_address1, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys with non-whitelisted and signed address and invalid customerId with buyWithSignedAddress",
-#  crowdsale.buy_with_signed_address(0, v, r, s, non_whitelisted_address1, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys with non-whitelisted and unsigned address and valid customerId with buyWithSignedAddress",
-#  crowdsale.buy_with_signed_address(1, v, r, s, non_whitelisted_address1, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys with non-whitelisted and unsigned address and invalid customerId with buyWithSignedAddress",
-#  crowdsale.buy_with_signed_address(0, v, r, s, non_whitelisted_address1, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-
-
-
-balance = token.balance_of(non_whitelisted_address1)
-succeeds("Preallocate tokens with non-whitelisted address",
-  crowdsale.preallocate(non_whitelisted_address1, tokens_to_preallocate, 350))
-assert token.balance_of(non_whitelisted_address1) > balance
-assert token.balance_of(non_whitelisted_address1) == balance + (tokens_to_preallocate * (10 ** 18))
-
-balance = token.balance_of(whitelisted_address2)
-succeeds("Preallocate tokens with whitelisted address",
-  crowdsale.preallocate(whitelisted_address2, tokens_to_preallocate, 350))
-assert token.balance_of(whitelisted_address2) > balance
-assert token.balance_of(whitelisted_address2) == balance + (tokens_to_preallocate * (10 ** 18))
-
-
-
-crowdsale.start_ico()
-assert states['Funding'] == crowdsale.get_state(), "State should be Funding"
-print("ESTAMOS EN ICO!")
-
-
-
-fails("Failed Crowdsale configuration",
-  crowdsale.configuration_crowdsale())
-
-fails("Failed Crowdsale finalization", crowdsale.finalize())
-assert crowdsale.finalized() == False
-
-
-
-# Testing buying functions
-balance = token.balance_of(whitelisted_address1)
-succeeds("Buys using a whitelisted address through fallback function.",
-  crowdsale.send_ether_to_crowdsale(whitelisted_address1, 2))
-assert token.balance_of(whitelisted_address1) > balance
-
-balance = token.balance_of(non_whitelisted_address1)
-succeeds("Buys using a non-whitelisted address through fallback function.",
-  crowdsale.send_ether_to_crowdsale(non_whitelisted_address1, 2))
-assert token.balance_of(non_whitelisted_address1) > balance
-
-
-
-balance = token.balance_of(whitelisted_address1)
-succeeds("Buys using a whitelisted address through buy.",
-  crowdsale.buy(whitelisted_address1, 2))
-assert token.balance_of(whitelisted_address1) > balance
-
-balance = token.balance_of(non_whitelisted_address1)
-succeeds("Buys using a non-whitelisted address through buy.",
-  crowdsale.buy(non_whitelisted_address1, 2))
-assert token.balance_of(non_whitelisted_address1) > balance
-
-
-
-balance = token.balance_of(whitelisted_address1)
-succeeds("Buys on behalf of themself using a whitelisted address through buyOnBehalf.",
-  crowdsale.buy_on_behalf(whitelisted_address1, whitelisted_address1, 2))
-assert token.balance_of(whitelisted_address1) > balance
-
-balance = token.balance_of(non_whitelisted_address1)
-succeeds("Buys on behalf of themself using a non-whitelisted address through buyOnBehalf.",
-  crowdsale.buy_on_behalf(non_whitelisted_address1, non_whitelisted_address1, 2))
-assert token.balance_of(non_whitelisted_address1) > balance
-
-balance = token.balance_of(whitelisted_address2)
-succeeds("Buys on behalf of another whitelisted address using a whitelisted address through buyOnBehalf.",
-  crowdsale.buy_on_behalf(whitelisted_address1, whitelisted_address2, 2))
-assert token.balance_of(whitelisted_address2) > balance
-
-balance = token.balance_of(non_whitelisted_address1)
-succeeds("Buys on behalf of a non-whitelisted address using a whitelisted address through buyOnBehalf.",
-  crowdsale.buy_on_behalf(whitelisted_address1, non_whitelisted_address1, 2))
-assert token.balance_of(non_whitelisted_address1) > balance
-
-balance = token.balance_of(whitelisted_address1)
-succeeds("Buys on behalf of a whitelisted address using a non-whitelisted address through buyOnBehalf.",
-  crowdsale.buy_on_behalf(non_whitelisted_address1, whitelisted_address1, 2))
-assert token.balance_of(whitelisted_address1) > balance
-
-balance = token.balance_of(non_whitelisted_address2)
-succeeds("Buys on behalf of a non-whitelisted address using a non-whitelisted address through buyOnBehalf.",
-  crowdsale.buy_on_behalf(non_whitelisted_address1, non_whitelisted_address2, 2))
-assert token.balance_of(non_whitelisted_address2) > balance
-
-
-
-balance = token.balance_of(whitelisted_address1)
-succeeds("Buys on behalf of themself using a whitelisted address with valid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(whitelisted_address1, whitelisted_address1, 1, 2))
-assert token.balance_of(whitelisted_address1) > balance
-
-balance = token.balance_of(non_whitelisted_address1)
-succeeds("Buys on behalf of themself using a non-whitelisted address with valid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(non_whitelisted_address1, non_whitelisted_address1, 1, 2))
-assert token.balance_of(non_whitelisted_address1) > balance
-
-balance = token.balance_of(whitelisted_address2)
-succeeds("Buys on behalf of another whitelisted address using a whitelisted address with valid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(whitelisted_address1, whitelisted_address2, 1, 2))
-assert token.balance_of(whitelisted_address2) > balance
-
-balance = token.balance_of(non_whitelisted_address1)
-succeeds("Buys on behalf of a non-whitelisted address using a whitelisted address with valid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(whitelisted_address1, non_whitelisted_address1, 1, 2))
-assert token.balance_of(non_whitelisted_address1) > balance
-
-balance = token.balance_of(whitelisted_address1)
-succeeds("Buys on behalf of a whitelisted address using a non-whitelisted address with valid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(non_whitelisted_address1, whitelisted_address1, 1, 2))
-assert token.balance_of(whitelisted_address1) > balance
-
-balance = token.balance_of(non_whitelisted_address2)
-succeeds("Buys on behalf of a non-whitelisted address using a non-whitelisted address with valid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(non_whitelisted_address1, non_whitelisted_address2, 1, 2))
-assert token.balance_of(non_whitelisted_address2) > balance
-
-
-balance = token.balance_of(whitelisted_address1)
-fails("Buys on behalf of themself using a whitelisted address with invalid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(whitelisted_address1, whitelisted_address1, 0, 2))
-assert token.balance_of(whitelisted_address1) == balance
-
-balance = token.balance_of(non_whitelisted_address1)
-fails("Buys on behalf of themself using a non-whitelisted address with invalid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(non_whitelisted_address1, non_whitelisted_address1, 0, 2))
-assert token.balance_of(non_whitelisted_address1) == balance
-
-balance = token.balance_of(whitelisted_address2)
-fails("Buys on behalf of another whitelisted address using a whitelisted address with invalid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(whitelisted_address1, whitelisted_address2, 0, 2))
-assert token.balance_of(whitelisted_address2) == balance
-
-balance = token.balance_of(non_whitelisted_address1)
-fails("Buys on behalf of a non-whitelisted address using a whitelisted address with invalid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(whitelisted_address1, non_whitelisted_address1, 0, 2))
-assert token.balance_of(non_whitelisted_address1) == balance
-
-balance = token.balance_of(whitelisted_address1)
-fails("Buys on behalf of a whitelisted address using a non-whitelisted address with invalid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(non_whitelisted_address1, whitelisted_address1, 0, 2))
-assert token.balance_of(whitelisted_address1) == balance
-
-balance = token.balance_of(non_whitelisted_address2)
-fails("Buys on behalf of a non-whitelisted address using a non-whitelisted address with invalid customerId through buyOnBehalfWithCustomerId.",
-  crowdsale.buy_on_behalf_with_customer_id(non_whitelisted_address1, non_whitelisted_address2, 0, 2))
-assert token.balance_of(non_whitelisted_address2) == balance
-
-
-
-#balance = token.balance_of(whitelisted_address1)
-#succeeds("Buys with whitelisted address on behalf of a whitelisted, signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address2, whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) > balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with whitelisted address on behalf of a whitelisted, non-signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address2, whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#succeeds("Buys with whitelisted address on behalf of a non-whitelisted, signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address2, non_whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address1) > balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys with whitelisted address on behalf of a non-whitelisted, non-signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address2, non_whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with non-whitelisted address on behalf of a whitelisted, signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with non-whitelisted address on behalf of a whitelisted, non-signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address2)
-#fails("Buys with non-whitelisted address on behalf of a non-whitelisted, signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, non_whitelisted_address2, 1, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address2) == balance
-#
-#balance = token.balance_of(non_whitelisted_address2)
-#fails("Buys with non-whitelisted address on behalf of a non-whitelisted, non-signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, non_whitelisted_address2, 1, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address2) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#succeeds("Buys on behalf of themself with a whitelisted, signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address1, whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) > balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys on behalf of themself with a whitelisted, non-signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address1, whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys on behalf of themself with a non-whitelisted, signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, non_whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys on behalf of themself with a non-whitelisted, non-signed and with valid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, non_whitelisted_address1, 1, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with whitelisted address on behalf of a whitelisted, signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address2, whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with whitelisted address on behalf of a whitelisted, non-signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address2, whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys with whitelisted address on behalf of a non-whitelisted, signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address2, non_whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys with whitelisted address on behalf of a non-whitelisted, non-signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address2, non_whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with non-whitelisted address on behalf of a whitelisted, signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with non-whitelisted address on behalf of a whitelisted, non-signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address2)
-#fails("Buys with non-whitelisted address on behalf of a non-whitelisted, signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, non_whitelisted_address2, 0, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address2) == balance
-#
-#balance = token.balance_of(non_whitelisted_address2)
-#fails("Buys with non-whitelisted address on behalf of a non-whitelisted, non-signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, non_whitelisted_address2, 0, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address2) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys on behalf of themself with a whitelisted, signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address1, whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys on behalf of themself with a whitelisted, non-signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(whitelisted_address1, whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys on behalf of themself with a non-whitelisted, signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, non_whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys on behalf of themself with a non-whitelisted, non-signed and with invalid customerId address with buyOnBehalfWithSignedAddress.",
-#  crowdsale.buy_on_behalf_with_signed_address(non_whitelisted_address1, non_whitelisted_address1, 0, v, r, s, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-
-
-
-balance = token.balance_of(whitelisted_address1)
-succeeds("Buys with whitelisted address and valid customerId with buyWithCustomerId.",
-  crowdsale.buy_with_customer_id(1, whitelisted_address1, 2))
-assert token.balance_of(whitelisted_address1) > balance
-
-balance = token.balance_of(whitelisted_address1)
-fails("Buys with whitelisted address and invalid customerId with buyWithCustomerId.",
-  crowdsale.buy_with_customer_id(0, whitelisted_address1, 2))
-assert token.balance_of(whitelisted_address1) == balance
-
-balance = token.balance_of(non_whitelisted_address1)
-succeeds("Buys with non-whitelisted address and valid customerId with buyWithCustomerId.",
-  crowdsale.buy_with_customer_id(1, non_whitelisted_address1, 2))
-assert token.balance_of(non_whitelisted_address1) > balance
-
-balance = token.balance_of(non_whitelisted_address1)
-fails("Buys with non-whitelisted address and invalid customerId with buyWithCustomerId.",
-  crowdsale.buy_with_customer_id(0, non_whitelisted_address1, 2))
-assert token.balance_of(non_whitelisted_address1) == balance
-
-
-
-#balance = token.balance_of(whitelisted_address1)
-#succeeds("Buys with whitelisted and signed address and valid customerId with buyWithSignedAddress",
-#  crowdsale.buy_with_signed_address(1, v, r, s, whitelisted_address1, 2))
-#assert token.balance_of(whitelisted_address1) > balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with whitelisted and signed address and invalid customerId with buyWithSignedAddress",
-#  crowdsale.buy_with_signed_address(0, v, r, s, whitelisted_address1, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with whitelisted and unsigned address and valid customerId with buyWithSignedAddress",
-#  crowdsale.buy_with_signed_address(1, v, r, s, whitelisted_address1, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(whitelisted_address1)
-#fails("Buys with whitelisted and unsigned address and invalid customerId with buyWithSignedAddress",
-#  crowdsale.buy_with_signed_address(0, v, r, s, whitelisted_address1, 2))
-#assert token.balance_of(whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys with non-whitelisted and signed address and valid customerId with buyWithSignedAddress",
-#  crowdsale.buy_with_signed_address(1, v, r, s, non_whitelisted_address1, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys with non-whitelisted and signed address and invalid customerId with buyWithSignedAddress",
-#  crowdsale.buy_with_signed_address(0, v, r, s, non_whitelisted_address1, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys with non-whitelisted and unsigned address and valid customerId with buyWithSignedAddress",
-#  crowdsale.buy_with_signed_address(1, v, r, s, non_whitelisted_address1, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-#
-#balance = token.balance_of(non_whitelisted_address1)
-#fails("Buys with non-whitelisted and unsigned address and invalid customerId with buyWithSignedAddress",
-#  crowdsale.buy_with_signed_address(0, v, r, s, non_whitelisted_address1, 2))
-#assert token.balance_of(non_whitelisted_address1) == balance
-
-
-
-balance = token.balance_of(non_whitelisted_address1)
-succeeds("Preallocate tokens with non-whitelisted address",
-  crowdsale.preallocate(non_whitelisted_address1, tokens_to_preallocate, 350))
-assert token.balance_of(non_whitelisted_address1) > balance
-assert token.balance_of(non_whitelisted_address1) == balance + (tokens_to_preallocate * (10 ** 18))
-
-balance = token.balance_of(whitelisted_address2)
-succeeds("Preallocate tokens with whitelisted address",
-  crowdsale.preallocate(whitelisted_address2, tokens_to_preallocate, 350))
-assert token.balance_of(whitelisted_address2) > balance
-assert token.balance_of(whitelisted_address2) == balance + (tokens_to_preallocate * (10 ** 18))
-
-
-
-crowdsale.end_ico()
-assert states['Success'] == crowdsale.get_state(), "State should be Success"
-print("CHAU ICO!")
-
-
-
-succeeds("Finalize Crowdsale", crowdsale.finalize())
-assert crowdsale.finalized() == True
+crowdsale_checker.check_state()
 
+crowdsale_checker.try_buys()
 
+crowdsale_checker.try_finalize()
+
+crowdsale_checker.try_preallocate()
+
+# -- Halt stage
+
+crowdsale_checker.halt()
+
+crowdsale_checker.check_state()
+
+crowdsale_checker.try_buys()
+
+crowdsale_checker.try_finalize()
+
+crowdsale_checker.try_preallocate()
+
+# ---- Require Customer ID stage
+
+crowdsale_checker.require_customer_id()
+
+crowdsale_checker.check_state()
+
+crowdsale_checker.try_buys()
+
+crowdsale_checker.try_finalize()
+
+crowdsale_checker.try_preallocate()
+
+crowdsale_checker.unrequire_customer_id()
+
+# ---- End Require Customer ID stage
+
+crowdsale_checker.unhalt()
+
+# -- End Halt stage
+
+# -- Require Customer ID stage
+
+crowdsale_checker.require_customer_id()
+
+crowdsale_checker.check_state()
+
+crowdsale_checker.try_buys()
+
+crowdsale_checker.try_finalize()
+
+crowdsale_checker.try_preallocate()
+
+crowdsale_checker.unrequire_customer_id()
+
+# -- End Require Customer ID stage
 
 miner.stop()

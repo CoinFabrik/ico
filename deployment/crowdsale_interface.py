@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 import time
-from web3 import Web3, IPCProvider
+from web3 import Web3, IPCProvider, HTTPProvider
+from web3.middleware import geth_poa_middleware
 import json
 import glob
 import os
@@ -16,11 +17,17 @@ class Crowdsale:
   ipc_path = '/home/coinfabrik/Programming/blockchain/node/geth.ipc'
   # web3.py instance
   web3 = Web3(IPCProvider(ipc_path))
+  web3.middleware_stack.inject(geth_poa_middleware, layer=0)
+  print(web3.version.node)
+  # web3 = Web3(HTTPProvider("http://localhost:8545"))
   miner = web3.miner
   accounts = web3.eth.accounts
   sender_account = accounts[0]
-  params = None
-
+  contract = None
+  tokens_to_preallocate = 10
+  wei_price_of_preallocation = 350
+  states = {"Unknown": 0, "PendingConfiguration": 1, "PreFunding": 2, "Funding": 3, "Success": 4, "Finalized": 5}
+  
   def __init__(self, config_params):
     self.params = config_params
     # Get Crowdsale ABI
@@ -44,30 +51,41 @@ class Crowdsale:
 
   # Custom functions-------------------------------------------------------------------------
   def get_transaction_receipt(self, tx_hash):
-    self.wait()
+    self.wait(tx_hash)
     return self.web3.eth.getTransactionReceipt(tx_hash)
 
   # Transaction parameter
   def transaction_info(self, sender, value=0):
     return {"from": sender, "value": value*(10**18), "gas": self.gas, "gasPrice": self.gas_price}
 
-  def wait(self):
-    block_number = self.web3.eth.blockNumber
-    while self.web3.eth.blockNumber <= (block_number + 1):
+  def wait(self, tx_hash):
+    while self.web3.eth.getTransactionReceipt(tx_hash) == None:
       time.sleep(1)
 
-  def send_ether_to_crowdsale(self, account, value):
-    return self.get_transaction_receipt(self.web3.eth.sendTransaction({'from': account, 'to': self.contract.address, 'value': value, 'gas': 100000000}))
+  def send_ether_to_crowdsale(self, buyer, value):
+    return self.get_transaction_receipt(self.web3.eth.sendTransaction({'from': buyer, 'to': self.contract.address, 'value': value, 'gas': 100000000}))
+
+  def eta_ico():
+    return round(self.starts_at()-time.time())
+
+  def eta_end_ico():
+    return round(self.ends_at()-time.time())
 
   def start_ico(self):
-    print("ETA for ICO: " + str(round(self.starts_at()-time.time())) + " seconds.")
-    time.sleep(max(0,self.starts_at()-time.time()))
+    print("ETA for ICO: " + str(self.eta_ico()) + " seconds.")
+    time.sleep(max(0, self.eta_ico()))
     print("ICO STARTS")
 
   def end_ico(self):
-    print("ETA for ICO's end: " + str(round(self.ends_at()-time.time())) + " seconds.")
-    time.sleep(max(0,self.ends_at()-time.time()))
-    print("ICO ENDS")
+    tokens_sold = self.tokens_sold()
+    sellable_tokens = self.sellable_tokens()
+    if tokens_sold >= sellable_tokens:
+      print("ICO ENDS")
+    else:
+      print("ETA for ICO's end: " + str(self.eta_end_ico()) + " seconds.")
+      time.sleep(max(0, self.eta_end_ico()))
+      print("ICO ENDS")
+
 
   # Crowdsale Contract's functions-----------------------------------------------------------
   def buy(self, buyer, value):
@@ -142,6 +160,9 @@ class Crowdsale:
   def required_signed_address(self):
     return self.contract.functions.requiredSignedAddress().call()
   
+  def sellable_tokens(self):
+    return self.contract.functions.sellable_tokens().call()
+
   def set_early_participant_whitelist(self, addr, status):
     return self.get_transaction_receipt(self.contract.functions.setEarlyParticipantWhitelist(addr, status).transact(self.transaction_info(self.sender_account)))
   
@@ -178,94 +199,3 @@ class Crowdsale:
   def wei_raised(self):
     return self.contract.functions.weiRaised().call()
 
-
-class Token:
-
-  gas = 50000000
-  gas_price = 20000000000
-  params = None
-  
-  # Change ipcPath if needed
-  ipc_path = '/home/coinfabrik/Programming/blockchain/node/geth.ipc'
-  # web3.py instance
-  web3 = Web3(IPCProvider(ipc_path))
-  miner = web3.miner
-  accounts = web3.eth.accounts
-  sender_account = accounts[0]
-  owner = None
-
-  def __init__(self, crowdsale_contract):
-    self.owner = crowdsale_contract.address
-    # Get CrowdsaleToken ABI
-    with open("./build/CrowdsaleToken.abi") as token_abi_file:
-      token_abi = json.load(token_abi_file)
-    
-    token_address = crowdsale_contract.functions.token().call()
-    self.contract = self.web3.eth.contract(address=token_address, abi=token_abi)
-  
-  # Custom functions-------------------------------------------------------------------------
-  def balances(self):
-    for i in self.web3.eth.accounts:
-      print(balance_of(i))
-
-  def get_transaction_receipt(self, tx_hash):
-    self.wait()
-    return self.web3.eth.getTransactionReceipt(tx_hash)
-
-  # Transaction parameter
-  def transaction_info(self, sender, value=0):
-    return {"from": sender, "value": value*(10**18), "gas": self.gas, "gasPrice": self.gas_price}
-
-  def wait(self):
-    block_number = self.web3.eth.blockNumber
-    while self.web3.eth.blockNumber <= (block_number + 1):
-      time.sleep(1)
-
-  # Token Contract's functions---------------------------------------------------------------
-  def add_approval(self, spender, addedValue):
-    return self.contract.functions.addApproval(spender, addedValue).transact(self.transaction_info(self.sender_account))
-  
-  def allowance(self, account, spender):
-    return self.contract.functions.allowance(account, spender).call()
-  
-  def approve(self, spender, value):
-    return self.contract.functions.approve(spender, value).transact(self.transaction_info(self.sender_account))
-  
-  def balance_of(self, investor):
-    if isinstance(investor, str):
-      return self.contract.functions.balanceOf(investor).call()
-    else:
-      return self.contract.functions.balanceOf(self.web3.eth.accounts[investor]).call()
-  
-  def can_upgrade(self):
-    return self.contract.functions.canUpgrade().call()
-  
-  def change_upgrade_master(self, newMaster):
-    return self.contract.functions.changeUpgradeMaster(newMaster).transact(self.transaction_info(self.sender_account))
-  
-  def decimals(self):
-    return self.contract.functions.decimals().call()
-  
-  def enable_lost_and_found(self, agent, tokens, token_contr):
-    return self.contract.functions.enableLostAndFound(agent, tokens, token_contr).transact(self.transaction_info(self.sender_account))
-  
-  def get_upgrade_state(self):
-    return self.contract.functions.getUpgradeState().call()
-  
-  def set_transfer_agent(self, addr, state):
-    return self.get_transaction_receipt(self.contract.functions.setTransferAgent(addr, state).transact(self.transaction_info(self.owner)))
-
-  def sub_approval(self, spender, subtractedValue):
-    return self.contract.functions.subApproval(spender, subtractedValue).transact(self.transaction_info(self.sender_account))
-  
-  def total_supply(self):
-    return self.contract.functions.totalSupply().call()
-  
-  def transfer_agents(self, agent):
-    return self.contract.functions.transferAgents(agent).call()
-
-  def transfer(self, to, value):
-    return self.contract.functions.transfer(to, value).transact(self.transaction_info(self.sender_account))
-  
-  def transferFrom(self, from_addr, to, value):
-    return self.contract.functions.transferFrom(from_addr, to, value).transact(self.transaction_info(self.sender_account))

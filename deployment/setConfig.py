@@ -7,7 +7,8 @@ import time
 import os, errno
 import glob
 import unlock
-from web3 import Web3, IPCProvider
+from web3 import Web3, IPCProvider, HTTPProvider
+from web3.middleware import geth_poa_middleware
 
 if __name__ == '__main__':
   from config import config_f
@@ -26,6 +27,9 @@ params_log_path = "./params_log"
 ipc_path = '/home/coinfabrik/Programming/blockchain/node/geth.ipc'
 # web3.py instance
 web3 = Web3(IPCProvider(ipc_path))
+web3.middleware_stack.inject(geth_poa_middleware, layer=0)
+print(web3.version.node)
+# web3 = Web3(HTTPProvider("http://localhost:8545"))
 miner = web3.miner
 accounts = web3.eth.accounts
 sender_account = accounts[0]
@@ -59,14 +63,12 @@ crowdsale_contract = web3.eth.contract(address=crowdsale_address, abi=crowdsale_
 with open("./build/CrowdsaleToken.abi") as token_abi_file:
   token_abi = json.load(token_abi_file)
 
-def wait():
-  block_number = web3.eth.blockNumber
-  while web3.eth.blockNumber <= (block_number + 1):
+def wait(tx_hash):
+  while web3.eth.getTransactionReceipt(tx_hash) == None:
     time.sleep(1)
 
 # Display configuration parameters, confirm them, write them to json file
-def dump():
-  
+def dump():  
   pending_input = True
   consent = None
   
@@ -126,7 +128,7 @@ def dump():
     json.dump(config, fp, sort_keys=True, indent=2)
 
 if __name__ == '__main__':
-  print("\n\nEnter 'configurate()' to configurate Crowdsale. Returns (token_address, token_contract) tuple.")
+  print("\n\nEnter 'configurate()' to configurate Crowdsale. Returns token_contract object.")
 
 def configurate():
   if __name__ == '__main__':
@@ -134,10 +136,10 @@ def configurate():
   miner.start(1)
   hash_configured_transact = crowdsale_contract.functions.configurationCrowdsale(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]).transact({"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price})
   print("\nConfiguration Tx Hash: " + hash_configured_transact.hex())
-  wait()
+  wait(hash_configured_transact)
   receipt = web3.eth.getTransactionReceipt(hash_configured_transact)
-  print("\nConfiguration successful: " + receipt.status == 1)
+  print("\nConfiguration successful: " + str(receipt.status == 1))
   print("\n" + receipt)
   token_address = crowdsale_contract.functions.token().call()
   token_contract = web3.eth.contract(address=token_address, abi=token_abi)
-  return (token_address, token_contract)
+  return token_contract

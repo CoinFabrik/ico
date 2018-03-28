@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import sys
-from web3 import Web3, IPCProvider
+from web3 import Web3, IPCProvider, HTTPProvider
+from web3.middleware import geth_poa_middleware
 import json
 from address import generate_contract_address
 import unlock
@@ -13,6 +13,9 @@ from datetime import datetime
 ipc_path = '/home/coinfabrik/Programming/blockchain/node/geth.ipc'
 # web3.py instance
 web3 = Web3(IPCProvider(ipc_path))
+web3.middleware_stack.inject(geth_poa_middleware, layer=0)
+print(web3.version.node)
+# web3 = Web3(HTTPProvider("http://localhost:8545"))
 miner = web3.miner
 
 accounts = web3.eth.accounts
@@ -43,10 +46,9 @@ miner.start(1)
 
 # Crowdsale contract deployment
 print("\nDeploying Crowdsale contract")
-tx_hash_crowdsale = crowdsale_contract.deploy(transaction={"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price}, args=None)
+tx_hash_crowdsale = crowdsale_contract.constructor().transact(transaction={"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price})
 
-block_number = web3.eth.blockNumber
-while web3.eth.blockNumber <= (block_number + 1):
+while web3.eth.getTransactionReceipt(tx_hash_crowdsale) == None:
   time.sleep(1)
 
 receipt = web3.eth.getTransactionReceipt(tx_hash_crowdsale)
@@ -55,7 +57,7 @@ print("\nDeployment successful: " + str(receipt.status == 1))
 
 print("\nCrowdsale address: " + crowdsale_address)
 
-print("\nGas used: " + str(receipt.gasUsed))
+print("\nGas used: " + str(receipt.gasUsed) + "\n")
 
 
 # Write json file with crowdsale contract's address into address_log folder -------------------------

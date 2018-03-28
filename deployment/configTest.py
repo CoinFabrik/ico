@@ -28,9 +28,9 @@ def config_t(network):
 
     config['multisig_owners'] = [to_checksum_address("0xf19258256b06324c7516b00bf5c76af001ee1e95")]
 
-    config['startTime'] = int(round(time.time())) + 80
+    config['startTime'] = int(round(time.time())) + 1500
 
-    pre_ico_tranches_start = config['startTime'] - 80
+    pre_ico_tranches_start = config['startTime'] - 1500
 
     pre_ico_tranches_end = config['startTime']
 
@@ -51,7 +51,7 @@ def config_t(network):
       config['tranches'].append(tokens_per_wei[x])
       ico_tranches_end += 60*60*24
 
-    config['endTime'] = ico_tranches_start + 100 # config['tranches'][-2]
+    config['endTime'] = ico_tranches_start + 3500 # config['tranches'][-2]
   else:
     #Main net configuration
     config['startTime'] = int(datetime(2017, 11, 23).timestamp())
