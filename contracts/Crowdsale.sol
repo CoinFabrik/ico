@@ -91,7 +91,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
     token.mint(multisigWallet, toShare);
     token.setMintAgent(address(this), false);
     token.releaseTokenTransfer();
-    token.burn(tokens.balanceOf(address(this)));
+    token.burn(token.balanceOf(address(this)));
     super.finalize();
   }
 
