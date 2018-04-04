@@ -6,37 +6,28 @@ import json
 import time
 import os, errno
 import glob
-import unlock
-from web3 import Web3, IPCProvider, HTTPProvider
-from web3.middleware import geth_poa_middleware
+from unlock import Unlock
+from web3_interface import Web3Interface
 
 if __name__ == '__main__':
   from config import config_f
 else:
-  from configTest import config_t as config_f
+  from config_test import config_t as config_f
 
 
 # Dict of configuration parameters
-token_retriever_account = "0x0F048ff7dE76B83fDC14912246AC4da5FA755cFE"
 config = config_f('privateTestnet')
-config['token_retriever_account'] = token_retriever_account
 params = [config['multisig_owners'][0], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], 525 * (10 ** 5) * (10 ** 18), 525 * (10 ** 5) * (10 ** 18), 18, 525 * (10 ** 5) * (10 ** 18)]
 params_log_path = "./params_log"
 
-# Change ipcPath if needed
-ipc_path = '/home/coinfabrik/Programming/blockchain/node/geth.ipc'
 # web3.py instance
-web3 = Web3(IPCProvider(ipc_path))
-web3.middleware_stack.inject(geth_poa_middleware, layer=0)
-print(web3.version.node)
-# web3 = Web3(HTTPProvider("http://localhost:8545"))
+web3 = Web3Interface(middleware=True).w3
 miner = web3.miner
-accounts = web3.eth.accounts
-sender_account = accounts[0]
+sender_account = web3.eth.accounts[0]
 gas = 50000000
 gas_price = 20000000000
-unlock.web3 = web3
-unlock.unlock()
+unlocker = Unlock()
+unlocker.unlock()
 
 # Get Crowdsale ABI
 with open("./build/Crowdsale.abi") as contract_abi_file:
@@ -91,7 +82,7 @@ def dump():
     )
   
   print("------------------------------------------------------------------------------");
-  print("\nTransaction sender: " + accounts[0],
+  print("\nTransaction sender: " + sender_account,
         "\nGas and Gas price: " + str(gas) + " and " + str(gas_price) + "\n"
   )
   

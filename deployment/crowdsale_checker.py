@@ -1,25 +1,6 @@
 from crowdsale_interface import Crowdsale
 from investor import Investor
-
-def fails(message, tx_receipt):
-  print(message, end='')
-  try:
-    assert tx_receipt.status == 0
-  except Exception as e:
-    print(" ✗✘")
-    raise "Transaction expected to fail succeeded"
-  else:
-    print(" ✓✔")
-
-def succeeds(message, tx_receipt):
-  print(message, end='')
-  try:
-    assert tx_receipt.status == 1
-  except Exception as e:
-    print(" ✗✘")
-    raise "Transaction expected to succeed failed"
-  else:
-    print(" ✓✔")
+from tx_checker import fails, succeeds
 
 class CrowdsaleChecker(Crowdsale):
   requiredCustomerId = False
@@ -30,7 +11,6 @@ class CrowdsaleChecker(Crowdsale):
   investors = []
   ether = 2
 
-
   def __init__(self, params):
     Crowdsale.__init__(self, params)
     self.state = self.states["PendingConfiguration"]
@@ -39,7 +19,10 @@ class CrowdsaleChecker(Crowdsale):
     self.investors.append(Investor(self.accounts[3], False, 0))
     self.investors.append(Investor(self.accounts[4], False, 1))
   
-
+  def set_early_participant_whitelist(self):
+    succeeds("Whitelist Account 1", super().set_early_participant_whitelist(self.accounts[1], True))
+    succeeds("Whitelist Account 2", super().set_early_participant_whitelist(self.accounts[2], True))  
+  
   def require_customer_id(self):
     succeeds("Require Customer ID", super().set_require_customer_id(True))
     self.requiredCustomerId = True

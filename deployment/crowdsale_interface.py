@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 import time
-from web3 import Web3, IPCProvider, HTTPProvider
-from web3.middleware import geth_poa_middleware
+from web3_interface import Web3Interface
 import json
 import glob
 import os
@@ -12,14 +11,9 @@ class Crowdsale:
   gas = 50000000
   gas_price = 20000000000
   params = None
-  
-  # Change ipcPath if needed
-  ipc_path = '/home/coinfabrik/Programming/blockchain/node/geth.ipc'
+    
   # web3.py instance
-  web3 = Web3(IPCProvider(ipc_path))
-  web3.middleware_stack.inject(geth_poa_middleware, layer=0)
-  print(web3.version.node)
-  # web3 = Web3(HTTPProvider("http://localhost:8545"))
+  web3 = Web3Interface("middleware").w3
   miner = web3.miner
   accounts = web3.eth.accounts
   sender_account = accounts[0]
@@ -65,15 +59,15 @@ class Crowdsale:
   def send_ether_to_crowdsale(self, buyer, value):
     return self.get_transaction_receipt(self.web3.eth.sendTransaction({'from': buyer, 'to': self.contract.address, 'value': value, 'gas': 100000000}))
 
-  def eta_ico():
+  def eta_ico(self):
     return round(self.starts_at()-time.time())
 
-  def eta_end_ico():
+  def eta_end_ico(self):
     return round(self.ends_at()-time.time())
 
   def start_ico(self):
-    print("ETA for ICO: " + str(self.eta_ico()) + " seconds.")
-    time.sleep(max(0, self.eta_ico()))
+    print("ETA for ICO: " + str(self.eta_ico() + 1) + " seconds.")
+    time.sleep(max(0, self.eta_ico() + 1))
     print("ICO STARTS")
 
   def end_ico(self):

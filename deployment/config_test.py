@@ -6,6 +6,8 @@ def config_t(network):
 
   config = {}
 
+  config['token_retriever_account'] = "0x0F048ff7dE76B83fDC14912246AC4da5FA755cFE"
+
   tokens_per_wei = [350, 300]
   
   tranches_quantity = len(tokens_per_wei)
@@ -28,9 +30,9 @@ def config_t(network):
 
     config['multisig_owners'] = [to_checksum_address("0xf19258256b06324c7516b00bf5c76af001ee1e95")]
 
-    config['startTime'] = int(round(time.time())) + 1500
+    config['startTime'] = int(round(time.time())) + 15
 
-    pre_ico_tranches_start = config['startTime'] - 1500
+    pre_ico_tranches_start = config['startTime'] - 15
 
     pre_ico_tranches_end = config['startTime']
 
