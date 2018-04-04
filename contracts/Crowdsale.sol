@@ -29,11 +29,9 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
    */
 
   function configurationCrowdsale(address team_multisig, uint start, uint end, address token_retriever, uint[] init_tranches, uint multisig_supply, uint crowdsale_supply, uint8 token_decimals, uint max_tokens_to_sell) public onlyOwner {
-      // Testing values
-      token = new CrowdsaleToken(token_initial_supply, token_decimals, team_multisig, token_retriever);
 
       
-      initial_tokens = token_initial_supply;  
+      initial_tokens = multisig_supply;  
       token = new CrowdsaleToken(multisig_supply, token_decimals, team_multisig, token_retriever);
       // Necessary if assignTokens mints
       token.setMintAgent(address(this), true);
