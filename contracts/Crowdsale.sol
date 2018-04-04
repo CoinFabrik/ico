@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.19;
 
 /**
  * Authored by https://www.coinfabrik.com/
@@ -91,7 +91,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
     token.mint(multisigWallet, toShare);
     token.setMintAgent(address(this), false);
     token.releaseTokenTransfer();
-    token.burn();
+    token.burn(tokens.balanceOf(address(this)));
     super.finalize();
   }
 

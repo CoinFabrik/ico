@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.19;
 
 // Simple deployment information store inside contract storage.
 contract DeploymentInfo {

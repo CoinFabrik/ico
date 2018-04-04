@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.19;
 
 /**
  * Envisioned in FirstBlood ICO contract.
@@ -31,12 +31,12 @@ contract Haltable is Ownable {
   // called by the owner on emergency, triggers stopped state
   function halt() external onlyOwner {
     halted = true;
-    emit Halted(true);
+    Halted(true);
   }
 
   // called by the owner on end of emergency, returns to normal state
   function unhalt() external onlyOwner onlyInEmergency {
     halted = false;
-    emit Halted(false);
+    Halted(false);
   }
 }
