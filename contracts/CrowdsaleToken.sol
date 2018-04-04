@@ -64,6 +64,10 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Los
     return released && super.canUpgrade();
   }
 
+  function burn(uint value) public {
+    burnTokens(msg.sender, value);
+  }
+
   function getLostAndFoundMaster() internal view returns(address) {
     return lost_and_found_master;
   }
