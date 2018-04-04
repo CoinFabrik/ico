@@ -4,7 +4,6 @@ import sys
 from web3 import Web3, IPCProvider
 import json
 from address import generate_contract_address
-import unlock
 import os, errno
 import time
 from datetime import datetime
@@ -13,14 +12,12 @@ from datetime import datetime
 ipc_path = '/home/coinfabrik/Programming/blockchain/node/geth.ipc'
 # web3.py instance
 web3 = Web3(IPCProvider(ipc_path))
-miner = web3.miner
 
 accounts = web3.eth.accounts
 sender_account = accounts[0]
 gas = 50000000
 gas_price = 20000000000
 address_log_path = "./address_log"
-unlock.web3 = web3
 
 # Get Crowdsale ABI
 with open("./build/Crowdsale.abi") as contract_abi_file:
@@ -36,27 +33,9 @@ crowdsale_address = generate_contract_address(sender_account, nonce_crowdsale)
 # Crowdsale instance creation
 crowdsale_contract = web3.eth.contract(address=crowdsale_address, abi=crowdsale_abi, bytecode=crowdsale_bytecode)
 
-# Unlock accounts
-unlock.unlock()
-
-miner.start(1)
-
 # Crowdsale contract deployment
 print("\nDeploying Crowdsale contract")
 tx_hash_crowdsale = crowdsale_contract.deploy(transaction={"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price}, args=None)
-
-block_number = web3.eth.blockNumber
-while web3.eth.blockNumber <= (block_number + 1):
-  time.sleep(1)
-
-receipt = web3.eth.getTransactionReceipt(tx_hash_crowdsale)
-
-print("\nDeployment successful: " + str(receipt.status == 1))
-
-print("\nCrowdsale address: " + crowdsale_address)
-
-print("\nGas used: " + str(receipt.gasUsed))
-
 
 # Write json file with crowdsale contract's address into address_log folder -------------------------
 if __name__ == "__main__":
