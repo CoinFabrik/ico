@@ -28,7 +28,9 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
    * @param token_retriever Address that will handle tokens accidentally sent to the token contract. See the LostAndFoundToken and CrowdsaleToken contracts for further details.
    */
 
-  function configurationCrowdsale(address team_multisig, uint start, uint end, address token_retriever, uint[] init_tranches, uint multisig_supply, uint crowdsale_supply, uint8 token_decimals, uint max_tokens_to_sell) public onlyOwner {
+  function configurationCrowdsale(address team_multisig, uint start, uint end,
+  address token_retriever, uint[] init_tranches, uint multisig_supply, uint crowdsale_supply,
+  uint8 token_decimals, uint max_tokens_to_sell) public onlyOwner {
 
     initial_tokens = multisig_supply;  
     token = new CrowdsaleToken(multisig_supply, token_decimals, team_multisig, token_retriever);
@@ -70,7 +72,8 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
       tokenAmount = sellable_tokens.sub(tokensSold);
     }
 
-    require(token.balanceOf(receiver).add(tokenAmount) >= 100);
+    // Require a minimum contribution of 100 fulltokens
+    require(token.balanceOf(receiver).add(tokenAmount) >= 100.mul(10 ** uint(token.decimals())));
   }
 
   // Implements funding state criterion
@@ -97,7 +100,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
     // Release transfers and burn unsold tokens.
     token.releaseTokenTransfer();
     token.burn(token.balanceOf(address(this)));
-    
+
     super.finalize();
   }
 
@@ -117,8 +120,8 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
   }
 
   function setEndingTime(uint endingTime) public onlyOwner notFinished {
-     require(endingTime > now && endingTime > startsAt);
-     endsAt = endingTime;
+    require(endingTime > now && endingTime > startsAt);
+    endsAt = endingTime;
   }
 
   function updateEursPerEth (uint milieurs_amount) public onlyOwner notFinished {
