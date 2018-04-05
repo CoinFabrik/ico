@@ -15,6 +15,14 @@ def require_customer_id_stage():
   general_check()
   crowdsale_checker.unrequire_customer_id()
 
+def halt_stage():
+  crowdsale_checker.halt()
+  general_check()
+  # ---- Require Customer ID stage
+  require_customer_id_stage()
+  # ---- End Require Customer ID stage
+  crowdsale_checker.unhalt()
+
 
 crowdsale_checker = CrowdsaleChecker(params)
 
@@ -24,17 +32,7 @@ general_check()
 
 # -- Halt stage
 
-crowdsale_checker.halt()
-
-general_check()
-
-# ---- Require Customer ID stage
-
-require_customer_id_stage()
-
-# ---- End Require Customer ID stage
-
-crowdsale_checker.unhalt()
+halt_stage()
 
 # -- End Halt stage
 
@@ -56,17 +54,7 @@ general_check()
 
 # -- Halt stage
 
-crowdsale_checker.halt()
-
-general_check()
-
-# ---- Require Customer ID stage
-
-require_customer_id_stage()
-
-# ---- End Require Customer ID stage
-
-crowdsale_checker.unhalt()
+halt_stage()
 
 # -- End Halt stage
 
@@ -84,17 +72,7 @@ general_check()
 
 # -- Halt stage
 
-crowdsale_checker.halt()
-
-general_check()
-
-# ---- Require Customer ID stage
-
-require_customer_id_stage()
-
-# ---- End Require Customer ID stage
-
-crowdsale_checker.unhalt()
+halt_stage()
 
 # -- End Halt stage
 
@@ -112,17 +90,7 @@ general_check()
 
 # -- Halt stage
 
-crowdsale_checker.halt()
-
-general_check()
-
-# ---- Require Customer ID stage
-
-require_customer_id_stage()
-
-# ---- End Require Customer ID stage
-
-crowdsale_checker.unhalt()
+halt_stage()
 
 # -- End Halt stage
 
