@@ -1,7 +1,7 @@
 #!/usr/bin/python3 -i
 
 import sys
-from web3 import Web3, IPCProvider
+from web3 import Web3, HTTPProvider
 import json
 from address import generate_contract_address
 import os, errno
@@ -9,14 +9,14 @@ import time
 from datetime import datetime
 
 # Change ipc_path if needed
-ipc_path = '/home/coinfabrik/Programming/blockchain/node/geth.ipc'
+ipc_path = '/home/martin/.ethereum/testnet/node/geth.ipc'
 # web3.py instance
-web3 = Web3(IPCProvider(ipc_path))
+web3 = Web3(HTTPProvider("http://localhost:8545"))
 
 accounts = web3.eth.accounts
-sender_account = accounts[0]
-gas = 50000000
-gas_price = 20000000000
+sender_account = accounts[1]
+gas = 5000000
+gas_price = 1500000000
 address_log_path = "./address_log"
 
 # Get Crowdsale ABI

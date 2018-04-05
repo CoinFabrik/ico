@@ -24,9 +24,9 @@ import "./MintableToken.sol";
  */
 contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, LostAndFoundToken {
 
-  string public name = "TokenHome";
+  string public name = "Cryptosolartech";
 
-  string public symbol = "TH";
+  string public symbol = "CST";
 
   uint8 public decimals;
 

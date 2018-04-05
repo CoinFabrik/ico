@@ -7,7 +7,8 @@ import time
 import os, errno
 import glob
 import unlock
-from web3 import Web3, IPCProvider
+from pprint import pprint
+from web3 import Web3, HTTPProvider
 
 if __name__ == '__main__':
 	from config import config_f
@@ -19,18 +20,18 @@ else:
 token_retriever_account = "0x0F048ff7dE76B83fDC14912246AC4da5FA755cFE"
 config = config_f('privateTestnet')
 config['token_retriever_account'] = token_retriever_account
-params = [config['multisig_owners'][0], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], 525 * (10 ** 5) * (10 ** 18), 525 * (10 ** 5) * (10 ** 18), 18, 525 * (10 ** 5) * (10 ** 18)]
+params = [config['MW_address'], config['startTime'], config['endTime'], config['MW_address'], config['tranches'], 252 * (10 ** 5) * (10 ** 18), 1008 * (10 ** 6) * (10 ** 18), 18, 1008 * (10 ** 6) * (10 ** 18)]
 params_log_path = "./params_log"
 
 # Change ipcPath if needed
 ipc_path = '/home/coinfabrik/Programming/blockchain/node/geth.ipc'
 # web3.py instance
-web3 = Web3(IPCProvider(ipc_path))
-miner = web3.miner
+web3 = Web3(HTTPProvider("http://localhost:8545"))
+#miner = web3.miner
 accounts = web3.eth.accounts
-sender_account = accounts[0]
-gas = 50000000
-gas_price = 20000000000
+sender_account = accounts[1]
+gas = 5000000
+gas_price = 1500000000
 unlock.web3 = web3
 unlock.unlock()
 
@@ -53,6 +54,8 @@ crowdsale_address = crowdsale_address_json['crowdsale_address']
 
 # Crowdsale instance creation
 crowdsale_contract = web3.eth.contract(address=crowdsale_address, abi=crowdsale_abi, bytecode=crowdsale_bytecode)
+pprint(crowdsale_contract.functions.__dict__)
+
 
 
 # Get CrowdsaleToken ABI
@@ -74,10 +77,10 @@ def dump():
 	print("\nWeb3 version:", web3.version.api)
 	
 	print(
-	  "\n\nMultisig address:", config['multisig_owners'][0], 
+	  "\n\nMultisig address:", config['MW_address'], 
 	  "\n\nStart time:", time.ctime(config['startTime']),
 	  "\n\nEnd time:", time.ctime(config['endTime']),
-	  "\n\nToken retriever: " + config['token_retriever_account']
+	  "\n\nToken retriever: " + config['MW_address']
 	);
 	
 	for x in range(0,int((len(config['tranches'])/4)-1)):
@@ -89,7 +92,7 @@ def dump():
 	  )
 	
 	print("------------------------------------------------------------------------------");
-	print("\nTransaction sender: " + accounts[0],
+	print("\nTransaction sender: " + accounts[1],
 	      "\nGas and Gas price: " + str(gas) + " and " + str(gas_price) + "\n"
 	)
 	
@@ -131,12 +134,13 @@ if __name__ == '__main__':
 def configurate():
 	if __name__ == '__main__':
 		dump()
-	miner.start(1)
-	hash_configured_transact = crowdsale_contract.functions.configurationCrowdsale(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]).transact({"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price})
+	#miner.start(1)
+	pprint(crowdsale_contract.functions)
+	hash_configured_transact = crowdsale_contract.functions.configurationCrowdsale(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7], params[8]).transact({"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price})
 	print("\nConfiguration Tx Hash: " + hash_configured_transact.hex())
 	wait()
 	receipt = web3.eth.getTransactionReceipt(hash_configured_transact)
-	print("\nConfiguration successful: " + receipt.status == 1)
+	print("\nConfiguration successful: " + str(receipt.status == 1))
 	print("\n" + receipt)
 	token_address = crowdsale_contract.functions.token().call()
 	token_contract = web3.eth.contract(address=token_address, abi=token_abi)

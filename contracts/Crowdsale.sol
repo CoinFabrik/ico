@@ -88,7 +88,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
     //Tokens sold + bounties represent 75% of the total, the other 25% goes ti the multisig to the partners and to regulate market 
     uint sold = tokensSold.add(  initial_tokens);
-    uint toShare = sold.mul(25).div(75).mul(10**uint(token.decimals()));
+    uint toShare = sold.mul(18).div(82).mul(10**uint(token.decimals()));
     token.setMintAgent(address(this), true);
     token.mint(multisigWallet, toShare);
     token.setMintAgent(address(this), false);
