@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 import time
-from web3 import Web3, IPCProvider, HTTPProvider
-from web3.middleware import geth_poa_middleware
+from web3_interface import Web3Interface
 import json
 
 class Token:
@@ -11,13 +10,7 @@ class Token:
   gas_price = 20000000000
   params = None
   
-  # Change ipcPath if needed
-  ipc_path = '/home/coinfabrik/Programming/blockchain/node/geth.ipc'
-  # web3.py instance
-  web3 = Web3(IPCProvider(ipc_path))
-  web3.middleware_stack.inject(geth_poa_middleware, layer=0)
-  print(web3.version.node)
-  # web3 = Web3(HTTPProvider("http://localhost:8545"))
+  web3 = Web3Interface(middleware=True).w3
   miner = web3.miner
   accounts = web3.eth.accounts
   sender_account = accounts[0]

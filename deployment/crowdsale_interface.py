@@ -5,6 +5,7 @@ from web3_interface import Web3Interface
 import json
 import glob
 import os
+from load_contract import ContractLoader
 
 class Crowdsale:
 
@@ -24,24 +25,9 @@ class Crowdsale:
   
   def __init__(self, config_params):
     self.params = config_params
-    # Get Crowdsale ABI
-    with open("./build/Crowdsale.abi") as contract_abi_file:
-      crowdsale_abi = json.load(contract_abi_file)
     
-    # Get Crowdsale Bytecode
-    with open("./build/Crowdsale.bin") as contract_bin_file:
-      crowdsale_bytecode = '0x' + contract_bin_file.read()
-    
-    file_list = glob.glob('./address_log/*')
-    latest_file = max(file_list, key=os.path.getctime)
-    # Get Syndicatev2 address
-    with open(latest_file) as contract_address_file:
-      crowdsale_address_json = json.load(contract_address_file)
-
-    crowdsale_address = crowdsale_address_json['crowdsale_address']
-
-    # Crowdsale instance creation
-    self.contract = self.web3.eth.contract(address=crowdsale_address, abi=crowdsale_abi, bytecode=crowdsale_bytecode)
+    loader = ContractLoader()
+    self.contract = loader.load("./build/", "Crowdsale", address_path="./address_log/")
 
   # Custom functions-------------------------------------------------------------------------
   def get_transaction_receipt(self, tx_hash):

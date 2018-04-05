@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from web3_interface import Web3Interface
 import json
 from address import generate_contract_address
