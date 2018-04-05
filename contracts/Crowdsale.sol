@@ -30,25 +30,24 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
 
   function configurationCrowdsale(address team_multisig, uint start, uint end, address token_retriever, uint[] init_tranches, uint multisig_supply, uint crowdsale_supply, uint8 token_decimals, uint max_tokens_to_sell) public onlyOwner {
 
-      
-      initial_tokens = multisig_supply;  
-      token = new CrowdsaleToken(multisig_supply, token_decimals, team_multisig, token_retriever);
-      // Necessary if assignTokens mints
-      token.setMintAgent(address(this), true);
-      // Necessary if finalize is overriden to release the tokens for public trading.
-      token.setReleaseAgent(address(this));
-      // Necessary for the execution of buy function and of the subsequent CrowdsaleToken's transfer function. 
-      token.setTransferAgent(address(this), true);
-      // Crowdsale mints to himself the initial supply
-      token.mint(address(this), crowdsale_supply);
+    initial_tokens = multisig_supply;  
+    token = new CrowdsaleToken(multisig_supply, token_decimals, team_multisig, token_retriever);
+    // Necessary if assignTokens mints
+    token.setMintAgent(address(this), true);
+    // Necessary if finalize is overriden to release the tokens for public trading.
+    token.setReleaseAgent(address(this));
+    // Necessary for the execution of buy function and of the subsequent CrowdsaleToken's transfer function. 
+    token.setTransferAgent(address(this), true);
+    // Crowdsale mints to himself the initial supply
+    token.mint(address(this), crowdsale_supply);
 
-      sellable_tokens = max_tokens_to_sell;
+    sellable_tokens = max_tokens_to_sell;
 
-      // Configuration functionality for GenericCrowdsale.
-      configurationGenericCrowdsale(team_multisig, start, end);
+    // Configuration functionality for GenericCrowdsale.
+    configurationGenericCrowdsale(team_multisig, start, end);
 
-      // Configuration functionality for TokenTranchePricing.
-      configurationTokenTranchePricing(init_tranches);
+    // Configuration functionality for TokenTranchePricing.
+    configurationTokenTranchePricing(init_tranches);
   }
 
   //token assignation
@@ -62,8 +61,6 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
     uint maxWeiAllowed = sellable_tokens.sub(tokensSold).mul(1 ether).div(tokensPerEth);
     weiAllowed = maxWeiAllowed.min256(weiAmount);
 
-    require(token.balanceOf(receiver).add(weiAllowed) >= 100);
-    
     if (weiAmount < maxWeiAllowed) {
       //Divided by 1000 because eth eth_price_in_eurs is multiplied by 1000
       tokenAmount = tokensPerEth.mul(weiAmount).div(1 ether);
@@ -72,9 +69,11 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
     else {
       tokenAmount = sellable_tokens.sub(tokensSold);
     }
+
+    require(token.balanceOf(receiver).add(tokenAmount) >= 100);
   }
 
-  //TODO: implement to control funding state criterion
+  // Implements funding state criterion
   function isCrowdsaleFull() internal view returns (bool full) {
     return tokensSold >= sellable_tokens;
   }
@@ -86,14 +85,19 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
    * Note that by default tokens are not in a released state.
    */
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
-    //Tokens sold + bounties represent 75% of the total, the other 25% goes ti the multisig to the partners and to regulate market 
-    uint sold = tokensSold.add(  initial_tokens);
-    uint toShare = sold.mul(18).div(82).mul(10**uint(token.decimals()));
+    //Tokens sold + bounties represent 82% of the total, the other 18% goes to the multisig, partners and market making
+    uint sold = tokensSold.add(initial_tokens);
+    uint toShare = sold.mul(18).div(82);
+
+    // Mint the 18% to the multisig
     token.setMintAgent(address(this), true);
     token.mint(multisigWallet, toShare);
     token.setMintAgent(address(this), false);
+
+    // Release transfers and burn unsold tokens.
     token.releaseTokenTransfer();
     token.burn(token.balanceOf(address(this)));
+    
     super.finalize();
   }
 
@@ -104,23 +108,20 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
    */
   function getLostAndFoundMaster() internal view returns (address) {
     return owner;
-
   }
 
   // These two setters are present only to correct timestamps if they are off from their target date by more than, say, a day
   function setStartingTime(uint startingTime) public onlyOwner inState(State.PreFunding) {
-      require(startingTime > now && startingTime < endsAt);
-      startsAt = startingTime;
+    require(startingTime > now && startingTime < endsAt);
+    startsAt = startingTime;
   }
 
   function setEndingTime(uint endingTime) public onlyOwner notFinished {
-       require(endingTime > now && endingTime > startsAt);
-       endsAt = endingTime;
+     require(endingTime > now && endingTime > startsAt);
+     endsAt = endingTime;
   }
 
-
-
-  function updateEursPerEth (uint milieurs_amount) public onlyOwner {
+  function updateEursPerEth (uint milieurs_amount) public onlyOwner notFinished {
     require(milieurs_amount >= 100);
     milieurs_per_eth = milieurs_amount;
   }
