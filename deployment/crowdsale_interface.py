@@ -9,7 +9,7 @@ from load_contract import ContractLoader
 
 class Crowdsale:
 
-  gas = 50000000
+  gas = 5000000
   gas_price = 20000000000
   params = None
     

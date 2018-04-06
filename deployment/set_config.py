@@ -10,21 +10,15 @@ from unlock import Unlock
 from web3_interface import Web3Interface
 from load_contract import ContractLoader
 from config import config_f
-
-if __name__ == '__main__':
-  config = config_f('liveNet')
-else:
-  config = config_f('testNet')
-  unlocker = Unlock()
-  unlocker.unlock()
+import sys
 
 web3 = Web3Interface(middleware=True).w3
 miner = web3.miner
 sender_account = web3.eth.accounts[0]
-gas = 50000000
-gas_price = 20000000000
+gas = 5000000
+gas_price = None
 params_log_path = "./params_log/"
-params = [config['multisig_owners'], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals'], config['max_tokens_to_sell']]
+params = None
 
 loader = ContractLoader()
 
@@ -41,33 +35,27 @@ def wait(tx_hash):
 # Display configuration parameters, confirm them, write them to json file
 def dump():  
   pending_input = True
-  consent = None
-  
+  consent = None  
   # Displaying configuration parameters ----------------------------------------------------------------------------------
-  print("\nWeb3 version:", web3.version.api)
-  
+  print("\nWeb3 version:", web3.version.api)  
   print(
     "\n\nMultisig address:", config['multisig_owners'][0], 
     "\n\nStart time:", time.ctime(config['startTime']),
     "\n\nEnd time:", time.ctime(config['endTime']),
     "\n\nToken retriever: " + config['token_retriever_account']
-  );
-  
+  );  
   for x in range(0,int((len(config['tranches'])/4)-1)):
     print("\nTranche #", x, " -----------------------------------------------------------------",
       "\nFullTokens cap:", int(config['tranches'][4*x]/(10**18)),
       "\nStart:         ", time.ctime(config['tranches'][4*x+1]),
       "\nEnd:           ", time.ctime(config['tranches'][4*x+2]),
       "\nTokens per EUR:", config['tranches'][4*x+3]
-    )
-  
+    )  
   print("------------------------------------------------------------------------------");
   print("\nTransaction sender: " + sender_account,
         "\nGas and Gas price: " + str(gas) + " and " + str(gas_price) + "\n"
-  )
-  
+  )  
   # ----------------------------------------------------------------------------------------------------------------------
-  
   # Validating configuration parameters
   while pending_input:
     consent = input('\nDo you agree with the information? [yes/no]: ')
@@ -94,19 +82,47 @@ def dump():
     json.dump(config, fp, sort_keys=True, indent=2)
 
 def configuration_details(web3, contract, tx_hash):
-  if __name__ == '__main__':
+  if len(sys.argv) == 2:
     wait(tx_hash)
     receipt = web3.eth.getTransactionReceipt(tx_hash)
     print("\nConfiguration successful: " + str(receipt.status == 1))
+    print("\nConfiguration Tx Hash: " + receipt.transactionHash.hex())
+    print("\nGas used: " + str(receipt.gasUsed)  + "\n")
     token_address = contract.functions.token().call()
     token_contract = web3.eth.contract(address=token_address, abi=token_abi)
     return token_contract
 
 def configurate(f):
   config_tx_hash = contract.functions.configurationCrowdsale(*params).transact({"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price})
-  print("\nConfiguration Tx Hash: " + config_tx_hash.hex())
   return f(web3, contract, config_tx_hash)
 
-if __name__ == '__main__':
-  dump()
-  configurate(configuration_details)
+pending_configuration = True
+
+while pending_configuration:
+  try:
+    if __name__ != '__main__':
+      config = config_f('testNet')
+      params = [config['multisig_owners'], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals'], config['max_tokens_to_sell']]
+      unlocker = Unlock()
+      unlocker.unlock()
+      miner.start(1)
+      gas_price = 20000000000
+      pending_configuration = False
+    elif sys.argv[1] == 'test':
+      config = config_f('testNet')
+      params = [config['multisig_owners'], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals'], config['max_tokens_to_sell']]
+      unlocker = Unlock()
+      unlocker.unlock()
+      miner.start(1)
+      gas_price = 20000000000
+      configurate(configuration_details)
+      pending_configuration = False
+    else:
+      print("Enter 'test' as a parameter or no parameter for MainNet configuration")
+  except IndexError:
+    config = config_f('liveNet')
+    params = [config['multisig_owners'], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals'], config['max_tokens_to_sell']]
+    gas_price = input("Enter gas price: ")
+    dump()
+    configurate(configuration_details)
+    pending_configuration = False

@@ -22,7 +22,7 @@ def config_f(network):
     pre_ico_tranches_quantity = 1
     ico_tranches_quantity = tranches_quantity - pre_ico_tranches_quantity
     amounts = list(map(toWei, amounts))
-    config['multisig_owners'] = to_checksum_address("0xf19258256b06324c7516b00bf5c76af001ee1e95")
+    config['multisig_owners'] = "0xF19258256B06324C7516B00bf5C76Af001ee1E95"
     config['startTime'] = int(round(time.time())) + 150
     pre_ico_tranches_start = config['startTime'] - 150
     pre_ico_tranches_end = config['startTime']
@@ -42,7 +42,7 @@ def config_f(network):
       config['tranches'].append(tokens_per_wei[x])
       ico_tranches_end += 60*60*24
 
-    config['endTime'] = ico_tranches_start + 3500 #config['tranches'][len(config['tranches'])-2]
+    config['endTime'] = ico_tranches_start + 3500 # config['tranches'][len(config['tranches'])-2]
   else:
     #Main net configuration
     tokens_per_wei = [410, 390, 370, 350, 340, 330, 320, 310, 300, 290, 280]
