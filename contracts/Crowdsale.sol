@@ -14,7 +14,9 @@ import "./TokenTranchePricing.sol";
 contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, TokenTranchePricing {
   uint public sellable_tokens;
   uint public initial_tokens;
-  uint public milieurs_per_eth; 
+  uint public milieurs_per_eth;
+  // Minimum amounts of tokens that must be bought by an investor
+  uint public minimum_buy_value;
 
   /*
    * The constructor for the crowdsale was removed given it didn't receive any arguments nor had any body.
@@ -32,7 +34,8 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
   address token_retriever, uint[] init_tranches, uint multisig_supply, uint crowdsale_supply,
   uint8 token_decimals, uint max_tokens_to_sell) public onlyOwner {
 
-    initial_tokens = multisig_supply;  
+    initial_tokens = multisig_supply;
+    minimum_buy_value = uint(100).mul(10 ** uint(token_decimals));
     token = new CrowdsaleToken(multisig_supply, token_decimals, team_multisig, token_retriever);
     // Necessary if assignTokens mints
     token.setMintAgent(address(this), true);
@@ -59,12 +62,12 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
 
   //token amount calculation
   function calculateTokenAmount(uint weiAmount, address receiver) internal view returns (uint weiAllowed, uint tokenAmount) {
+    //Divided by 1000 because eth eth_price_in_eurs is multiplied by 1000
     uint tokensPerEth = getCurrentPrice(tokensSold).mul(milieurs_per_eth).div(1000);
     uint maxWeiAllowed = sellable_tokens.sub(tokensSold).mul(1 ether).div(tokensPerEth);
     weiAllowed = maxWeiAllowed.min256(weiAmount);
 
     if (weiAmount < maxWeiAllowed) {
-      //Divided by 1000 because eth eth_price_in_eurs is multiplied by 1000
       tokenAmount = tokensPerEth.mul(weiAmount).div(1 ether);
     }
     // With this case we let the crowdsale end even when there are rounding errors due to the tokens to wei ratio
@@ -73,7 +76,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
     }
 
     // Require a minimum contribution of 100 fulltokens
-    require(token.balanceOf(receiver).add(tokenAmount) >= 100.mul(10 ** uint(token.decimals())));
+    require(token.balanceOf(receiver).add(tokenAmount) >= minimum_buy_value);
   }
 
   // Implements funding state criterion
@@ -115,17 +118,24 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
 
   // These two setters are present only to correct timestamps if they are off from their target date by more than, say, a day
   function setStartingTime(uint startingTime) public onlyOwner inState(State.PreFunding) {
-    require(startingTime > now && startingTime < endsAt);
+    require(now < startingTime && startingTime < endsAt);
     startsAt = startingTime;
   }
 
   function setEndingTime(uint endingTime) public onlyOwner notFinished {
-    require(endingTime > now && endingTime > startsAt);
+    require(now < endingTime && startsAt < endingTime);
     endsAt = endingTime;
   }
 
   function updateEursPerEth (uint milieurs_amount) public onlyOwner notFinished {
     require(milieurs_amount >= 100);
     milieurs_per_eth = milieurs_amount;
+  }
+
+  /**
+   * @param new_minimum New minimum amount of indivisible tokens to be required
+   */
+  function setMinimumBuyValue(uint new_minimum) public onlyOwner notFinished {
+    minimum_buy_value = new_minimum;
   }
 }
