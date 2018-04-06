@@ -14,7 +14,7 @@ def config_f(network):
     return int(ether / price);
 
   tokens_per_eur = list(map(to_tokens, eur_per_fulltokens))
-  
+
   tranches_quantity = len(tokens_per_eur)
 
   amounts = [210000000, 420000000, 630000000, 840000000, 1008000000]
