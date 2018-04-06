@@ -42,10 +42,10 @@ def config_f(network):
   config['max_tokens_to_sell'] = 1008 * (10 ** 6) * ether
 
   tranches_start = [int(datetime.utcnow().timestamp()),
-                  int(datetime(2018, 5, 1, 10, tzinfo = timezone.utc).timestamp()),
-                  int(datetime(2018, 5, 16, 10, tzinfo = timezone.utc).timestamp()),
-                  int(datetime(2018, 5, 31, 10, tzinfo = timezone.utc).timestamp()),
-                  int(datetime(2018, 6, 15, 10, tzinfo = timezone.utc).timestamp())]
+                    int(datetime.utcnow().timestamp()),
+                    int(datetime.utcnow().timestamp()),
+                    int(datetime.utcnow().timestamp()),
+                    int(datetime.utcnow().timestamp())]
 
   tranches_end = [int(datetime(2018, 5, 1, 10, tzinfo = timezone.utc).timestamp()),
                   int(datetime(2018, 5, 16, 10, tzinfo = timezone.utc).timestamp()),
