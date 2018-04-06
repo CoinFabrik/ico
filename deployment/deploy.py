@@ -31,7 +31,7 @@ crowdsale_contract = web3.eth.contract(address=crowdsale_address, abi=crowdsale_
 
 # Crowdsale contract deployment
 print("\nDeploying Crowdsale contract")
-tx_hash_crowdsale = crowdsale_contract.deploy(transaction={"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price, "nonce": 94}, args=None)
+tx_hash_crowdsale = crowdsale_contract.deploy(transaction={"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price}, args=None)
 
 # Write json file with crowdsale contract's address into address_log folder -------------------------
 if __name__ == "__main__":
