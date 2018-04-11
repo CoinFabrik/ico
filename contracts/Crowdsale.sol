@@ -17,6 +17,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
   uint public milieurs_per_eth;
   // Minimum amounts of tokens that must be bought by an investor
   uint public minimum_buy_value;
+  address public price_agent; 
 
   /*
    * The constructor for the crowdsale was removed given it didn't receive any arguments nor had any body.
@@ -43,6 +44,8 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
     token.setReleaseAgent(address(this));
     // Necessary for the execution of buy function and of the subsequent CrowdsaleToken's transfer function. 
     token.setTransferAgent(address(this), true);
+    // Necessary for the execution of buy function and of the subsequent CrowdsaleToken's transfer function. 
+    token.setTransferAgent(team_multisig, true);
     // Crowdsale mints to himself the initial supply
     token.mint(address(this), crowdsale_supply);
 
@@ -127,9 +130,14 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
     endsAt = endingTime;
   }
 
-  function updateEursPerEth (uint milieurs_amount) public onlyOwner notFinished {
+  function updateEursPerEth (uint milieurs_amount) public notFinished {
     require(milieurs_amount >= 100);
+    require(msg.sender == price_agent);
     milieurs_per_eth = milieurs_amount;
+  }
+
+  function updatePriceAgent(address new_price_agent) public onlyOwner notFinished {
+    price_agent = new_price_agent;
   }
 
   /**
