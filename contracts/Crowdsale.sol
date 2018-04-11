@@ -48,6 +48,8 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
     token.setTransferAgent(team_multisig, true);
     // Crowdsale mints to himself the initial supply
     token.mint(address(this), crowdsale_supply);
+    // Necessary if assignTokens mints
+    token.setMintAgent(address(this), false);
 
     sellable_tokens = max_tokens_to_sell;
 
