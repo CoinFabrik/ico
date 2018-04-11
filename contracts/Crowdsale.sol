@@ -44,7 +44,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
     token.setReleaseAgent(address(this));
     // Necessary for the execution of buy function and of the subsequent CrowdsaleToken's transfer function. 
     token.setTransferAgent(address(this), true);
-    // Necessary for the execution of buy function and of the subsequent CrowdsaleToken's transfer function. 
+    // Necessary for the delivery of bounties 
     token.setTransferAgent(team_multisig, true);
     // Crowdsale mints to himself the initial supply
     token.mint(address(this), crowdsale_supply);
