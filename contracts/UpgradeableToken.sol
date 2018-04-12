@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.19;
 
 /**
  * First envisioned by Golem and Lunyr projects.
@@ -73,7 +73,7 @@ contract UpgradeableToken is EIP20Token, Burnable {
     burnTokens(msg.sender, value);
     totalUpgraded = totalUpgraded.add(value);
 
-    emit Upgrade(msg.sender, upgradeAgent, value);
+    Upgrade(msg.sender, upgradeAgent, value);
   }
 
   /**
@@ -94,7 +94,7 @@ contract UpgradeableToken is EIP20Token, Burnable {
     // Make sure that token supplies match in source and target
     require(upgradeAgent.originalSupply() == totalSupply());
 
-    emit UpgradeAgentSet(upgradeAgent);
+    UpgradeAgentSet(upgradeAgent);
   }
 
   /**

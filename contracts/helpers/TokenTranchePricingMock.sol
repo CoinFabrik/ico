@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.18;
 
 import "../TokenTranchePricing.sol";
 
@@ -7,9 +7,5 @@ contract TokenTranchePricingMock is TokenTranchePricing {
 
   function getCurrentPriceMock(uint tokensSold) public view returns (uint result) {
     return super.getCurrentPrice(tokensSold);
-  }
-
-  function configurateTokenTranchePricingMock(uint[] init_tranches) public {
-  	super.configurationTokenTranchePricing(init_tranches);
   }
 }

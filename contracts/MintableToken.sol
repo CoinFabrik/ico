@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.19;
 
 /**
  * Originally from https://github.com/TokenMarketNet/ico
@@ -53,7 +53,7 @@ contract MintableToken is Mintable, Ownable {
    */
   function setMintAgent(address addr, bool state) onlyOwner canMint public {
     mintAgents[addr] = state;
-    emit MintingAgentChanged(addr, state);
+    MintingAgentChanged(addr, state);
   }
 
   modifier onlyMintAgent() {

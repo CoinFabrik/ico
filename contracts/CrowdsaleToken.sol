@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.19;
 
 /**
  * Originally from https://github.com/TokenMarketNet/ico
@@ -24,9 +24,9 @@ import "./MintableToken.sol";
  */
 contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, LostAndFoundToken {
 
-  string public name = "BurgerKoenig";
+  string public name = "Cryptosolartech";
 
-  string public symbol = "BK";
+  string public symbol = "CST";
 
   uint8 public decimals;
 
@@ -62,6 +62,10 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Los
    */
   function canUpgrade() public view returns(bool) {
     return released && super.canUpgrade();
+  }
+
+  function burn(uint value) public {
+    burnTokens(msg.sender, value);
   }
 
   function getLostAndFoundMaster() internal view returns(address) {

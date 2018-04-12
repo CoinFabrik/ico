@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.19;
 
 /**
  * Authored by https://www.coinfabrik.com/
@@ -12,7 +12,7 @@ contract Mintable {
 
   /**
    * @dev Mints tokens for an account
-   * This function should emit the Minted event.
+   * This function should the Minted event.
    */
   function mintInternal(address receiver, uint amount) internal;
 

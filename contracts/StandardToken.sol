@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.19;
 
 /**
  * Originally from https://github.com/OpenZeppelin/zeppelin-solidity
@@ -34,7 +34,7 @@ contract StandardToken is EIP20Token, Burnable, Mintable {
   function transfer(address to, uint value) public returns (bool success) {
     balances[msg.sender] = balances[msg.sender].sub(value);
     balances[to] = balances[to].add(value);
-    emit Transfer(msg.sender, to, value);
+    Transfer(msg.sender, to, value);
     return true;
   }
 
@@ -63,7 +63,7 @@ contract StandardToken is EIP20Token, Burnable, Mintable {
     balances[from] = balances[from].sub(value);
     balances[to] = balances[to].add(value);
     allowed[from][msg.sender] = allowance.sub(value);
-    emit Transfer(from, to, value);
+    Transfer(from, to, value);
     return true;
   }
 
@@ -81,7 +81,7 @@ contract StandardToken is EIP20Token, Burnable, Mintable {
     require (value == 0 || allowed[msg.sender][spender] == 0);
 
     allowed[msg.sender][spender] = value;
-    emit Approval(msg.sender, spender, value);
+    Approval(msg.sender, spender, value);
     return true;
   }
 
@@ -104,7 +104,7 @@ contract StandardToken is EIP20Token, Burnable, Mintable {
   function addApproval(address spender, uint addedValue) public returns (bool success) {
       uint oldValue = allowed[msg.sender][spender];
       allowed[msg.sender][spender] = oldValue.add(addedValue);
-      emit Approval(msg.sender, spender, allowed[msg.sender][spender]);
+      Approval(msg.sender, spender, allowed[msg.sender][spender]);
       return true;
   }
 
@@ -122,7 +122,7 @@ contract StandardToken is EIP20Token, Burnable, Mintable {
       } else {
           allowed[msg.sender][spender] = oldVal.sub(subtractedValue);
       }
-      emit Approval(msg.sender, spender, allowed[msg.sender][spender]);
+      Approval(msg.sender, spender, allowed[msg.sender][spender]);
       return true;
   }
 
@@ -132,8 +132,8 @@ contract StandardToken is EIP20Token, Burnable, Mintable {
   function burnTokens(address account, uint value) internal {
     balances[account] = balances[account].sub(value);
     total_supply = total_supply.sub(value);
-    emit Transfer(account, 0, value);
-    emit Burned(account, value);
+    Transfer(account, 0, value);
+    Burned(account, value);
   }
 
   /**
@@ -142,12 +142,12 @@ contract StandardToken is EIP20Token, Burnable, Mintable {
   function mintInternal(address receiver, uint amount) internal {
     total_supply = total_supply.add(amount);
     balances[receiver] = balances[receiver].add(amount);
-    emit Minted(receiver, amount);
+    Minted(receiver, amount);
 
     // Beware: Address zero may be used for special transactions in a future fork.
     // This will make the mint transaction appear in EtherScan.io
     // We can remove this after there is a standardized minting event
-    emit Transfer(0, receiver, amount);
+    Transfer(0, receiver, amount);
   }
   
 }

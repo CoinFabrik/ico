@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.19;
 
 /**
  * Originally from https://github.com/TokenMarketNet/ico
@@ -197,7 +197,7 @@ contract GenericCrowdsale is Haltable {
 
     assignTokens(receiver, tokenAmount);
     // Tell us that the investment was completed successfully
-    emit Invested(receiver, weiAmount, tokenAmount, customerId);
+    Invested(receiver, weiAmount, tokenAmount, customerId);
   }
 
   /**
@@ -266,7 +266,7 @@ contract GenericCrowdsale is Haltable {
    */
   function finalize() public inState(State.Success) onlyOwner stopInEmergency {
     finalized = true;
-    emit Finalized();
+    Finalized();
   }
 
   /**
@@ -275,7 +275,7 @@ contract GenericCrowdsale is Haltable {
    */
   function setRequireCustomerId(bool value) public onlyOwner {
     requireCustomerId = value;
-    emit InvestmentPolicyChanged(requireCustomerId, requiredSignedAddress, signerAddress);
+    InvestmentPolicyChanged(requireCustomerId, requiredSignedAddress, signerAddress);
   }
 
   /**
@@ -287,7 +287,7 @@ contract GenericCrowdsale is Haltable {
   function setRequireSignedAddress(bool value, address signer) public onlyOwner {
     requiredSignedAddress = value;
     signerAddress = signer;
-    emit InvestmentPolicyChanged(requireCustomerId, requiredSignedAddress, signerAddress);
+    InvestmentPolicyChanged(requireCustomerId, requiredSignedAddress, signerAddress);
   }
 
   /**
@@ -295,7 +295,7 @@ contract GenericCrowdsale is Haltable {
    */
   function setEarlyParticipantWhitelist(address addr, bool status) public onlyOwner notFinished stopInEmergency {
     earlyParticipantWhitelist[addr] = status;
-    emit Whitelisted(addr, status);
+    Whitelisted(addr, status);
   }
 
   /**
