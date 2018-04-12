@@ -73,6 +73,7 @@ class CrowdsaleChecker(Crowdsale):
       self.state = self.states["PreFunding"]
     else:
       fails("Configuration of Crowdsale fails", super().configuration_crowdsale())
+    print("ETA for ICO: " + str(super().eta_ico() + 1) + " seconds.")
   
   def try_preallocate(self):
     for investor in self.investors:

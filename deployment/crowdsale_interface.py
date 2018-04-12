@@ -62,8 +62,8 @@ class Crowdsale:
     if tokens_sold >= sellable_tokens:
       print("ICO ENDS")
     else:
-      print("ETA for ICO's end: " + str(self.eta_end_ico()) + " seconds.")
-      time.sleep(max(0, self.eta_end_ico()))
+      print("ETA for ICO's end: " + str(self.eta_end_ico() + 1) + " seconds.")
+      time.sleep(max(0, self.eta_end_ico() + 1))
       print("ICO ENDS")
 
 
@@ -87,7 +87,7 @@ class Crowdsale:
     return self.get_transaction_receipt(self.contract.functions.buyWithSignedAddress(customerId, v, r, s).transact(self.transaction_info(buyer, value)))
   
   def configuration_crowdsale(self):
-    return self.get_transaction_receipt(self.contract.functions.configurationCrowdsale(self.params[0], self.params[1], self.params[2], self.params[3], self.params[4], self.params[5], self.params[6], self.params[7], self.params[8]).transact({"from": self.sender_account, "value": 0, "gas": self.gas, "gasPrice": self.gas_price}))
+    return self.get_transaction_receipt(self.contract.functions.configurationCrowdsale(*self.params).transact({"from": self.sender_account, "value": 0, "gas": self.gas, "gasPrice": self.gas_price}))
 
   def configured(self):
     return self.contract.functions.configured().call()

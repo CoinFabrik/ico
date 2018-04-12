@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import crowdsale_deployment
-from set_config import params
+from configurate import c
 from crowdsale_checker import CrowdsaleChecker
 
 def general_check():
@@ -11,93 +11,51 @@ def general_check():
   crowdsale_checker.try_preallocate()
 
 def require_customer_id_stage():
+  print("----Require Customer ID Stage")
   crowdsale_checker.require_customer_id()
   general_check()
   crowdsale_checker.unrequire_customer_id()
+  print("----End Require Customer ID Stage")
 
 def halt_stage():
+  print("--Halt Stage")
   crowdsale_checker.halt()
   general_check()
-  # ---- Require Customer ID stage
   require_customer_id_stage()
-  # ---- End Require Customer ID stage
   crowdsale_checker.unhalt()
+  print("--End Halt Stage")
 
+def all_checks_and_stages():
+  general_check()
+  halt_stage()
+  require_customer_id_stage()
 
-crowdsale_checker = CrowdsaleChecker(params)
+crowdsale_checker = CrowdsaleChecker(c)
 
-# Pre-ico before configuration stage --------------------------------------------------------
+print("Pre-ICO before configuration stage")
 
-general_check()
+all_checks_and_stages()
 
-# -- Halt stage
-
-halt_stage()
-
-# -- End Halt stage
-
-# -- Require Customer ID stage
-
-require_customer_id_stage()
-
-# -- End Require Customer ID stage
-
-# End Pre-ico before configuration stage -----------------------------------------------
+print("End Pre-ICO before configuration stage")
 
 crowdsale_checker.try_configuration_crowdsale()
 
 crowdsale_checker.set_early_participant_whitelist()
 
-# Pre-ico after configuration stage ---------------------------------------------------------
+print("Pre-ico after configuration stage")
 
-general_check()
-
-# -- Halt stage
-
-halt_stage()
-
-# -- End Halt stage
-
-# -- Require Customer ID stage
-
-require_customer_id_stage()
-
-# -- End Require Customer ID stage
+all_checks_and_stages()
 
 crowdsale_checker.start_ico()
 
-# ICO stage ---------------------------------------------------------------------------------
+print("ICO Stage")
 
-general_check()
-
-# -- Halt stage
-
-halt_stage()
-
-# -- End Halt stage
-
-# -- Require Customer ID stage
-
-require_customer_id_stage()
-
-# -- End Require Customer ID stage
+all_checks_and_stages()
 
 crowdsale_checker.end_ico()
 
-# End ICO stage -----------------------------------------------------------------------------
+print("End ICO Stage")
 
-general_check()
-
-# -- Halt stage
-
-halt_stage()
-
-# -- End Halt stage
-
-# -- Require Customer ID stage
-
-require_customer_id_stage()
-
-# -- End Require Customer ID stage
+all_checks_and_stages()
 
 miner.stop()

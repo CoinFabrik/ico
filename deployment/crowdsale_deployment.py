@@ -7,6 +7,13 @@ import os, errno
 from datetime import datetime
 from deployer import Deployer
 import sys
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-n", "--network", default="testnet")
+parser.add_argument("-p", "--provider", default="http")
+parser.add_argument("-t", "--test", action="store_true")
+args = parser.parse_args()
 
 # web3.py instance
 web3 = Web3Interface(middleware=True).w3
@@ -17,28 +24,18 @@ gas = 5000000
 address_log_path = "./address_log/"
 compiled_path = "./build/"
 
+if args.test:
+  unlocker.unlock()
+  miner.start(1)
+  contract_name = "Crowdsale"
+  gas_price = 20000000000
+else:
+  contract_name = input("\nEnter contract's name: ")
+  gas_price = input("\nEnter gas price: ")
+
 pending_configuration = True
 
-while pending_configuration:
-  try:
-    if __name__ != '__main__' or sys.argv[1] == 'test':
-      unlocker.unlock()
-      miner.start(1)
-      contract_name = "Crowdsale"
-      gas_price = 20000000000
-      pending_configuration = False
-    else:
-      print("Enter 'test' as a parameter or no parameter for MainNet deployment")
-  except IndexError:
-    contract_name = input("\nEnter contract's name: ")
-    gas_price = input("\nEnter gas price: ")
-    pending_configuration = False
-
-if compiled_path[len(compiled_path)-1] != "/":
-  compiled_path += "/"
-
 deployer = Deployer()
-
 print("\nDeploying contract...")
 (crowdsale_contract, receipt) = deployer.deploy(compiled_path, contract_name, sender_account, {"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price},)
 

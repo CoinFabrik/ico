@@ -1,16 +1,37 @@
-from web3 import Web3, IPCProvider
+from web3 import Web3
 from web3.middleware import geth_poa_middleware
+import argparse
+import json
 
 class Web3Interface:
+  parser = argparse.ArgumentParser()
+  parser.add_argument("-n", "--network", default="testnet")
+  parser.add_argument("-p", "--provider", default="http")
+  parser.add_argument("-t", "--test", action="store_true")
+  args = parser.parse_args()
   
-  ipc_path = None
+  with open("networks.json") as networks_file:
+    networks = json.load(networks_file)
+
+  provider_param = None
   w3 = None
+  ip = None
+  port = None
 
   def __init__(self, middleware=False):
-    # Change ipc_path if needed
-    self.ipc_path = '/home/coinfabrik/Programming/blockchain/node/geth.ipc'
-    # web3.py instance
-    self.w3 = Web3(IPCProvider(self.ipc_path))
-    # self.w3 = Web3(HTTPProvider("http://localhost:8545"))
+    try:
+      if self.args.provider == "ipc":
+        self.provider_param = self.networks[self.args.network][self.args.provider]["path"]
+        self.w3 = Web3(Web3.IPCProvider(self.provider_param))
+      elif self.args.provider == "ws":
+        self.provider_param = self.args.provider + "://" + self.networks[self.args.network][self.args.provider]["host"] + ":" + str(self.networks[self.args.network][self.args.provider]["port"])
+        self.w3 = Web3(Web3.WebsocketProvider(self.provider_param))
+      else:
+        self.provider_param = self.args.provider + "://" + self.networks[self.args.network][self.args.provider]["host"] + ":" + str(self.networks[self.args.network][self.args.provider]["port"])
+        self.w3 = Web3(Web3.HTTPProvider(self.provider_param))
+    except IndexError:
+      print("IndexError")
+      pass
+
     if middleware:
       self.w3.middleware_stack.inject(geth_poa_middleware, layer=0)
