@@ -1,6 +1,7 @@
 from crowdsale_interface import Crowdsale
 from investor import Investor
 from tx_checker import fails, succeeds
+import time
 
 class CrowdsaleChecker(Crowdsale):
   requiredCustomerId = False
@@ -83,8 +84,18 @@ class CrowdsaleChecker(Crowdsale):
       else:
         fails("Preallocate fails", tx_receipt)
   
+  def try_set_starting_time(self, starting_time):
+    if self.state == self.states["PreFunding"] and int(round(time.time())) < starting_time and starting_time < super().ends_at():
+      succeeds("Set starting time succeeds", super().set_starting_time(starting_time))
+    else:
+      fails("Set starting time fails", super().set_starting_time(starting_time))
   
-  
+  def try_set_ending_time(self, ending_time):
+    if (self.state == self.states["PreFunding"] or self.state == self.states["Funding"]) and int(round(time.time())) < ending_time and super().starts_at() < ending_time:
+      succeeds("Set starting time succeeds", super().set_ending_time(ending_time))
+    else:
+      fails("Set starting time fails", super().set_ending_time(ending_time))
+
   # Buy functions
   def send_ether(self, buyer):
     tx_receipt = super().send_ether_to_crowdsale(buyer.address, self.ether)

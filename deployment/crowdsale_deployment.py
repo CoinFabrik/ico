@@ -33,8 +33,6 @@ else:
   contract_name = input("\nEnter contract's name: ")
   gas_price = input("\nEnter gas price: ")
 
-pending_configuration = True
-
 deployer = Deployer()
 print("\nDeploying contract...")
 (crowdsale_contract, receipt) = deployer.deploy(compiled_path, contract_name, sender_account, {"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price},)
@@ -44,9 +42,9 @@ print("Deployment successful: " + str(receipt.status == 1),
       "\nCrowdsale address: " + crowdsale_contract.address,
       "\nGas used: " + str(receipt.gasUsed) + "\n")
 
-def write_to_address_log(address_log_path):
+def write_to_address_log(address_log_path, test):
   # Write json file with contract's address into address_log folder
-  if args:
+  if test:
     deployment_name = "test"
   else:
     deployment_name = input('Enter name of deployment: ')
@@ -66,4 +64,4 @@ def write_to_address_log(address_log_path):
   with open(file_path_name_w_ext, 'w') as fp:
     json.dump(address_for_file, fp, sort_keys=True, indent=2)
 
-write_to_address_log(address_log_path)
+write_to_address_log(address_log_path, args.test)

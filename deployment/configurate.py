@@ -106,7 +106,8 @@ if args.test:
   unlocker.unlock()
   miner.start(1)
   gas_price = 20000000000
-  configurate(args.test)
+  if __name__ == '__main__':
+    configurate(args.test)
 else:
   config = config_f()
   c = [config['MW_address'], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals'], config['max_tokens_to_sell']]
