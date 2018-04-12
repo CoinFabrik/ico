@@ -1,0 +1,82 @@
+{
+  "liveNet": {
+    "ws": {
+      "host": "localhost",
+      "port": 8546,
+      "network_id": "1",
+      "gas": 5000000,
+      "gasPrice": 20000000000
+    },
+    "http": {
+      "host": "localhost",
+      "port": 8545,
+      "network_id": "1",
+      "gas": 5000000,
+      "gasPrice": 20000000000
+    }
+  },
+  "ropsten": {
+    "ws": {
+      "host": "localhost",
+      "port": 8546,
+      "network_id": "3",
+      "gas": 5000000,
+      "gasPrice": 20000000000
+    },
+    "http": {
+      "host": "localhost",
+      "port": 8545,
+      "network_id": "3",
+      "gas": 5000000,
+      "gasPrice": 20000000000
+    }
+  },
+  "testrpc": {
+    "ws": {
+      "host": "localhost",
+      "port": 8546,
+      "network_id": "58342",
+      "gas": 5000000,
+      "gasPrice": 20000000000
+    },
+    "http": {
+      "host": "localhost",
+      "port": 8545,
+      "network_id": "58342",
+      "gas": 5000000,
+      "gasPrice": 20000000000
+    },
+    "ipc": {
+      "host": "localhost",
+      "port": 8545,
+      "network_id": "58342",
+      "path": "/home/coinfabrik/Programming/blockchain/node/geth.ipc",
+      "gas": 5000000,
+      "gasPrice": 20000000000
+    }
+  },
+  "testnet": {
+    "ws": {
+      "host": "localhost",
+      "port": 8546,
+      "network_id": "58342",
+      "gas": 5000000,
+      "gasPrice": 20000000000
+    },
+    "http": {
+      "host": "localhost",
+      "port": 8545,
+      "network_id": "58342",
+      "gas": 5000000,
+      "gasPrice": 20000000000
+    },
+    "ipc": {
+      "host": "localhost",
+      "port": 8545,
+      "network_id": "58342",
+      "path": "/home/coinfabrik/Programming/blockchain/node/geth.ipc",
+      "gas": 5000000,
+      "gasPrice": 20000000000
+    }
+  }
+}
