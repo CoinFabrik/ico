@@ -46,10 +46,9 @@ print("Deployment successful: " + str(receipt.status == 1),
 
 def write_to_address_log(address_log_path):
   # Write json file with contract's address into address_log folder
-  try:
-    if __name__ != "__main__" or sys.argv[1] == 'test':
-      deployment_name = "test"
-  except IndexError:
+  if args:
+    deployment_name = "test"
+  else:
     deployment_name = input('Enter name of deployment: ')
   
   local_time = datetime.now()

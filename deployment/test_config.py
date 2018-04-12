@@ -1,44 +1,43 @@
 import time
+from datetime import datetime, timezone
+from eth_utils import to_checksum_address
 
 def config_f():
-  def toWei(x):
-    return x*(10**18)
-
   config = {}
-  config['tranches'] = []
-  config['max_tokens_to_sell'] = 525 * (10 ** 5) * (10 ** 18)
-  config['token_decimals'] = 18
-  config['crowdsale_supply'] = 525 * (10 ** 5) * (10 ** 18)
-  config['multisig_supply'] = 525 * (10 ** 5) * (10 ** 18)
-
-  #Values for testing purposes only
-  config['token_retriever_account'] = "0x0F048ff7dE76B83fDC14912246AC4da5FA755cFE"
-  tokens_per_wei = [350, 300]
-  tranches_quantity = len(tokens_per_wei)
-  amounts = [3500000, 10500000]
-  pre_ico_tranches_quantity = 1
-  ico_tranches_quantity = tranches_quantity - pre_ico_tranches_quantity
+  ether = 10 ** 18
+  eur_per_fulltokens = [0.05, 0.06, 0.07, 0.08, 0.10]
+  def to_tokens(price):
+    return int(ether / price);
+  tokens_per_eur = list(map(to_tokens, eur_per_fulltokens))
+  tranches_quantity = len(tokens_per_eur)
+  amounts = [210000000, 420000000, 630000000, 840000000, 1008000000]
+  ico_tranches_quantity = len(amounts)
+  def toWei(x):
+    return x*ether
   amounts = list(map(toWei, amounts))
-  config['multisig_owners'] = "0xF19258256B06324C7516B00bf5C76Af001ee1E95"
-  config['startTime'] = int(round(time.time())) + 860
-  pre_ico_tranches_start = config['startTime'] - 860
-  pre_ico_tranches_end = config['startTime']
-  ico_tranches_start = config['startTime']
-  ico_tranches_end = ico_tranches_start + 60 * 60 * 24 * 2
-
-  for x in range(pre_ico_tranches_quantity):
+  assert len(amounts) == len(eur_per_fulltokens),  "Fails lengths"
+  config['tranches'] = []
+  config['startTime'] = int(datetime(2018, 4, 16, 10, tzinfo = timezone.utc).timestamp())
+  config['endTime'] = int(datetime(2018, 7, 14, 10, tzinfo = timezone.utc).timestamp())
+  config['MW_address'] = to_checksum_address("0x93C4a8ed12BAb494bc3045380EE1CfC07507D234")
+  config['token_retriever_account'] = to_checksum_address('0x54d9249C776C56520A62faeCB87A00E105E8c9Dc')
+  config['multisig_supply'] = 252 * (10 ** 5) * ether
+  config['crowdsale_supply'] = 1008 * (10 ** 6) * ether
+  config['token_decimals'] = 18
+  config['max_tokens_to_sell'] = 1008 * (10 ** 6) * ether
+  tranches_start = [int(datetime.utcnow().timestamp()),
+                    int(datetime.utcnow().timestamp()),
+                    int(datetime.utcnow().timestamp()),
+                    int(datetime.utcnow().timestamp()),
+                    int(datetime.utcnow().timestamp())]
+  tranches_end = [int(datetime(2018, 5, 1, 10, tzinfo = timezone.utc).timestamp()),
+                  int(datetime(2018, 5, 16, 10, tzinfo = timezone.utc).timestamp()),
+                  int(datetime(2018, 5, 31, 10, tzinfo = timezone.utc).timestamp()),
+                  int(datetime(2018, 6, 15, 10, tzinfo = timezone.utc).timestamp()),
+                  config['endTime']]
+  for x in range(0, tranches_quantity):
     config['tranches'].append(amounts[x])
-    config['tranches'].append(pre_ico_tranches_start)
-    config['tranches'].append(pre_ico_tranches_end)
-    config['tranches'].append(tokens_per_wei[x])
-
-  for x in range(pre_ico_tranches_quantity, tranches_quantity):
-    config['tranches'].append(amounts[x])
-    config['tranches'].append(ico_tranches_start)
-    config['tranches'].append(ico_tranches_end)
-    config['tranches'].append(tokens_per_wei[x])
-    ico_tranches_end += 60*60*24
-
-  config['endTime'] = ico_tranches_start + 400 # config['tranches'][len(config['tranches'])-2]
-
+    config['tranches'].append(tranches_start[x])
+    config['tranches'].append(tranches_end[x])
+    config['tranches'].append(tokens_per_eur[x])
   return config
