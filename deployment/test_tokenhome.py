@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 import crowdsale_deployment
-from configurate import c
+from configurate import config, sender_account
 from crowdsale_checker import CrowdsaleChecker
 import time
 
-starting_time = int(round(time.time())) + 60
-ending_time = int(round(time.time())) + 200
+starting_time = int(round(time.time())) + 1
+ending_time = int(round(time.time())) + 460
 
 def general_check():
   crowdsale_checker.check_state()
@@ -36,15 +36,20 @@ def all_checks_and_stages():
 
 crowdsale_checker = CrowdsaleChecker(c)
 
-crowdsale_checker.check_state()
-crowdsale_checker.try_finalize()
-crowdsale_checker.try_preallocate()
+all_checks_and_stages()
 
 crowdsale_checker.try_configuration_crowdsale()
-crowdsale_checker.set_early_participant_whitelist()
 
+crowdsale_checker.try_set_starting_time(int(round(time.time())) + 3)
 crowdsale_checker.start_ico()
 
+crowdsale_checker.try_update_price_agent(sender_account)
+crowdsale_checker.try_update_eurs_per_eth(3728700, sender_account)
+crowdsale_checker.try_set_minimum_buy_value(0)
+
+all_checks_and_stages()
+
+crowdsale_checker.try_set_ending_time(int(round(time.time())) + 3)
 crowdsale_checker.end_ico()
 
-miner.stop()
+all_checks_and_stages()

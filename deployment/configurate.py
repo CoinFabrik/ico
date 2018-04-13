@@ -19,9 +19,11 @@ parser.add_argument("-t", "--test", action="store_true")
 args = parser.parse_args()
 
 if args.test:
-  from test_config import config_f
+  from test_config2 import config_f
 else:
   from client_config import config_f
+config = config_f()
+c = [config['MW_address'], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals'], config['max_tokens_to_sell']]
 
 web3 = Web3Interface(middleware=True).w3
 miner = web3.miner
@@ -99,9 +101,8 @@ def configurate(test):
   else:
     return "\nConfiguration Tx Hash: " + config_tx_hash
 
+
 if args.test:
-  config = config_f()
-  c = [config['MW_address'], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals'], config['max_tokens_to_sell']]
   unlocker = Unlock()
   unlocker.unlock()
   miner.start(1)
@@ -109,8 +110,6 @@ if args.test:
   if __name__ == '__main__':
     configurate(args.test)
 else:
-  config = config_f()
-  c = [config['MW_address'], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals'], config['max_tokens_to_sell']]
   gas_price = input("Enter gas price: ")
   dump()
   configurate(args.test)

@@ -25,7 +25,6 @@ class Crowdsale:
   
   def __init__(self, config_params):
     self.params = config_params
-    
     loader = ContractLoader()
     self.contract = loader.load("./build/", "Crowdsale", address_path="./address_log/")
 
@@ -87,7 +86,8 @@ class Crowdsale:
     return self.get_transaction_receipt(self.contract.functions.buyWithSignedAddress(customerId, v, r, s).transact(self.transaction_info(buyer, value)))
   
   def configuration_crowdsale(self):
-    return self.get_transaction_receipt(self.contract.functions.configurationCrowdsale(*self.params).transact({"from": self.sender_account, "value": 0, "gas": self.gas, "gasPrice": self.gas_price}))
+    param_list = [self.params['MW_address'], self.params['startTime'], self.params['endTime'], self.params['token_retriever_account'], self.params['tranches'], self.params['multisig_supply'], self.params['crowdsale_supply'], self.params['token_decimals'], self.params['max_tokens_to_sell']]
+    return self.get_transaction_receipt(self.contract.functions.configurationCrowdsale(*param_list).transact({"from": self.sender_account, "value": 0, "gas": self.gas, "gasPrice": self.gas_price}))
 
   def configured(self):
     return self.contract.functions.configured().call()
@@ -104,6 +104,9 @@ class Crowdsale:
   def finalized(self):
     return self.contract.functions.finalized().call()
   
+  def get_current_price(self):
+    return self.get_transaction_receipt(self.contract.functions.getCurrentPrice(self.tokens_sold()).transact(self.transaction_info(self.sender_account)))
+
   def get_deployment_block(self):
     return self.contract.functions.getDeploymentBlock().call()
   
@@ -119,15 +122,24 @@ class Crowdsale:
   def halted(self):
     return self.contract.functions.halted().call()
   
+  def initial_bounties_tokens(self):
+    return self.contract.functions.initial_tokens().call()
+
   def invested_amount_of(self):
     return self.contract.functions.investedAmountOf().call()
   
   def investor_count(self):
     return self.contract.functions.investorCount().call()
   
+  def milieurs_per_eth(self):
+    return self.contract.functions.milieurs_per_eth().call()
+
   def multisig_wallet(self):
     return self.contract.functions.multisigWallet().call()
   
+  def minimum_buy_value(self):
+    return self.contract.functions.minimum_buy_value().call()
+
   def owner(self):
     return self.contract.functions.owner().call()
   

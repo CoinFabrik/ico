@@ -2,6 +2,7 @@ from crowdsale_interface import Crowdsale
 from investor import Investor
 from tx_checker import fails, succeeds
 import time
+from load_contract import ContractLoader
 
 class CrowdsaleChecker(Crowdsale):
   requiredCustomerId = False
@@ -11,6 +12,14 @@ class CrowdsaleChecker(Crowdsale):
   signer = None
   investors = []
   ether = 2
+  startsAt = None
+  endsAt = None
+  bounties_tokens = None
+  milieurs_per_eth = None
+  priceAgent = None
+  minimum_buy_value = None
+  token = None
+  balances = {x : 0 for x in self.accounts}
 
   def __init__(self, params):
     Crowdsale.__init__(self, params)
@@ -68,10 +77,24 @@ class CrowdsaleChecker(Crowdsale):
     else:
       fails("Finalization of Crowdsale fails", super().finalize())
   
+  def instantiate_token(self):
+    loader = ContractLoader()
+    contract = loader.load("./build/", "CrowdsaleToken", super().token())
+    return contract
+
+  def token_balance(self, address):
+    return self.token.functions.balanceOf(address)
+
   def try_configuration_crowdsale(self):
     if self.state == self.states["PendingConfiguration"]:
       succeeds("Configuration of Crowdsale succeeds", super().configuration_crowdsale())
       self.state = self.states["PreFunding"]
+      self.startsAt = super().starts_at()
+      self.endsAt = super().ends_at()
+      self.bounties_tokens = super().initial_bounties_tokens()
+      self.token = self.instantiate_token()
+      assert token_balance("0x93C4a8ed12BAb494bc3045380EE1CfC07507D234") == self.params["multisig_supply"]
+      assert token_balance(self.contract.address) == self.params["crowdsale_supply"]
     else:
       fails("Configuration of Crowdsale fails", super().configuration_crowdsale())
     print("ETA for ICO: " + str(super().eta_ico() + 1) + " seconds.")
@@ -87,14 +110,49 @@ class CrowdsaleChecker(Crowdsale):
   def try_set_starting_time(self, starting_time):
     if self.state == self.states["PreFunding"] and int(round(time.time())) < starting_time and starting_time < super().ends_at():
       succeeds("Set starting time succeeds", super().set_starting_time(starting_time))
+      self.startsAt = starting_time
     else:
       fails("Set starting time fails", super().set_starting_time(starting_time))
   
   def try_set_ending_time(self, ending_time):
     if (self.state == self.states["PreFunding"] or self.state == self.states["Funding"]) and int(round(time.time())) < ending_time and super().starts_at() < ending_time:
       succeeds("Set starting time succeeds", super().set_ending_time(ending_time))
+      self.endsAt = ending_time
     else:
       fails("Set starting time fails", super().set_ending_time(ending_time))
+
+  def try_update_eurs_per_eth(self, milieurs_amount, price_agent):
+    if (self.state == self.states["PreFunding"] or self.state == self.states["Funding"]) and self.priceAgent == price_agent:
+      succeeds("Update eurs per eth succeeds", super().update_eurs_per_eth(milieurs_amount))
+      self.milieurs_per_eth = milieurs_amount
+    else:
+      fails("Update eurs per eth fails", super().update_eurs_per_eth(milieurs_amount))
+
+  def try_update_price_agent(self, new_price_agent):
+    if (self.state == self.states["PreFunding"] or self.state == self.states["Funding"]):
+      succeeds("Update price agent succeeds", super().update_price_agent(new_price_agent))
+      self.priceAgent = new_price_agent
+    else:
+      fails("Update price agent fails", super().update_price_agent(new_price_agent))
+
+  def try_set_minimum_buy_value(self, new_minimum):
+    if (self.state == self.states["PreFunding"] or self.state == self.states["Funding"]):
+      succeeds("Set minimum buy value succeeds", super().set_minimum_buy_value(new_minimum))
+      self.minimum_buy_value = new_minimum
+    else:
+      fails("Set minimum buy value fails", super().set_minimum_buy_value(new_minimum))
+
+  def calculate_token_amount(self, wei_amount, receiver):
+    token_amount = None
+    tokens_per_eth = super().get_current_price() * super().milieurs_per_eth() / 1000
+    max_wei_allowed = (super().sellable_tokens() - super().tokens_sold()) * (10 ** 18) / tokens_per_eth
+    wei_allowed = min(max_wei_allowed, wei_amount)
+    if wei_amount < max_wei_allowed:
+      token_amount = tokens_per_eth * wei_amount / (10**18)
+    else:
+      token_amount = super().sellable_tokens() - super().tokens_sold()
+    assert (self.token.functions.balanceOf(receiver) + token_amount) >= super().minimum_buy_value()
+    return token_amount
 
   # Buy functions
   def send_ether(self, buyer):
