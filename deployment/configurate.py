@@ -23,6 +23,9 @@ if args.test:
 else:
   from client_config import config_f
 
+config = config_f()
+c = [config['multisig_owners'], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals'], config['max_tokens_to_sell']]
+
 web3 = Web3Interface(middleware=True).w3
 miner = web3.miner
 sender_account = web3.eth.accounts[0]
@@ -88,10 +91,10 @@ def dump():
     json.dump(config, fp, sort_keys=True, indent=2)
 
 def configurate(test):
-  config_tx_hash = contract.functions.configurationCrowdsale(*params).transact({"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price})
+  config_tx_hash = contract.functions.configurationCrowdsale(*c).transact({"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price})
   if test:
-    wait(tx_hash)
-    receipt = web3.eth.getTransactionReceipt(tx_hash)
+    wait(config_tx_hash)
+    receipt = web3.eth.getTransactionReceipt(config_tx_hash)
     print("\nConfiguration successful: " + str(receipt.status == 1))
     print("\nConfiguration Tx Hash: " + receipt.transactionHash.hex())
     print("\nGas used: " + str(receipt.gasUsed)  + "\n")
@@ -100,16 +103,13 @@ def configurate(test):
     return "\nConfiguration Tx Hash: " + config_tx_hash
 
 if args.test:
-  config = config_f()
-  c = [config['multisig_owners'], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals'], config['max_tokens_to_sell']]
   unlocker = Unlock()
   unlocker.unlock()
   miner.start(1)
   gas_price = 20000000000
-  #configurate(args.test)
+  if __name__ == '__main__':
+    configurate(args.test)
 else:
-  config = config_f()
-  c = [config['multisig_owners'], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals'], config['max_tokens_to_sell']]
   gas_price = input("Enter gas price: ")
   dump()
   configurate(args.test)
