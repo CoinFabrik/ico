@@ -26,6 +26,7 @@ else:
 config = config_f()
 c = [config['multisig_address'], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals'], config['max_tokens_to_sell']]
 
+#TODO: Check if middleware is truly needed
 web3 = Web3Interface(middleware=True).w3
 miner = web3.miner
 sender_account = web3.eth.accounts[0]
