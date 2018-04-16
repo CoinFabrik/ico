@@ -28,7 +28,7 @@ def config_f():
   config['startTime'] = int(datetime(2018, 4, 10).timestamp())
   config['endTime'] = int(datetime(2018, 7, 7).timestamp())
   config['multisig_owners'] = to_checksum_address("0xA8c39c22822a89bC8EAC413a1FFb93b73fb9c906")
-  config['token_retriever_account'] = "0x0F048ff7dE76B83fDC14912246AC4da5FA755cFE"
+  config['token_retriever_account'] = to_checksum_address("0x0F048ff7dE76B83fDC14912246AC4da5FA755cFE")
 
   tranches_start = int(datetime(2018, 4, 6, 18).timestamp())
 
