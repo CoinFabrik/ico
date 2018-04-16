@@ -24,7 +24,7 @@ else:
   from client_config import config_f
 
 config = config_f()
-c = [config['multisig_owners'], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals'], config['max_tokens_to_sell']]
+c = [config['multisig_address'], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals'], config['max_tokens_to_sell']]
 
 web3 = Web3Interface(middleware=True).w3
 miner = web3.miner
