@@ -127,7 +127,10 @@ class Crowdsale:
   
   def multisig_wallet(self):
     return self.contract.functions.multisigWallet().call()
-  
+ 
+  def minimum_buy_value(self):
+    return self.contract.functions.minimum_buy_value().call()
+ 
   def owner(self):
     return self.contract.functions.owner().call()
   
@@ -145,7 +148,16 @@ class Crowdsale:
 
   def set_early_participant_whitelist(self, addr, status):
     return self.get_transaction_receipt(self.contract.functions.setEarlyParticipantWhitelist(addr, status).transact(self.transaction_info(self.sender_account)))
+ 
+  def set_starting_time(self, starting_time):
+    return self.get_transaction_receipt(self.contract.functions.setStartingTime(starting_time).transact(self.transaction_info(self.sender_account))))
+
+  def set_ending_time(self, ending_time):
+    return self.get_transaction_receipt(self.contract.functions.setEndingTime(endingTime).transact(self.transaction_info(self.sender_acount)))
   
+  def set_minimum_buy_value(self, new_minimum):
+    return self.get_transaction_receipt(self.contract.functions.setMinimumBuyValue(new_minimum).transact(self.transaction_info(self.sender_account)))
+ 
   def set_require_customer_id(self, value):
     return self.get_transaction_receipt(self.contract.functions.setRequireCustomerId(value).transact(self.transaction_info(self.sender_account)))
   
