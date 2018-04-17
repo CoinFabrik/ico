@@ -64,14 +64,6 @@ class CrowdsaleChecker(Crowdsale):
     super().end_ico()
     self.state = self.states["Success"]
  
-  def instantiate_token(self):
-    loader = ContractLoader
-    contract = loader.load("./build/", "CrowdsaleToken", self.token())
-    return contract
-
-  def token_balance(self, address):
-    return self.token.functions.balanceOf(address)
-  
   def check_state(self):
     assert super().get_state() == self.state
 
@@ -81,6 +73,14 @@ class CrowdsaleChecker(Crowdsale):
       self.state = self.states["Finalized"]
     else:
       fails("Finalization of Crowdsale fails", super().finalize())
+  
+  def instantiate_token(self):
+    loader = ContractLoader
+    contract = loader.load("./build/", "CrowdsaleToken", self.token())
+    return contract
+
+  def token_balance(self, address):
+    return self.token.functions.balanceOf(address)
   
   def try_configuration_crowdsale(self):
     if self.state == self.states["PendingConfiguration"]:
