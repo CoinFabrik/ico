@@ -64,4 +64,4 @@ def write_to_address_log(address_log_path):
   with open(file_path_name_w_ext, 'w') as fp:
     json.dump(address_for_file, fp, sort_keys=True, indent=2)
 
-write_to_address_log(address_log_path)
+write_to_address_log(address_log_path, args.test)
