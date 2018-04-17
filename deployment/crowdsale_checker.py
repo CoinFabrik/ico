@@ -94,6 +94,14 @@ class CrowdsaleChecker(Crowdsale):
       fails("Configuration of Crowdsale fails", super().configuration_crowdsale())
     print("ETA for ICO: " + str(super().eta_ico() + 1) + " seconds.")
   
+  def try_preallocate(self):
+    for investor in self.investors:
+      tx_receipt = super().preallocate(investor.address, self.tokens_to_preallocate, self.wei_price_of_preallocation)
+      if self.state == self.states["PreFunding"] or self.state == self.states["Funding"]:
+        succeeds("Preallocate succeeds", tx_receipt)
+      else:
+        fails("Preallocate fails", tx_receipt)
+  
   def try_set_starting_time(self, starting_time):
     if self.state == self.states["PreFunding"] and int(round(time.time())) < starting_time and starting_time < super().ends_at():
       succeeds("Set starting time succeeds", super().set_starting_time(starting_time))
@@ -126,15 +134,7 @@ class CrowdsaleChecker(Crowdsale):
       token_amount = super().sellable_tokens() - super().tokens_sold()
     assert (self.token.functions.balanceOf(receiver) + token_amount) >= super().minimum_buy_value()
     return token_amount
-
-  def try_preallocate(self):
-    for investor in self.investors:
-      tx_receipt = super().preallocate(investor.address, self.tokens_to_preallocate, self.wei_price_of_preallocation)
-      if self.state == self.states["PreFunding"] or self.state == self.states["Funding"]:
-        succeeds("Preallocate succeeds", tx_receipt)
-      else:
-        fails("Preallocate fails", tx_receipt)
-    
+ 
   # Buy functions
   def send_ether(self, buyer):
     tx_receipt = super().send_ether_to_crowdsale(buyer.address, self.ether)
