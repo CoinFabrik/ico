@@ -15,11 +15,14 @@ class CrowdsaleChecker(Crowdsale):
   startsAt = None
   endsAt = None
   bounties_tokens = None
+  multisig_wei = 0
+  multisig_tokens = 0
   milieurs_per_eth = None
   priceAgent = None
   minimum_buy_value = None
   token = None
-  balances = {x : 0 for x in self.accounts}
+  token_balances = None
+  tokens_sold_var = 0
 
   def __init__(self, params):
     Crowdsale.__init__(self, params)
@@ -28,6 +31,10 @@ class CrowdsaleChecker(Crowdsale):
     self.investors.append(Investor(self.accounts[2], True, 1))
     self.investors.append(Investor(self.accounts[3], False, 0))
     self.investors.append(Investor(self.accounts[4], False, 1))
+    self.token_balances = {x : 0 for x in self.accounts}
+    self.multisig_wei = self.web3.eth.getBalance(super().multisig_wallet())
+    print(self.multisig_wei)
+    print(self.web3.eth.getBalance(super().multisig_wallet()))
   
   def set_early_participant_whitelist(self):
     succeeds("Whitelist Account 1", super().set_early_participant_whitelist(self.accounts[1], True))
@@ -74,16 +81,30 @@ class CrowdsaleChecker(Crowdsale):
     if self.state == self.states["Success"] and not self.halted:
       succeeds("Finalization of Crowdsale succeeds", super().finalize())
       self.state = self.states["Finalized"]
+      sold = self.tokens_sold_var + self.bounties_tokens
+      to_share = (sold * 18) // 82
+      self.multisig_tokens += to_share
+      self.check_all_end_balances()
     else:
       fails("Finalization of Crowdsale fails", super().finalize())
   
   def instantiate_token(self):
     loader = ContractLoader()
-    contract = loader.load("./build/", "CrowdsaleToken", super().token())
+    contract = loader.load("./build/", "CrowdsaleToken", contract_address=super().token())
     return contract
 
+  def check_all_end_balances(self):
+    assert self.web3.eth.getBalance(super().multisig_wallet()) == self.multisig_wei
+    assert self.token_balance(super().multisig_wallet()) == self.multisig_tokens
+    assert self.crowdsale_balance() == 0
+    for account in self.accounts:
+      assert self.token_balance(account) == self.token_balances[account]
+
   def token_balance(self, address):
-    return self.token.functions.balanceOf(address)
+    return self.token.functions.balanceOf(address).call()
+
+  def crowdsale_balance(self):
+    return self.web3.eth.getBalance(self.contract.address)
 
   def try_configuration_crowdsale(self):
     if self.state == self.states["PendingConfiguration"]:
@@ -91,22 +112,19 @@ class CrowdsaleChecker(Crowdsale):
       self.state = self.states["PreFunding"]
       self.startsAt = super().starts_at()
       self.endsAt = super().ends_at()
-      self.bounties_tokens = super().initial_bounties_tokens()
+      self.bounties_tokens = self.multisig_tokens = super().initial_bounties_tokens()
       self.token = self.instantiate_token()
-      assert token_balance("0x93C4a8ed12BAb494bc3045380EE1CfC07507D234") == self.params["multisig_supply"]
-      assert token_balance(self.contract.address) == self.params["crowdsale_supply"]
+      try:
+        assert self.token_balance(super().multisig_wallet()) == 252 * (10 ** 5) * (10 ** 18)
+        assert self.token_balance(self.contract.address) == 1008 * (10 ** 6) * (10 ** 18)
+        assert self.token_balance(super().multisig_wallet()) == self.params["multisig_supply"]
+        assert self.token_balance(self.contract.address) == self.params["crowdsale_supply"]
+      except AssertionError:
+        print("Assertion Error")
     else:
       fails("Configuration of Crowdsale fails", super().configuration_crowdsale())
     print("ETA for ICO: " + str(super().eta_ico() + 1) + " seconds.")
-  
-  def try_preallocate(self):
-    for investor in self.investors:
-      tx_receipt = super().preallocate(investor.address, self.tokens_to_preallocate, self.wei_price_of_preallocation)
-      if self.state == self.states["PreFunding"] or self.state == self.states["Funding"]:
-        succeeds("Preallocate succeeds", tx_receipt)
-      else:
-        fails("Preallocate fails", tx_receipt)
-  
+    
   def try_set_starting_time(self, starting_time):
     if self.state == self.states["PreFunding"] and int(round(time.time())) < starting_time and starting_time < super().ends_at():
       succeeds("Set starting time succeeds", super().set_starting_time(starting_time))
@@ -144,15 +162,26 @@ class CrowdsaleChecker(Crowdsale):
 
   def calculate_token_amount(self, wei_amount, receiver):
     token_amount = None
-    tokens_per_eth = super().get_current_price() * super().milieurs_per_eth() / 1000
-    max_wei_allowed = (super().sellable_tokens() - super().tokens_sold()) * (10 ** 18) / tokens_per_eth
+    tokens_per_eth = super().get_current_price() * super().milieurs_per_eth() // 1000
+    max_wei_allowed = (super().sellable_tokens() - super().tokens_sold()) * (10 ** 18) // tokens_per_eth
     wei_allowed = min(max_wei_allowed, wei_amount)
     if wei_amount < max_wei_allowed:
-      token_amount = tokens_per_eth * wei_amount / (10**18)
+      token_amount = tokens_per_eth * wei_amount // (10**18)
     else:
       token_amount = super().sellable_tokens() - super().tokens_sold()
-    assert (self.token.functions.balanceOf(receiver) + token_amount) >= super().minimum_buy_value()
-    return token_amount
+    assert (self.token_balance(receiver) + token_amount) >= super().minimum_buy_value()
+    return (wei_allowed, token_amount)
+
+  def try_preallocate(self):
+    for investor in self.investors:
+      tx_receipt = super().preallocate(investor.address, self.tokens_to_preallocate, self.wei_price_of_preallocation)
+      if self.state == self.states["PreFunding"] or self.state == self.states["Funding"]:
+        succeeds("Preallocate succeeds", tx_receipt)
+        token_amount = self.tokens_to_preallocate * (10**18)
+        self.token_balances[investor.address] += token_amount
+        self.tokens_sold_var += token_amount
+      else:
+        fails("Preallocate fails", tx_receipt)
 
   # Buy functions
   def send_ether(self, buyer):
@@ -167,6 +196,12 @@ class CrowdsaleChecker(Crowdsale):
       fails("Sending ether to crowdsale fails if not in PreFunding nor Funding state", tx_receipt)
     else:
       succeeds("Sending ether to crowdsale succeeds", tx_receipt)
+      (wei_amount, token_amount) = self.calculate_token_amount(self.ether * (10**18), buyer.address)
+      self.multisig_wei += wei_amount
+      print(self.multisig_wei)
+      print(self.web3.eth.getBalance(super().multisig_wallet()))
+      self.token_balances[buyer.address] += token_amount
+      self.tokens_sold_var += token_amount
 
   def buy(self, buyer):
     tx_receipt = super().buy(buyer.address, self.ether)
@@ -180,6 +215,12 @@ class CrowdsaleChecker(Crowdsale):
       fails("Buying using buy fails if not in PreFunding nor Funding state", tx_receipt)
     else:
       succeeds("Buying using buy succeeds", tx_receipt)
+      (wei_amount, token_amount) = self.calculate_token_amount(self.ether * (10**18), buyer.address)
+      self.multisig_wei += wei_amount
+      print(self.multisig_wei)
+      print(self.web3.eth.getBalance(super().multisig_wallet()))
+      self.token_balances[buyer.address] += token_amount
+      self.tokens_sold_var += token_amount
 
   def buy_on_behalf(self, buyer, receiver):
     tx_receipt = super().buy_on_behalf(buyer.address, receiver.address, self.ether)
@@ -193,6 +234,12 @@ class CrowdsaleChecker(Crowdsale):
       fails("Buying using buyOnBehalf fails if not in PreFunding nor Funding state", tx_receipt)
     else:
       succeeds("Buying using buyOnBehalf succeeds", tx_receipt)
+      (wei_amount, token_amount) = self.calculate_token_amount(self.ether * (10**18), receiver.address)
+      self.multisig_wei += wei_amount
+      print(self.multisig_wei)
+      print(self.web3.eth.getBalance(super().multisig_wallet()))
+      self.token_balances[receiver.address] += token_amount
+      self.tokens_sold_var += token_amount
   
   def buy_on_behalf_with_customer_id(self, buyer, receiver):
     tx_receipt = super().buy_on_behalf_with_customer_id(buyer.address, receiver.address, buyer.customerId, self.ether)
@@ -206,6 +253,12 @@ class CrowdsaleChecker(Crowdsale):
       fails("Buying using buyOnBehalfWithCustomerId fails if not in PreFunding nor Funding state", tx_receipt)
     else:
       succeeds("Buying using buyOnBehalfWithCustomerId succeeds", tx_receipt)
+      (wei_amount, token_amount) = self.calculate_token_amount(self.ether * (10**18), receiver.address)
+      self.multisig_wei += wei_amount
+      print(self.multisig_wei)
+      print(self.web3.eth.getBalance(super().multisig_wallet()))
+      self.token_balances[receiver.address] += token_amount
+      self.tokens_sold_var += token_amount
   
   def buy_with_customer_id(self, buyer):
     tx_receipt = super().buy_with_customer_id(buyer.customerId, buyer.address, self.ether)
@@ -219,6 +272,13 @@ class CrowdsaleChecker(Crowdsale):
       fails("Buying using buyOnBehalfWithCustomerId fails if not in PreFunding nor Funding state", tx_receipt)
     else:
       succeeds("Buying using buyOnBehalfWithCustomerId succeeds", tx_receipt)
+      (wei_amount, token_amount) = self.calculate_token_amount(self.ether * (10**18), buyer.address)
+      self.multisig_wei += wei_amount
+      print(self.multisig_wei)
+      print(self.web3.eth.getBalance(super().multisig_wallet()))
+      self.token_balances[buyer.address] += token_amount
+      self.tokens_sold_var += token_amount
+
   
   def try_buys(self):
     for x in self.investors:

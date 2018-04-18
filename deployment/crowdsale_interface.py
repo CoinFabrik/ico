@@ -6,18 +6,27 @@ import json
 import glob
 import os
 from load_contract import ContractLoader
+import argparse
 
 class Crowdsale:
+  parser = argparse.ArgumentParser()
+  parser.add_argument("-n", "--network", default="poanet")
+  parser.add_argument("-p", "--provider", default="http")
+  parser.add_argument("-t", "--test", action="store_true")
+  args = parser.parse_args()
 
   gas = 5000000
   gas_price = 20000000000
   params = None
     
   # web3.py instance
-  web3 = Web3Interface("middleware").w3
+  web3 = Web3Interface().w3
   miner = web3.miner
   accounts = web3.eth.accounts
-  sender_account = accounts[0]
+  if args.network == "mainnet":
+    sender_account = "0x54d9249C776C56520A62faeCB87A00E105E8c9Dc"
+  else:
+    sender_account = web3.eth.accounts[0]
   contract = None
   tokens_to_preallocate = 10
   wei_price_of_preallocation = 350
@@ -42,7 +51,7 @@ class Crowdsale:
       time.sleep(1)
 
   def send_ether_to_crowdsale(self, buyer, value):
-    return self.get_transaction_receipt(self.web3.eth.sendTransaction({'from': buyer, 'to': self.contract.address, 'value': value, 'gas': 100000000}))
+    return self.get_transaction_receipt(self.web3.eth.sendTransaction({'from': buyer, 'to': self.contract.address, 'value': value * (10 ** 18), 'gas': 100000000}))
 
   def eta_ico(self):
     return round(self.starts_at()-time.time())
@@ -105,7 +114,7 @@ class Crowdsale:
     return self.contract.functions.finalized().call()
   
   def get_current_price(self):
-    return self.get_transaction_receipt(self.contract.functions.getCurrentPrice(self.tokens_sold()).transact(self.transaction_info(self.sender_account)))
+    return self.contract.functions.getCurrentPrice(self.tokens_sold()).call()
 
   def get_deployment_block(self):
     return self.contract.functions.getDeploymentBlock().call()

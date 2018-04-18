@@ -10,16 +10,19 @@ import sys
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-n", "--network", default="testnet")
+parser.add_argument("-n", "--network", default="poanet")
 parser.add_argument("-p", "--provider", default="http")
 parser.add_argument("-t", "--test", action="store_true")
 args = parser.parse_args()
 
 # web3.py instance
-web3 = Web3Interface(middleware=True).w3
+web3 = Web3Interface().w3
 miner = web3.miner
 unlocker = Unlock()
-sender_account = web3.eth.accounts[0]
+if args.network == "mainnet":
+  sender_account = "0x54d9249C776C56520A62faeCB87A00E105E8c9Dc"
+else:
+  sender_account = web3.eth.accounts[0]
 gas = 5000000
 address_log_path = "./address_log/"
 compiled_path = "./build/"

@@ -13,7 +13,7 @@ import sys
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-n", "--network", default="testnet")
+parser.add_argument("-n", "--network", default="poanet")
 parser.add_argument("-p", "--provider", default="http")
 parser.add_argument("-t", "--test", action="store_true")
 args = parser.parse_args()
@@ -25,9 +25,12 @@ else:
 config = config_f()
 c = [config['MW_address'], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals'], config['max_tokens_to_sell']]
 
-web3 = Web3Interface(middleware=True).w3
+web3 = Web3Interface().w3
 miner = web3.miner
-sender_account = web3.eth.accounts[0]
+if args.network == "mainnet":
+  sender_account = "Hardcode the sender's address"
+else:
+  sender_account = web3.eth.accounts[0]
 gas = 5000000
 gas_price = None
 params_log_path = "./params_log/"
@@ -43,7 +46,8 @@ def wait(tx_hash):
 # Display configuration parameters, confirm them, write them to json file
 def dump():  
   # Displaying configuration parameters ----------------------------------------------------------------------------------
-  print("\nWeb3 version:", web3.version.api)  
+  print("\nWeb3 version:", web3.version.api)
+  print("\nWeb3 network:", args.network)
   print(
     "\n\nMultisig address:", config['multisig_owners'][0], 
     "\n\nStart time:", time.ctime(config['startTime']),

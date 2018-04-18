@@ -17,7 +17,7 @@ def config_f():
   amounts = list(map(toWei, amounts))
   assert len(amounts) == len(eur_per_fulltokens),  "Fails lengths"
   config['tranches'] = []
-  config['startTime'] = int(datetime(2018, 4, 16, 10, tzinfo = timezone.utc).timestamp())
+  config['startTime'] = int(datetime(2018, 4, 23, 10, tzinfo = timezone.utc).timestamp()) # int(datetime(2018, 4, 16, 10, tzinfo = timezone.utc).timestamp())
   config['endTime'] = int(datetime(2018, 7, 14, 10, tzinfo = timezone.utc).timestamp())
   config['MW_address'] = to_checksum_address("0x93C4a8ed12BAb494bc3045380EE1CfC07507D234")
   config['token_retriever_account'] = to_checksum_address('0x54d9249C776C56520A62faeCB87A00E105E8c9Dc')

@@ -5,7 +5,7 @@ import json
 
 class Web3Interface:
   parser = argparse.ArgumentParser()
-  parser.add_argument("-n", "--network", default="testnet")
+  parser.add_argument("-n", "--network", default="poanet")
   parser.add_argument("-p", "--provider", default="http")
   parser.add_argument("-t", "--test", action="store_true")
   args = parser.parse_args()
@@ -18,7 +18,7 @@ class Web3Interface:
   ip = None
   port = None
 
-  def __init__(self, middleware=False):
+  def __init__(self):
     try:
       if self.args.provider == "ipc":
         self.provider_param = self.networks[self.args.network][self.args.provider]["path"]
@@ -33,5 +33,5 @@ class Web3Interface:
       print("IndexError")
       pass
 
-    if middleware:
+    if (args.network == "poanet"):
       self.w3.middleware_stack.inject(geth_poa_middleware, layer=0)
