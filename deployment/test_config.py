@@ -20,10 +20,10 @@ def config_f():
   ico_tranches_quantity = tranches_quantity - pre_ico_tranches_quantity
   amounts = list(map(toWei, amounts))
   config['multisig_owners'] = "0xF19258256B06324C7516B00bf5C76Af001ee1E95"
-  config['startTime'] = int(round(time.time())) + 860
-  pre_ico_tranches_start = config['startTime'] - 860
-  pre_ico_tranches_end = config['startTime']
-  ico_tranches_start = config['startTime']
+  config['start_time'] = int(round(time.time())) + 860
+  pre_ico_tranches_start = config['start_time'] - 860
+  pre_ico_tranches_end = config['start_time']
+  ico_tranches_start = config['start_time']
   ico_tranches_end = ico_tranches_start + 60 * 60 * 24 * 2
 
   for x in range(pre_ico_tranches_quantity):
@@ -39,6 +39,6 @@ def config_f():
     config['tranches'].append(tokens_per_wei[x])
     ico_tranches_end += 60*60*24
 
-  config['endTime'] = ico_tranches_start + 400 # config['tranches'][len(config['tranches'])-2]
+  config['end_time'] = ico_tranches_start + 400 # config['tranches'][len(config['tranches'])-2]
 
   return config

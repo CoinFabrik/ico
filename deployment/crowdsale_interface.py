@@ -6,18 +6,27 @@ import json
 import glob
 import os
 from load_contract import ContractLoader
+import argparse
 
 class Crowdsale:
+  parser = argparse.ArgumentParser()
+  parser.add_argument("-n", "--network", default="poanet")
+  parser.add_argument("-p", "--provider", default="http")
+  parser.add_argument("-t", "--test", action="store_true")
+  args = parser.parse_args()
 
   gas = 5000000
   gas_price = 20000000000
   params = None
     
   # web3.py instance
-  web3 = Web3Interface("middleware").w3
+  web3 = Web3Interface().w3
   miner = web3.miner
   accounts = web3.eth.accounts
-  sender_account = accounts[0]
+  if args.network == "mainnet":
+    sender_account = "0x54d9249C776C56520A62faeCB87A00E105E8c9Dc"
+  else:
+    sender_account = web3.eth.accounts[0]
   contract = None
   tokens_to_preallocate = 10
   wei_price_of_preallocation = 350
@@ -43,7 +52,7 @@ class Crowdsale:
       time.sleep(1)
 
   def send_ether_to_crowdsale(self, buyer, value):
-    return self.get_transaction_receipt(self.web3.eth.sendTransaction({'from': buyer, 'to': self.contract.address, 'value': value, 'gas': 100000000}))
+    return self.get_transaction_receipt(self.web3.eth.sendTransaction({'from': buyer, 'to': self.contract.address, 'value': value * (10 ** 18), 'gas': 100000000}))
 
   def eta_ico(self):
     return round(self.starts_at()-time.time())
@@ -87,7 +96,8 @@ class Crowdsale:
     return self.get_transaction_receipt(self.contract.functions.buyWithSignedAddress(customerId, v, r, s).transact(self.transaction_info(buyer, value)))
   
   def configuration_crowdsale(self):
-    return self.get_transaction_receipt(self.contract.functions.configurationCrowdsale(*self.params).transact({"from": self.sender_account, "value": 0, "gas": self.gas, "gasPrice": self.gas_price}))
+    param_list = [self.params['multisig_address'], self.params['start_time'], self.params['end_time'], self.params['token_retriever_account'], self.params['tranches'], self.params['multisig_supply'], self.params['crowdsale_supply'], self.params['token_decimals'], self.params['max_tokens_to_sell']]
+    return self.get_transaction_receipt(self.contract.functions.configurationCrowdsale(*param_list).transact({"from": self.sender_account, "value": 0, "gas": self.gas, "gasPrice": self.gas_price}))
 
   def configured(self):
     return self.contract.functions.configured().call()
@@ -104,6 +114,9 @@ class Crowdsale:
   def finalized(self):
     return self.contract.functions.finalized().call()
   
+  def get_current_price(self):
+    return self.contract.functions.getCurrentPrice(self.tokens_sold()).call()
+
   def get_deployment_block(self):
     return self.contract.functions.getDeploymentBlock().call()
   
@@ -150,10 +163,10 @@ class Crowdsale:
     return self.get_transaction_receipt(self.contract.functions.setEarlyParticipantWhitelist(addr, status).transact(self.transaction_info(self.sender_account)))
  
   def set_starting_time(self, starting_time):
-    return self.get_transaction_receipt(self.contract.functions.setStartingTime(starting_time).transact(self.transaction_info(self.sender_account))))
+    return self.get_transaction_receipt(self.contract.functions.setStartingTime(starting_time).transact(self.transaction_info(self.sender_account)))
 
   def set_ending_time(self, ending_time):
-    return self.get_transaction_receipt(self.contract.functions.setEndingTime(endingTime).transact(self.transaction_info(self.sender_acount)))
+    return self.get_transaction_receipt(self.contract.functions.setEndingTime(ending_time).transact(self.transaction_info(self.sender_acount)))
   
   def set_minimum_buy_value(self, new_minimum):
     return self.get_transaction_receipt(self.contract.functions.setMinimumBuyValue(new_minimum).transact(self.transaction_info(self.sender_account)))
