@@ -8,7 +8,7 @@ class ContractLoader:
   web3 = None
 
   def __init__(self):
-    self.web3 = Web3Interface(middleware=True).w3
+    self.web3 = Web3Interface().w3
 
   def load(self, compiled_path, contract_name, address_path=None, contract_address=None):
     (contract_abi, contract_bytecode) = self.get_abi_and_bytecode(compiled_path, contract_name)

@@ -5,7 +5,7 @@ class Unlock:
   web3 = None
   
   def __init__(self):
-    self.web3 = Web3Interface("middleware").w3
+    self.web3 = Web3Interface().w3
   
   def unlock(self):
     for x in self.web3.eth.accounts:

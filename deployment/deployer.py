@@ -8,7 +8,7 @@ class Deployer:
   web3 = None
 
   def __init__(self):
-    self.web3 = Web3Interface(middleware=True).w3
+    self.web3 = Web3Interface().w3
 
   def deploy(self, path, contract_name, sender_account, tx_args, *args):
     with open(path + contract_name + ".abi") as contract_abi_file:
