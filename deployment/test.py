@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import crowdsale_deployment
-from configurate import c
+from configurate import config
 from crowdsale_checker import CrowdsaleChecker
 
 def general_check():
@@ -27,10 +27,10 @@ def halt_stage():
 
 def all_checks_and_stages():
   general_check()
-  halt_stage()
-  require_customer_id_stage()
+  #halt_stage()
+  #require_customer_id_stage()
 
-crowdsale_checker = CrowdsaleChecker(c)
+crowdsale_checker = CrowdsaleChecker(config)
 
 print("Pre-ICO before configuration stage")
 

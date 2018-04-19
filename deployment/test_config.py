@@ -1,4 +1,5 @@
 import time
+from eth_utils import to_checksum_address
 
 def config_f():
   def toWei(x):
@@ -12,16 +13,16 @@ def config_f():
   config['multisig_supply'] = 525 * (10 ** 5) * (10 ** 18)
 
   #Values for testing purposes only
-  config['token_retriever_account'] = "0x0F048ff7dE76B83fDC14912246AC4da5FA755cFE"
+  config['token_retriever_account'] = to_checksum_address("0x0F048ff7dE76B83fDC14912246AC4da5FA755cFE")
   tokens_per_wei = [350, 300]
   tranches_quantity = len(tokens_per_wei)
   amounts = [3500000, 10500000]
   pre_ico_tranches_quantity = 1
   ico_tranches_quantity = tranches_quantity - pre_ico_tranches_quantity
   amounts = list(map(toWei, amounts))
-  config['multisig_owners'] = "0xF19258256B06324C7516B00bf5C76Af001ee1E95"
-  config['start_time'] = int(round(time.time())) + 860
-  pre_ico_tranches_start = config['start_time'] - 860
+  config['multisig_address'] = to_checksum_address("0xF19258256B06324C7516B00bf5C76Af001ee1E95")
+  config['start_time'] = int(round(time.time())) + 215
+  pre_ico_tranches_start = config['start_time'] - 215
   pre_ico_tranches_end = config['start_time']
   ico_tranches_start = config['start_time']
   ico_tranches_end = ico_tranches_start + 60 * 60 * 24 * 2
@@ -39,6 +40,6 @@ def config_f():
     config['tranches'].append(tokens_per_wei[x])
     ico_tranches_end += 60*60*24
 
-  config['end_time'] = ico_tranches_start + 400 # config['tranches'][len(config['tranches'])-2]
+  config['end_time'] = ico_tranches_start + 105 # config['tranches'][len(config['tranches'])-2]
 
   return config

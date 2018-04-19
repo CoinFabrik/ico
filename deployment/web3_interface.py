@@ -33,5 +33,5 @@ class Web3Interface:
       print("IndexError")
       pass
 
-    if (args.network == "poanet"):
+    if (self.args.network == "poanet"):
       self.w3.middleware_stack.inject(geth_poa_middleware, layer=0)
