@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
-import crowdsale_deployment
+from crowdsale_deployment import deploy
 from configurate import config
 from crowdsale_checker import CrowdsaleChecker
+
+deploy()
 
 def general_check():
   crowdsale_checker.check_state()

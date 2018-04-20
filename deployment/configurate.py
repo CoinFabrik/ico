@@ -35,18 +35,17 @@ else:
 gas = 5000000
 gas_price = None
 params_log_path = "./params_log/"
-params = None
 
 loader = ContractLoader()
 contract = loader.load("./build/", "Crowdsale", address_path="./address_log/")
 
 # Display configuration parameters, confirm them, write them to json file
-def dump():  
+def dump():
   # Displaying configuration parameters ----------------------------------------------------------------------------------
   print("\nWeb3 version:", web3.version.api)
   print("\nWeb3 network:", args.network)
   print(
-    "\n\nMultisig address:", config['multisig_owners'][0], 
+    "\n\nMultisig address:", config['multisig_owners'][0],
     "\n\nStart time:", time.ctime(config['start_time']),
     "\n\nEnd time:", time.ctime(config['end_time']),
     "\n\nToken retriever: " + config['token_retriever_account']
@@ -90,18 +89,17 @@ def dump():
   with open(file_path_name_w_ext, 'w') as fp:
     json.dump(config, fp, sort_keys=True, indent=2)
 
-def configurate(test):
+def configurate():
   configuration_tx_hash = contract.functions.configurationCrowdsale(*c).transact({"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price})
   print("Configuration transaction hash: ", configuration_tx_hash)
   return configuration_tx_hash
 
-if args.test:
-  unlocker.unlock()
-  miner.start(1)
-  gas_price = 20000000000
-  if __name__ == '__main__':
-    configurate(args.test)
-else:
-  gas_price = input("Enter gas price: ")
-  dump()
-  configurate(args.test)
+if __name__ == '__main__':
+  if args.test:
+    unlocker.unlock()
+    miner.start(1)
+    gas_price = 20000000000
+  else:
+    gas_price = input("Enter gas price: ")
+    dump()
+  configurate()

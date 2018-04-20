@@ -29,8 +29,7 @@ class CrowdsaleChecker(Crowdsale):
     self.investors.append(Investor(self.accounts[3], False, 0))
     self.investors.append(Investor(self.accounts[4], False, 1))
     self.token_balances = {x : 0 for x in self.accounts}
-    self.multisig_wei = self.web3.eth.getBalance(self.multisig_wallet())
-    self.multisig_wei -= 1
+    self.multisig_wei = self.web3.eth.getBalance(self.params['multisig_address'])
   
   def set_early_participant_whitelist(self):
     succeeds("Whitelist Account 1", super().set_early_participant_whitelist(self.accounts[1], True))
@@ -157,6 +156,10 @@ class CrowdsaleChecker(Crowdsale):
         succeeds("Preallocate succeeds", tx_hash)
         token_amount = self.tokens_to_preallocate * (10 ** 18)
         self.token_balances[investor.address] += token_amount
+        print(investor.address)
+        print(investor.whitelisted)
+        print(self.token_balance(investor.address))
+        print(self.token_balances[investor.address])
         self.sold_tokens += token_amount
       else:
         fails("Preallocate fails", tx_hash)
@@ -176,6 +179,10 @@ class CrowdsaleChecker(Crowdsale):
       (wei_amount, token_amount) = self.calculate_token_amount(self.investment * (10 ** 18), buyer.address)
       self.multisig_wei += wei_amount
       self.token_balances[buyer.address] += token_amount
+      print(buyer.address)
+      print(buyer.whitelisted)
+      print(self.token_balance(buyer.address))
+      print(self.token_balances[buyer.address])
       self.sold_tokens += token_amount
 
   def buy(self, buyer):
@@ -193,6 +200,10 @@ class CrowdsaleChecker(Crowdsale):
       (wei_amount, token_amount) = self.calculate_token_amount(self.investment * (10 ** 18), buyer.address)
       self.multisig_wei += wei_amount
       self.token_balances[buyer.address] += token_amount
+      print(buyer.address)
+      print(buyer.whitelisted)
+      print(self.token_balance(buyer.address))
+      print(self.token_balances[buyer.address])
       self.sold_tokens += token_amount
 
   def buy_on_behalf(self, buyer, receiver):
@@ -210,6 +221,10 @@ class CrowdsaleChecker(Crowdsale):
       (wei_amount, token_amount) = self.calculate_token_amount(self.investment * (10 ** 18), buyer.address)
       self.multisig_wei += wei_amount
       self.token_balances[buyer.address] += token_amount
+      print(buyer.address)
+      print(buyer.whitelisted)
+      print(self.token_balance(buyer.address))
+      print(self.token_balances[buyer.address])
       self.sold_tokens += token_amount
   
   def buy_on_behalf_with_customer_id(self, buyer, receiver):
@@ -227,6 +242,10 @@ class CrowdsaleChecker(Crowdsale):
       (wei_amount, token_amount) = self.calculate_token_amount(self.investment * (10 ** 18), buyer.address)
       self.multisig_wei += wei_amount
       self.token_balances[buyer.address] += token_amount
+      print(buyer.address)
+      print(buyer.whitelisted)
+      print(self.token_balance(buyer.address))
+      print(self.token_balances[buyer.address])
       self.sold_tokens += token_amount
   
   def buy_with_customer_id(self, buyer):
@@ -244,6 +263,10 @@ class CrowdsaleChecker(Crowdsale):
       (wei_amount, token_amount) = self.calculate_token_amount(self.investment * (10 ** 18), buyer.address)
       self.multisig_wei += wei_amount
       self.token_balances[buyer.address] += token_amount
+      print(buyer.address)
+      print(buyer.whitelisted)
+      print(self.token_balance(buyer.address))
+      print(self.token_balances[buyer.address])
       self.sold_tokens += token_amount
   
   def try_buys(self):

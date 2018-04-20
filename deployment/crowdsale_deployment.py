@@ -13,6 +13,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-n", "--network", default="poanet")
 parser.add_argument("-p", "--provider", default="http")
 parser.add_argument("-t", "--test", action="store_true")
+parser.add_argument("-c", "--configurate", action="store_true")
 args = parser.parse_args()
 
 # web3.py instance
@@ -25,6 +26,8 @@ else:
 gas = 5000000
 address_log_path = "./address_log/"
 compiled_path = "./build/"
+crowdsale_contract = None
+tx_hash = None
 
 if args.test:
   unlocker.unlock()
@@ -35,17 +38,15 @@ else:
   contract_name = input("\nEnter contract's name: ")
   gas_price = input("\nEnter gas price: ")
 
-deployer = Deployer()
-print("\nDeploying contract...")
-(crowdsale_contract, tx_hash) = deployer.deploy(compiled_path, contract_name, sender_account, {"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price},)
+def deploy():
+  deployer = Deployer()
+  print("\nDeploying contract...")
+  (crowdsale_contract, tx_hash) = deployer.deploy(compiled_path, contract_name, sender_account, {"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price},)
+  print("\nDeployment transaction hash: ", tx_hash.hex(),
+        "\nCrowdsale address: ", crowdsale_contract.address)
+  write_to_address_log(crowdsale_contract)
 
-print("Deployment transaction hash: ", tx_hash.hex(),
-      "\nCrowdsale address: ", crowdsale_contract.address)
-
-
-
-
-def write_to_address_log():
+def write_to_address_log(contract):
   # Write json file with contract's address into address_log folder
   if args.test:
     deployment_name = "test"
@@ -63,8 +64,12 @@ def write_to_address_log():
       raise
   
   file_path_name_w_ext = address_log_path + json_file_name + '.json'
-  address_for_file = {'contract_address': crowdsale_contract.address}
+  address_for_file = {'contract_address': contract.address}
   with open(file_path_name_w_ext, 'w') as fp:
     json.dump(address_for_file, fp, sort_keys=True, indent=2)
 
-write_to_address_log()
+if __name__ == '__main__':
+  deploy()
+  if args.configurate:
+    import configurate
+    configurate.configurate()
