@@ -23,7 +23,7 @@ class Crowdsale:
   web3 = Web3Interface().w3
   miner = web3.miner
   accounts = web3.eth.accounts
-  if args.network == "mainnet":
+  if web3.net.chainId == 1:
     sender_account = "0x54d9249C776C56520A62faeCB87A00E105E8c9Dc"
   else:
     sender_account = web3.eth.accounts[0]
@@ -38,21 +38,12 @@ class Crowdsale:
     loader = ContractLoader()
     self.contract = loader.load("./build/", "Crowdsale", address_path="./address_log/")
 
-  # Custom functions-------------------------------------------------------------------------
-  def get_transaction_receipt(self, tx_hash):
-    self.wait(tx_hash)
-    return self.web3.eth.getTransactionReceipt(tx_hash)
-
   # Transaction parameter
   def transaction_info(self, sender, value=0):
     return {"from": sender, "value": value*(10**18), "gas": self.gas, "gasPrice": self.gas_price}
 
-  def wait(self, tx_hash):
-    while self.web3.eth.getTransactionReceipt(tx_hash) == None:
-      time.sleep(1)
-
   def send_ether_to_crowdsale(self, buyer, value):
-    return self.get_transaction_receipt(self.web3.eth.sendTransaction({'from': buyer, 'to': self.contract.address, 'value': value * (10 ** 18), 'gas': 100000000}))
+    return self.web3.eth.sendTransaction({'from': buyer, 'to': self.contract.address, 'value': value * (10 ** 18), 'gas': 100000000})
 
   def eta_ico(self):
     return round(self.starts_at()-time.time())
@@ -78,26 +69,26 @@ class Crowdsale:
 
   # Crowdsale Contract's functions-----------------------------------------------------------
   def buy(self, buyer, value):
-    return self.get_transaction_receipt(self.contract.functions.buy().transact(self.transaction_info(buyer, value)))
+    return self.contract.functions.buy().transact(self.transaction_info(buyer, value))
 
   def buy_on_behalf(self, buyer, receiver, value):
-    return self.get_transaction_receipt(self.contract.functions.buyOnBehalf(receiver).transact(self.transaction_info(buyer, value)))
+    return self.contract.functions.buyOnBehalf(receiver).transact(self.transaction_info(buyer, value))
   
   def buy_on_behalf_with_customer_id(self, buyer, receiver, customerId, value):
-    return self.get_transaction_receipt(self.contract.functions.buyOnBehalfWithCustomerId(receiver, customerId).transact(self.transaction_info(buyer, value)))
+    return self.contract.functions.buyOnBehalfWithCustomerId(receiver, customerId).transact(self.transaction_info(buyer, value))
   
   def buy_on_behalf_with_signed_address(self, buyer, receiver, customerId, v, r, s, value):
-    return self.get_transaction_receipt(self.contract.functions.buyOnBehalfWithSignedAddress(receiver, customerId, v, r, s).transact(self.transaction_info(buyer, value)))
+    return self.contract.functions.buyOnBehalfWithSignedAddress(receiver, customerId, v, r, s).transact(self.transaction_info(buyer, value))
   
   def buy_with_customer_id(self, customerId, buyer, value):
-    return self.get_transaction_receipt(self.contract.functions.buyWithCustomerId(customerId).transact(self.transaction_info(buyer, value)))
+    return self.contract.functions.buyWithCustomerId(customerId).transact(self.transaction_info(buyer, value))
   
   def buy_with_signed_address(self, customerId, v, r, s, buyer, value):
-    return self.get_transaction_receipt(self.contract.functions.buyWithSignedAddress(customerId, v, r, s).transact(self.transaction_info(buyer, value)))
+    return self.contract.functions.buyWithSignedAddress(customerId, v, r, s).transact(self.transaction_info(buyer, value))
   
   def configuration_crowdsale(self):
     param_list = [self.params['multisig_address'], self.params['start_time'], self.params['end_time'], self.params['token_retriever_account'], self.params['tranches'], self.params['multisig_supply'], self.params['crowdsale_supply'], self.params['token_decimals'], self.params['max_tokens_to_sell']]
-    return self.get_transaction_receipt(self.contract.functions.configurationCrowdsale(*param_list).transact({"from": self.sender_account, "value": 0, "gas": self.gas, "gasPrice": self.gas_price}))
+    return self.contract.functions.configurationCrowdsale(*param_list).transact({"from": self.sender_account, "value": 0, "gas": self.gas, "gasPrice": self.gas_price})
 
   def configured(self):
     return self.contract.functions.configured().call()
@@ -109,7 +100,7 @@ class Crowdsale:
     return self.contract.functions.endsAt().call()
   
   def finalize(self):
-    return self.get_transaction_receipt(self.contract.functions.finalize().transact(self.transaction_info(self.sender_account)))
+    return self.contract.functions.finalize().transact(self.transaction_info(self.sender_account))
   
   def finalized(self):
     return self.contract.functions.finalized().call()
@@ -127,7 +118,7 @@ class Crowdsale:
     return self.contract.functions.getTranchesLength().call()
   
   def halt(self):
-    return self.get_transaction_receipt(self.contract.functions.halt().transact(self.transaction_info(self.sender_account)))
+    return self.contract.functions.halt().transact(self.transaction_info(self.sender_account))
   
   def halted(self):
     return self.contract.functions.halted().call()
@@ -148,7 +139,7 @@ class Crowdsale:
     return self.contract.functions.owner().call()
   
   def preallocate(self, receiver, fullTokens, weiPrice):
-    return self.get_transaction_receipt(self.contract.functions.preallocate(receiver, fullTokens, weiPrice).transact(self.transaction_info(self.sender_account)))
+    return self.contract.functions.preallocate(receiver, fullTokens, weiPrice).transact(self.transaction_info(self.sender_account))
   
   def require_customer_id(self):
     return self.contract.functions.requireCustomerId().call()
@@ -160,22 +151,22 @@ class Crowdsale:
     return self.contract.functions.sellable_tokens().call()
 
   def set_early_participant_whitelist(self, addr, status):
-    return self.get_transaction_receipt(self.contract.functions.setEarlyParticipantWhitelist(addr, status).transact(self.transaction_info(self.sender_account)))
+    return self.contract.functions.setEarlyParticipantWhitelist(addr, status).transact(self.transaction_info(self.sender_account))
  
   def set_starting_time(self, starting_time):
-    return self.get_transaction_receipt(self.contract.functions.setStartingTime(starting_time).transact(self.transaction_info(self.sender_account)))
+    return self.contract.functions.setStartingTime(starting_time).transact(self.transaction_info(self.sender_account))
 
   def set_ending_time(self, ending_time):
-    return self.get_transaction_receipt(self.contract.functions.setEndingTime(ending_time).transact(self.transaction_info(self.sender_acount)))
+    return self.contract.functions.setEndingTime(ending_time).transact(self.transaction_info(self.sender_acount))
   
   def set_minimum_buy_value(self, new_minimum):
-    return self.get_transaction_receipt(self.contract.functions.setMinimumBuyValue(new_minimum).transact(self.transaction_info(self.sender_account)))
+    return self.contract.functions.setMinimumBuyValue(new_minimum).transact(self.transaction_info(self.sender_account))
  
   def set_require_customer_id(self, value):
-    return self.get_transaction_receipt(self.contract.functions.setRequireCustomerId(value).transact(self.transaction_info(self.sender_account)))
+    return self.contract.functions.setRequireCustomerId(value).transact(self.transaction_info(self.sender_account))
   
   def set_require_signed_address(self, value, signer):
-    return self.get_transaction_receipt(self.contract.functions.setRequireSignedAddress(value, signer).transact(self.transaction_info(self.sender_account)))
+    return self.contract.functions.setRequireSignedAddress(value, signer).transact(self.transaction_info(self.sender_account))
   
   def signer_address(self):
     return self.contract.functions.signerAddress().call()
@@ -196,11 +187,10 @@ class Crowdsale:
     return self.contract.functions.tranches().call()
   
   def transfer_ownership(self, newOwner):
-    return self.get_transaction_receipt(self.contract.functions.transferOwnership(newOwner).transact(self.transaction_info(self.sender_account)))
+    return self.contract.functions.transferOwnership(newOwner).transact(self.transaction_info(self.sender_account))
   
   def unhalt(self):
-    return self.get_transaction_receipt(self.contract.functions.unhalt().transact(self.transaction_info(self.sender_account)))
+    return self.contract.functions.unhalt().transact(self.transaction_info(self.sender_account))
   
   def wei_raised(self):
     return self.contract.functions.weiRaised().call()
-

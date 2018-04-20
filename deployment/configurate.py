@@ -6,7 +6,7 @@ import json
 import time
 import os, errno
 import glob
-from unlock import Unlock
+import unlocker
 from web3_interface import Web3Interface
 from load_contract import ContractLoader
 import sys
@@ -28,7 +28,7 @@ c = [config['multisig_address'], config['start_time'], config['end_time'], confi
 
 web3 = Web3Interface().w3
 miner = web3.miner
-if args.network == "mainnet":
+if web3.net.chainId == 1:
   sender_account = "0x54d9249C776C56520A62faeCB87A00E105E8c9Dc"
 else:
   sender_account = web3.eth.accounts[0]
@@ -39,10 +39,6 @@ params = None
 
 loader = ContractLoader()
 contract = loader.load("./build/", "Crowdsale", address_path="./address_log/")
-
-def wait(tx_hash):
-  while web3.eth.getTransactionReceipt(tx_hash) == None:
-    time.sleep(1)
 
 # Display configuration parameters, confirm them, write them to json file
 def dump():  
@@ -63,8 +59,8 @@ def dump():
       "\nTokens per EUR:", config['tranches'][4*x+3]
     )  
   print("------------------------------------------------------------------------------");
-  print("\nTransaction sender: " + sender_account,
-        "\nGas and Gas price: " + str(gas) + " and " + str(gas_price) + "\n"
+  print("\nTransaction sender: ", sender_account,
+        "\nGas and Gas price: ", gas, " and ", gas_price, "\n"
   )  
   # ----------------------------------------------------------------------------------------------------------------------
   # Validating configuration parameters
@@ -95,19 +91,11 @@ def dump():
     json.dump(config, fp, sort_keys=True, indent=2)
 
 def configurate(test):
-  config_tx_hash = contract.functions.configurationCrowdsale(*c).transact({"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price})
-  if test:
-    wait(config_tx_hash)
-    receipt = web3.eth.getTransactionReceipt(config_tx_hash)
-    print("\nConfiguration successful: " + str(receipt.status == 1))
-    print("\nConfiguration Tx Hash: " + receipt.transactionHash.hex())
-    print("\nGas used: " + str(receipt.gasUsed)  + "\n")
-    return receipt
-  else:
-    return "\nConfiguration Tx Hash: " + config_tx_hash
+  configuration_tx_hash = contract.functions.configurationCrowdsale(*c).transact({"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price})
+  print("Configuration transaction hash: ", configuration_tx_hash)
+  return configuration_tx_hash
 
 if args.test:
-  unlocker = Unlock()
   unlocker.unlock()
   miner.start(1)
   gas_price = 20000000000
