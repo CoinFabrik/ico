@@ -30,6 +30,9 @@ class CrowdsaleChecker(Crowdsale):
     self.investors.append(Investor(self.accounts[4], False, 1))
     self.token_balances = {x : 0 for x in self.accounts}
     self.multisig_wei = self.web3.eth.getBalance(self.multisig_wallet())
+    self.multisig_wei -= 1
+    print(self.web3.eth.getBalance(self.multisig_wallet()))
+    print(self.multisig_wei)
   
   def set_early_participant_whitelist(self):
     succeeds("Whitelist Account 1", super().set_early_participant_whitelist(self.accounts[1], True))
@@ -88,6 +91,8 @@ class CrowdsaleChecker(Crowdsale):
     return contract
 
   def check_all_end_balances(self):
+    print(self.web3.eth.getBalance(self.multisig_wallet()))
+    print(self.multisig_wei)
     assert self.web3.eth.getBalance(self.multisig_wallet()) == self.multisig_wei
     assert self.token_balance(self.multisig_wallet()) == self.multisig_tokens
     assert self.crowdsale_balance() == 0
@@ -107,6 +112,7 @@ class CrowdsaleChecker(Crowdsale):
       self.start_time = self.starts_at()
       self.end_time = self.ends_at()
       self.token_contract = self.instantiate_token()
+      self.multisig_tokens = self.params['multisig_supply']
       assert self.token_balance(super().multisig_wallet()) == self.params['multisig_supply']
       assert self.token_balance(self.contract.address) == self.params['crowdsale_supply']
     else:
@@ -171,8 +177,12 @@ class CrowdsaleChecker(Crowdsale):
       succeeds("Sending ether to crowdsale succeeds", tx_receipt)
       (wei_amount, token_amount) = self.calculate_token_amount(self.investment * (10 ** 18), buyer.address)
       self.multisig_wei += wei_amount
+      print(self.web3.eth.getBalance(self.multisig_wallet()))
+      print(self.multisig_wei)
       self.token_balances[buyer.address] += token_amount
       self.sold_tokens += token_amount
+      print(self.tokens_sold())
+      print(self.sold_tokens)
 
   def buy(self, buyer):
     tx_receipt = super().buy(buyer.address, self.investment)
@@ -188,8 +198,12 @@ class CrowdsaleChecker(Crowdsale):
       succeeds("Buying using buy succeeds", tx_receipt)
       (wei_amount, token_amount) = self.calculate_token_amount(self.investment * (10 ** 18), buyer.address)
       self.multisig_wei += wei_amount
+      print(self.web3.eth.getBalance(self.multisig_wallet()))
+      print(self.multisig_wei)
       self.token_balances[buyer.address] += token_amount
       self.sold_tokens += token_amount
+      print(self.tokens_sold())
+      print(self.sold_tokens)
 
   def buy_on_behalf(self, buyer, receiver):
     tx_receipt = super().buy_on_behalf(buyer.address, receiver.address, self.investment)
@@ -205,8 +219,12 @@ class CrowdsaleChecker(Crowdsale):
       succeeds("Buying using buyOnBehalf succeeds", tx_receipt)
       (wei_amount, token_amount) = self.calculate_token_amount(self.investment * (10 ** 18), buyer.address)
       self.multisig_wei += wei_amount
+      print(self.web3.eth.getBalance(self.multisig_wallet()))
+      print(self.multisig_wei)
       self.token_balances[buyer.address] += token_amount
       self.sold_tokens += token_amount
+      print(self.tokens_sold())
+      print(self.sold_tokens)
   
   def buy_on_behalf_with_customer_id(self, buyer, receiver):
     tx_receipt = super().buy_on_behalf_with_customer_id(buyer.address, receiver.address, buyer.customerId, self.investment)
@@ -222,8 +240,12 @@ class CrowdsaleChecker(Crowdsale):
       succeeds("Buying using buyOnBehalfWithCustomerId succeeds", tx_receipt)
       (wei_amount, token_amount) = self.calculate_token_amount(self.investment * (10 ** 18), buyer.address)
       self.multisig_wei += wei_amount
+      print(self.web3.eth.getBalance(self.multisig_wallet()))
+      print(self.multisig_wei)
       self.token_balances[buyer.address] += token_amount
       self.sold_tokens += token_amount
+      print(self.tokens_sold())
+      print(self.sold_tokens)
   
   def buy_with_customer_id(self, buyer):
     tx_receipt = super().buy_with_customer_id(buyer.customerId, buyer.address, self.investment)
@@ -239,8 +261,12 @@ class CrowdsaleChecker(Crowdsale):
       succeeds("Buying using buyOnBehalfWithCustomerId succeeds", tx_receipt)
       (wei_amount, token_amount) = self.calculate_token_amount(self.investment * (10 ** 18), buyer.address)
       self.multisig_wei += wei_amount
+      print(self.web3.eth.getBalance(self.multisig_wallet()))
+      print(self.multisig_wei)
       self.token_balances[buyer.address] += token_amount
       self.sold_tokens += token_amount
+      print(self.tokens_sold())
+      print(self.sold_tokens)
   
   def try_buys(self):
     for x in self.investors:

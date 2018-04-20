@@ -61,8 +61,8 @@ class Crowdsale:
     return round(self.ends_at()-time.time())
 
   def start_ico(self):
-    print("ETA for ICO: " + str(self.eta_ico() + 1) + " seconds.")
-    time.sleep(max(0, self.eta_ico() + 1))
+    print("ETA for ICO: " + str(self.eta_ico() + 2) + " seconds.")
+    time.sleep(max(0, self.eta_ico() + 2))
     print("ICO STARTS")
 
   def end_ico(self):
@@ -71,8 +71,8 @@ class Crowdsale:
     if tokens_sold >= sellable_tokens:
       print("ICO ENDS")
     else:
-      print("ETA for ICO's end: " + str(self.eta_end_ico() + 1) + " seconds.")
-      time.sleep(max(0, self.eta_end_ico() + 1))
+      print("ETA for ICO's end: " + str(self.eta_end_ico() + 2) + " seconds.")
+      time.sleep(max(0, self.eta_end_ico() + 2))
       print("ICO ENDS")
 
 
