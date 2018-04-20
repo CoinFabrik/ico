@@ -31,12 +31,10 @@ class CrowdsaleChecker(Crowdsale):
     self.token_balances = {x : 0 for x in self.accounts}
     self.multisig_wei = self.web3.eth.getBalance(self.multisig_wallet())
     self.multisig_wei -= 1
-    print(self.web3.eth.getBalance(self.multisig_wallet()))
-    print(self.multisig_wei)
   
   def set_early_participant_whitelist(self):
     succeeds("Whitelist Account 1", super().set_early_participant_whitelist(self.accounts[1], True))
-    succeeds("Whitelist Account 2", super().set_early_participant_whitelist(self.accounts[2], True))  
+    succeeds("Whitelist Account 2", super().set_early_participant_whitelist(self.accounts[2], True))
   
   def require_customer_id(self):
     succeeds("Require Customer ID", self.set_require_customer_id(True))
@@ -73,8 +71,6 @@ class CrowdsaleChecker(Crowdsale):
     self.state = self.states["Success"]
  
   def check_state(self):
-    print(self.get_state())
-    print(self.state)
     assert self.get_state() == self.state
 
   def try_finalize(self):
@@ -91,8 +87,6 @@ class CrowdsaleChecker(Crowdsale):
     return contract
 
   def check_all_end_balances(self):
-    print(self.web3.eth.getBalance(self.multisig_wallet()))
-    print(self.multisig_wei)
     assert self.web3.eth.getBalance(self.multisig_wallet()) == self.multisig_wei
     assert self.token_balance(self.multisig_wallet()) == self.multisig_tokens
     assert self.crowdsale_balance() == 0
@@ -107,7 +101,11 @@ class CrowdsaleChecker(Crowdsale):
 
   def try_configuration_crowdsale(self):
     if self.state == self.states["PendingConfiguration"]:
-      succeeds("Configuration of Crowdsale succeeds", self.configuration_crowdsale())
+      tx_hash = self.configuration_crowdsale()
+      succeeds("Configuration of Crowdsale succeeds", tx_hash)
+      tx_receipt = self.web3.eth.getTransactionReceipt(tx_hash)
+      print("Configuration transaction used gas: ", tx_receipt.gasUsed,
+             "\nConfiguration transaction hash: ", tx_hash.hex())
       self.state = self.states["PreFunding"]
       self.start_time = self.starts_at()
       self.end_time = self.ends_at()
@@ -154,119 +152,99 @@ class CrowdsaleChecker(Crowdsale):
   # Buy functions
   def try_preallocate(self):
     for investor in self.investors:
-      tx_receipt = self.preallocate(investor.address, self.tokens_to_preallocate, self.wei_price_of_preallocation)
+      tx_hash = self.preallocate(investor.address, self.tokens_to_preallocate, self.wei_price_of_preallocation)
       if self.state == self.states["PreFunding"] or self.state == self.states["Funding"]:
-        succeeds("Preallocate succeeds", tx_receipt)
+        succeeds("Preallocate succeeds", tx_hash)
         token_amount = self.tokens_to_preallocate * (10 ** 18)
         self.token_balances[investor.address] += token_amount
         self.sold_tokens += token_amount
       else:
-        fails("Preallocate fails", tx_receipt)
+        fails("Preallocate fails", tx_hash)
   
   def send_ether(self, buyer):
-    tx_receipt = self.send_ether_to_crowdsale(buyer.address, self.investment)
+    tx_hash = self.send_ether_to_crowdsale(buyer.address, self.investment)
     if self.halted:
-      fails("Sending ether to crowdsale fails if halted", tx_receipt)
+      fails("Sending ether to crowdsale fails if halted", tx_hash)
     elif self.requiredCustomerId:
-      fails("Sending ether to crowdsale fails with requiredCustomerId", tx_receipt)
+      fails("Sending ether to crowdsale fails with requiredCustomerId", tx_hash)
     elif (self.states["PreFunding"] == self.state and not buyer.whitelisted):
-      fails("Sending ether to crowdsale fails if in PreFunding state and buyer isn't whitelisted", tx_receipt)
+      fails("Sending ether to crowdsale fails if in PreFunding state and buyer isn't whitelisted", tx_hash)
     elif (self.states["PreFunding"] != self.state and self.states["Funding"] != self.state):
-      fails("Sending ether to crowdsale fails if not in PreFunding nor Funding state", tx_receipt)
+      fails("Sending ether to crowdsale fails if not in PreFunding nor Funding state", tx_hash)
     else:
-      succeeds("Sending ether to crowdsale succeeds", tx_receipt)
+      succeeds("Sending ether to crowdsale succeeds", tx_hash)
       (wei_amount, token_amount) = self.calculate_token_amount(self.investment * (10 ** 18), buyer.address)
       self.multisig_wei += wei_amount
-      print(self.web3.eth.getBalance(self.multisig_wallet()))
-      print(self.multisig_wei)
       self.token_balances[buyer.address] += token_amount
       self.sold_tokens += token_amount
-      print(self.tokens_sold())
-      print(self.sold_tokens)
 
   def buy(self, buyer):
-    tx_receipt = super().buy(buyer.address, self.investment)
+    tx_hash = super().buy(buyer.address, self.investment)
     if self.halted:
-      fails("Buying using buy fails if halted", tx_receipt)
+      fails("Buying using buy fails if halted", tx_hash)
     elif self.requiredCustomerId:
-      fails("Buying using buy fails with requiredCustomerId", tx_receipt)
+      fails("Buying using buy fails with requiredCustomerId", tx_hash)
     elif (self.states["PreFunding"] == self.state and not buyer.whitelisted):
-      fails("Buying using buy fails if in PreFunding state and buyer isn't whitelisted", tx_receipt)
+      fails("Buying using buy fails if in PreFunding state and buyer isn't whitelisted", tx_hash)
     elif (self.states["PreFunding"] != self.state and self.states["Funding"] != self.state):
-      fails("Buying using buy fails if not in PreFunding nor Funding state", tx_receipt)
+      fails("Buying using buy fails if not in PreFunding nor Funding state", tx_hash)
     else:
-      succeeds("Buying using buy succeeds", tx_receipt)
+      succeeds("Buying using buy succeeds", tx_hash)
       (wei_amount, token_amount) = self.calculate_token_amount(self.investment * (10 ** 18), buyer.address)
       self.multisig_wei += wei_amount
-      print(self.web3.eth.getBalance(self.multisig_wallet()))
-      print(self.multisig_wei)
       self.token_balances[buyer.address] += token_amount
       self.sold_tokens += token_amount
-      print(self.tokens_sold())
-      print(self.sold_tokens)
 
   def buy_on_behalf(self, buyer, receiver):
-    tx_receipt = super().buy_on_behalf(buyer.address, receiver.address, self.investment)
+    tx_hash = super().buy_on_behalf(buyer.address, receiver.address, self.investment)
     if self.halted:
-      fails("Buying using buyOnBehalf fails if halted", tx_receipt)
+      fails("Buying using buyOnBehalf fails if halted", tx_hash)
     elif self.requiredCustomerId:
-      fails("Buying using buyOnBehalf fails with requiredCustomerId", tx_receipt)
+      fails("Buying using buyOnBehalf fails with requiredCustomerId", tx_hash)
     elif (self.states["PreFunding"] == self.state and not buyer.whitelisted):
-      fails("Buying using buyOnBehalf fails if in PreFunding state and buyer isn't whitelisted", tx_receipt)
+      fails("Buying using buyOnBehalf fails if in PreFunding state and buyer isn't whitelisted", tx_hash)
     elif (self.states["PreFunding"] != self.state and self.states["Funding"] != self.state):
-      fails("Buying using buyOnBehalf fails if not in PreFunding nor Funding state", tx_receipt)
+      fails("Buying using buyOnBehalf fails if not in PreFunding nor Funding state", tx_hash)
     else:
-      succeeds("Buying using buyOnBehalf succeeds", tx_receipt)
+      succeeds("Buying using buyOnBehalf succeeds", tx_hash)
       (wei_amount, token_amount) = self.calculate_token_amount(self.investment * (10 ** 18), buyer.address)
       self.multisig_wei += wei_amount
-      print(self.web3.eth.getBalance(self.multisig_wallet()))
-      print(self.multisig_wei)
       self.token_balances[buyer.address] += token_amount
       self.sold_tokens += token_amount
-      print(self.tokens_sold())
-      print(self.sold_tokens)
   
   def buy_on_behalf_with_customer_id(self, buyer, receiver):
-    tx_receipt = super().buy_on_behalf_with_customer_id(buyer.address, receiver.address, buyer.customerId, self.investment)
+    tx_hash = super().buy_on_behalf_with_customer_id(buyer.address, receiver.address, buyer.customerId, self.investment)
     if self.halted:
-      fails("Buying using buyOnBehalfWithCustomerId fails if halted", tx_receipt)
+      fails("Buying using buyOnBehalfWithCustomerId fails if halted", tx_hash)
     elif buyer.customerId == 0:
-      fails("Buying using buyOnBehalfWithCustomerId fails with invalid customer ID", tx_receipt)
+      fails("Buying using buyOnBehalfWithCustomerId fails with invalid customer ID", tx_hash)
     elif (self.states["PreFunding"] == self.state and not buyer.whitelisted):
-      fails("Buying using buyOnBehalfWithCustomerId fails if in PreFunding state and buyer isn't whitelisted", tx_receipt)
+      fails("Buying using buyOnBehalfWithCustomerId fails if in PreFunding state and buyer isn't whitelisted", tx_hash)
     elif (self.states["PreFunding"] != self.state and self.states["Funding"] != self.state):
-      fails("Buying using buyOnBehalfWithCustomerId fails if not in PreFunding nor Funding state", tx_receipt)
+      fails("Buying using buyOnBehalfWithCustomerId fails if not in PreFunding nor Funding state", tx_hash)
     else:
-      succeeds("Buying using buyOnBehalfWithCustomerId succeeds", tx_receipt)
+      succeeds("Buying using buyOnBehalfWithCustomerId succeeds", tx_hash)
       (wei_amount, token_amount) = self.calculate_token_amount(self.investment * (10 ** 18), buyer.address)
       self.multisig_wei += wei_amount
-      print(self.web3.eth.getBalance(self.multisig_wallet()))
-      print(self.multisig_wei)
       self.token_balances[buyer.address] += token_amount
       self.sold_tokens += token_amount
-      print(self.tokens_sold())
-      print(self.sold_tokens)
   
   def buy_with_customer_id(self, buyer):
-    tx_receipt = super().buy_with_customer_id(buyer.customerId, buyer.address, self.investment)
+    tx_hash = super().buy_with_customer_id(buyer.customerId, buyer.address, self.investment)
     if self.halted:
-      fails("Buying using buyOnBehalfWithCustomerId fails if halted", tx_receipt)
+      fails("Buying using buyOnBehalfWithCustomerId fails if halted", tx_hash)
     elif buyer.customerId == 0:
-      fails("Buying using buyOnBehalfWithCustomerId fails with invalid customer ID", tx_receipt)
+      fails("Buying using buyOnBehalfWithCustomerId fails with invalid customer ID", tx_hash)
     elif (self.states["PreFunding"] == self.state and not buyer.whitelisted):
-      fails("Buying using buyOnBehalfWithCustomerId fails if in PreFunding state and buyer isn't whitelisted", tx_receipt)
+      fails("Buying using buyOnBehalfWithCustomerId fails if in PreFunding state and buyer isn't whitelisted", tx_hash)
     elif (self.states["PreFunding"] != self.state and self.states["Funding"] != self.state):
-      fails("Buying using buyOnBehalfWithCustomerId fails if not in PreFunding nor Funding state", tx_receipt)
+      fails("Buying using buyOnBehalfWithCustomerId fails if not in PreFunding nor Funding state", tx_hash)
     else:
-      succeeds("Buying using buyOnBehalfWithCustomerId succeeds", tx_receipt)
+      succeeds("Buying using buyOnBehalfWithCustomerId succeeds", tx_hash)
       (wei_amount, token_amount) = self.calculate_token_amount(self.investment * (10 ** 18), buyer.address)
       self.multisig_wei += wei_amount
-      print(self.web3.eth.getBalance(self.multisig_wallet()))
-      print(self.multisig_wei)
       self.token_balances[buyer.address] += token_amount
       self.sold_tokens += token_amount
-      print(self.tokens_sold())
-      print(self.sold_tokens)
   
   def try_buys(self):
     for x in self.investors:

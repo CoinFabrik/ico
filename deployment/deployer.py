@@ -19,8 +19,4 @@ class Deployer:
     contract_address = generate_contract_address(sender_account, deployer_nonce)
     contract = self.web3.eth.contract(address=contract_address, abi=contract_abi, bytecode=contract_bytecode)
     tx_hash = contract.constructor(*args).transact(transaction=tx_args)
-    while self.web3.eth.getTransactionReceipt(tx_hash) == None:
-      sleep(1)
-    receipt = self.web3.eth.getTransactionReceipt(tx_hash)
-    assert receipt.status == 1
-    return (contract, receipt)
+    return (contract, tx_hash)

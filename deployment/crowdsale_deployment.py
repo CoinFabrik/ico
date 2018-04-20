@@ -2,7 +2,7 @@
 
 from web3_interface import Web3Interface
 import json
-from unlock import Unlock
+import unlocker
 import os, errno
 from datetime import datetime
 from deployer import Deployer
@@ -18,8 +18,7 @@ args = parser.parse_args()
 # web3.py instance
 web3 = Web3Interface().w3
 miner = web3.miner
-unlocker = Unlock()
-if args.network == "mainnet":
+if web3.net.chainId == 1:
   sender_account = "0x54d9249C776C56520A62faeCB87A00E105E8c9Dc"
 else:
   sender_account = web3.eth.accounts[0]
@@ -38,12 +37,13 @@ else:
 
 deployer = Deployer()
 print("\nDeploying contract...")
-(crowdsale_contract, receipt) = deployer.deploy(compiled_path, contract_name, sender_account, {"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price},)
+(crowdsale_contract, tx_hash) = deployer.deploy(compiled_path, contract_name, sender_account, {"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price},)
 
-print("Deployment successful: " + str(receipt.status == 1),
-      "\n\nDeployment hash: " + receipt.transactionHash.hex(),
-      "\nCrowdsale address: " + crowdsale_contract.address,
-      "\nGas used: " + str(receipt.gasUsed) + "\n")
+print("Deployment transaction hash: ", tx_hash.hex(),
+      "\nCrowdsale address: ", crowdsale_contract.address)
+
+
+
 
 def write_to_address_log():
   # Write json file with contract's address into address_log folder
