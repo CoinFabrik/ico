@@ -32,9 +32,9 @@ class CrowdsaleChecker(Crowdsale):
     self.investors.append(Investor(self.accounts[3], False, 0))
     self.investors.append(Investor(self.accounts[4], False, 1))
     self.token_balances = {x : 0 for x in self.accounts}
-    self.multisig_wei = self.web3.eth.getBalance(super().multisig_wallet())
+    self.multisig_wei = self.web3.eth.getBalance(self.params['MW_address'])
     print(self.multisig_wei)
-    print(self.web3.eth.getBalance(super().multisig_wallet()))
+    print(self.web3.eth.getBalance(self.params['MW_address']))
   
   def set_early_participant_whitelist(self):
     succeeds("Whitelist Account 1", super().set_early_participant_whitelist(self.accounts[1], True))
@@ -84,6 +84,8 @@ class CrowdsaleChecker(Crowdsale):
       sold = self.tokens_sold_var + self.bounties_tokens
       to_share = (sold * 18) // 82
       self.multisig_tokens += to_share
+      print(self.multisig_tokens)
+      print(self.token_balance(self.multisig_wallet()))
       self.check_all_end_balances()
     else:
       fails("Finalization of Crowdsale fails", super().finalize())
@@ -114,13 +116,12 @@ class CrowdsaleChecker(Crowdsale):
       self.endsAt = super().ends_at()
       self.bounties_tokens = self.multisig_tokens = super().initial_bounties_tokens()
       self.token = self.instantiate_token()
-      try:
-        assert self.token_balance(super().multisig_wallet()) == 252 * (10 ** 5) * (10 ** 18)
-        assert self.token_balance(self.contract.address) == 1008 * (10 ** 6) * (10 ** 18)
-        assert self.token_balance(super().multisig_wallet()) == self.params["multisig_supply"]
-        assert self.token_balance(self.contract.address) == self.params["crowdsale_supply"]
-      except AssertionError:
-        print("Assertion Error")
+      print(self.multisig_tokens)
+      print(self.token_balance(self.multisig_wallet()))
+      assert self.token_balance(super().multisig_wallet()) == 252 * (10 ** 5) * (10 ** 18)
+      assert self.token_balance(self.contract.address) == 1008 * (10 ** 6) * (10 ** 18)
+      assert self.token_balance(super().multisig_wallet()) == self.params["multisig_supply"]
+      assert self.token_balance(self.contract.address) == self.params["crowdsale_supply"]
     else:
       fails("Configuration of Crowdsale fails", super().configuration_crowdsale())
     print("ETA for ICO: " + str(super().eta_ico() + 1) + " seconds.")

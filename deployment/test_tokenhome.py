@@ -33,7 +33,7 @@ def all_checks_and_stages():
 
 crowdsale_checker = CrowdsaleChecker(config)
 
-#all_checks_and_stages()
+all_checks_and_stages()
 
 crowdsale_checker.try_configuration_crowdsale()
 
