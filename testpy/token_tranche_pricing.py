@@ -3,27 +3,20 @@
 from util.deployer import Deployer
 from util.web3_interface import Web3Interface
 from util.tx_checker import fails, succeeds
-from util.config import config_f
+from util.test_config2 import config_f
 
-
-web3 = Web3Interface(middleware=True).w3
-
+web3 = Web3Interface().w3
+web3.miner.start(1)
 deployer = Deployer()
-
 owner = web3.eth.accounts[0]
 gas = 50000000
 gas_price = 20000000000
-
-config = config_f("testNet")
-
-(token_tranche_pricing_contract, receipt) = deployer.deploy("./build/token_tranche_pricing/", "TokenTranchePricingMock", owner, {"from": owner, "value": 0, "gas": gas, "gasPrice": gas_price},)
-
+tx = {"from": owner, "value": 0, "gas": gas, "gasPrice": gas_price}
+config = config_f()
+(token_tranche_pricing_contract, tx_hash) = deployer.deploy("./build/token_tranche_pricing/", "TokenTranchePricingMock", owner, tx,)
+web3.eth.waitForTransactionReceipt(tx_hash)
 assert token_tranche_pricing_contract.functions.getTranchesLength().call() == 0
-
-assert token_tranche_pricing_contract.functions.getCurrentPriceMock(3500000).call() == 0
-
-succeeds("Configuration of TokenTranchePricing succeeds.", token_tranche_pricing_contract.functions.configurateTokenTranchePricingMock(config['tranches']).transact({"from": owner, "value": 0, "gas": gas, "gasPrice": gas_price}))
-
-assert token_tranche_pricing_contract.functions.getTranchesLength().call() == 2
-
-assert token_tranche_pricing_contract.functions.getCurrentPriceMock(3500000).call() == 0
+succeeds("Configuration of TokenTranchePricing succeeds.", token_tranche_pricing_contract.functions.configurateTokenTranchePricingMock(config['tranches']).transact(tx))
+assert token_tranche_pricing_contract.functions.getTranchesLength().call() == 5
+assert token_tranche_pricing_contract.functions.getCurrentPriceMock(3728700000000000000000000).call() == 20000000000000000000
+web3.miner.stop()
