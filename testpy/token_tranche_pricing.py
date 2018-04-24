@@ -16,10 +16,12 @@ config = config_f()
 
 (token_tranche_pricing_contract, tx_hash) = deployer.deploy("./build/token_tranche_pricing/", "TokenTranchePricingMock", owner, tx,)
 web3.eth.waitForTransactionReceipt(tx_hash)
+print(token_tranche_pricing_contract.functions.getTranchesLength().call())
 assert token_tranche_pricing_contract.functions.getTranchesLength().call() == 0
-assert token_tranche_pricing_contract.functions.getCurrentPriceMock(3728700000000000000000000).call() == 0
 succeeds("Configuration of TokenTranchePricing succeeds.", token_tranche_pricing_contract.functions.configurateTokenTranchePricingMock(config['tranches']).transact(tx))
-assert token_tranche_pricing_contract.functions.getTranchesLength().call() == 2
-assert token_tranche_pricing_contract.functions.getCurrentPriceMock(3728700000000000000000000).call() == 0
+print(token_tranche_pricing_contract.functions.getTranchesLength().call())
+assert token_tranche_pricing_contract.functions.getTranchesLength().call() == 5
+print(token_tranche_pricing_contract.functions.getCurrentPriceMock(3728700000000000000000000).call())
+assert token_tranche_pricing_contract.functions.getCurrentPriceMock(3728700000000000000000000).call() == 20000000000000000000
 
 web3.miner.stop()
