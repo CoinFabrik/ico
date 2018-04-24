@@ -13,10 +13,15 @@ gas = 50000000
 gas_price = 20000000000
 tx = {"from": owner, "value": 0, "gas": gas, "gasPrice": gas_price}
 config = config_f()
+
 (token_tranche_pricing_contract, tx_hash) = deployer.deploy("./build/token_tranche_pricing/", "TokenTranchePricingMock", owner, tx,)
-web3.eth.waitForTransactionReceipt(tx_hash)
+receipt = web3.eth.waitForTransactionReceipt(tx_hash)
+assert receipt.status == 1
+print(token_tranche_pricing_contract.functions.getTranchesLength().call())
 assert token_tranche_pricing_contract.functions.getTranchesLength().call() == 0
 succeeds("Configuration of TokenTranchePricing succeeds.", token_tranche_pricing_contract.functions.configurateTokenTranchePricingMock(config['tranches']).transact(tx))
+print(token_tranche_pricing_contract.functions.getTranchesLength().call())
 assert token_tranche_pricing_contract.functions.getTranchesLength().call() == 5
+print(token_tranche_pricing_contract.functions.getCurrentPriceMock(3728700000000000000000000).call())
 assert token_tranche_pricing_contract.functions.getCurrentPriceMock(3728700000000000000000000).call() == 20000000000000000000
 web3.miner.stop()
