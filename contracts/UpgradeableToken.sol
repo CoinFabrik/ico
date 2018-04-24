@@ -30,7 +30,7 @@ contract UpgradeableToken is EIP20Token, Burnable {
   /**
    * Upgrade states.
    *
-   * - NotAllowed: The child contract has not reached a condition where the upgrade can bgun
+   * - NotAllowed: The child contract has not reached a condition where the upgrade can begin
    * - WaitingForAgent: Token allows upgrade, but we don't have a new agent yet
    * - ReadyToUpgrade: The agent is set, but not a single token has been upgraded yet. This allows changing the upgrade agent while there is time.
    * - Upgrading: Upgrade agent is set and the balance holders can upgrade their tokens
