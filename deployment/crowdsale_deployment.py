@@ -41,7 +41,7 @@ else:
 def deploy():
   deployer = Deployer()
   print("\nDeploying contract...")
-  (crowdsale_contract, tx_hash) = deployer.deploy(compiled_path, contract_name, sender_account, {"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price},)
+  (crowdsale_contract, tx_hash) = deployer.deploy(compiled_path, contract_name, {"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price},)
   print("\nDeployment transaction hash: ", tx_hash.hex(),
         "\nCrowdsale address: ", crowdsale_contract.address)
   write_to_address_log(crowdsale_contract)
