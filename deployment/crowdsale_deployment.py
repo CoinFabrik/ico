@@ -19,7 +19,7 @@ args = parser.parse_args()
 # web3.py instance
 web3 = Web3Interface().w3
 miner = web3.miner
-if web3.net.chainId == 1:
+if web3.net.chainId == "1":
   sender_account = "0x54d9249C776C56520A62faeCB87A00E105E8c9Dc"
 else:
   sender_account = web3.eth.accounts[0]

@@ -3,8 +3,6 @@
 import time
 from web3_interface import Web3Interface
 import json
-import glob
-import os
 from load_contract import ContractLoader
 import argparse
 
@@ -23,16 +21,14 @@ class Crowdsale:
   web3 = Web3Interface().w3
   miner = web3.miner
   accounts = web3.eth.accounts
-  if web3.net.chainId == 1:
+  if web3.net.chainId == "1":
     sender_account = "0x54d9249C776C56520A62faeCB87A00E105E8c9Dc"
   else:
     sender_account = web3.eth.accounts[0]
   contract = None
-  tokens_to_preallocate = 10
-  wei_price_of_preallocation = 350
   states = {"Unknown": 0, "PendingConfiguration": 1, "PreFunding": 2, "Funding": 3, "Success": 4, "Finalized": 5}
   
-  def __init__(self, config_params):
+  def __init__(self, config_params=None):
     self.params = config_params
     
     loader = ContractLoader()
@@ -139,6 +135,7 @@ class Crowdsale:
     return self.contract.functions.owner().call()
   
   def preallocate(self, receiver, fullTokens, weiPrice):
+    receiver = self.web3.toChecksumAddress(receiver)
     return self.contract.functions.preallocate(receiver, fullTokens, weiPrice).transact(self.transaction_info(self.sender_account))
   
   def require_customer_id(self):
