@@ -20,6 +20,9 @@ class CrowdsaleChecker(Crowdsale):
   token_contract = None
   token_balances = None
   sold_tokens = 0
+  tokens_to_preallocate = 10
+  wei_price_of_preallocation = 350
+
 
   def __init__(self, params):
     Crowdsale.__init__(self, params)
