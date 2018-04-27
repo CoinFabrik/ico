@@ -18,10 +18,15 @@ tokens_sold_example = 37287 * 10 ** 20
 (token_tranche_pricing_contract, tx_hash) = deployer.deploy("./build/", "TokenTranchePricingMock", owner, tx,)
 receipt = web3.eth.waitForTransactionReceipt(tx_hash)
 assert receipt.status == 1
-print(token_tranche_pricing_contract.functions.getTranchesLength().call())
-assert token_tranche_pricing_contract.functions.getTranchesLength().call() == 0
-succeeds("Configuration of TokenTranchePricing succeeds.", token_tranche_pricing_contract.functions.configurateTokenTranchePricingMock(config['tranches']).transact(tx))
-print(token_tranche_pricing_contract.functions.getTranchesLength().call())
-assert token_tranche_pricing_contract.functions.getTranchesLength().call() == 5
-assert token_tranche_pricing_contract.functions.getCurrentPriceMock(tokens_sold_example).call() == 20000000000000000000
+functions = token_tranche_pricing_contract.functions
+
+def get_tranches_length():
+  return functions.getTranchesLength().call()
+
+print(get_tranches_length())
+assert get_tranches_length() == 0
+succeeds("Configuration of TokenTranchePricing succeeds.", functions.configurateTokenTranchePricingMock(config['tranches']).transact(tx))
+print(get_tranches_length())
+assert get_tranches_length() == 5
+assert functions.getCurrentPriceMock(tokens_sold_example).call() == 20000000000000000000
 web3.miner.stop()

@@ -28,49 +28,56 @@ assert receipt.status == 1
 print("Deployed UpgradeableTokenMock")
 functions = upgradeable_token_contract.functions
 
+def upgrade_master():
+  return functions.upgradeMaster().call()
+def get_upgrade_state():
+  return functions.getUpgradeState().call()
+def can_upgrade():
+  return functions.canUpgrade().call()
+def upgrade_agent():
+  return functions.upgradeAgent().call()
+def total_upgraded():
+  return functions.totalUpgraded().call()
+
 print("Testing changeUpgradeMaster")
 fails("changeUpgradeMaster fails calling with wrong master sender", functions.changeUpgradeMaster(newmaster).transact(txnewmaster))
-assert functions.upgradeMaster().call() == master
+assert upgrade_master() == master
 fails("changeUpgradeMaster fails setting address_zero and correct master sender", functions.changeUpgradeMaster(address_zero).transact(txmaster))
-assert functions.upgradeMaster().call() == master
+assert upgrade_master() == master
 succeeds("changeUpgradeMaster succeeds with correct master sender and setting new master", functions.changeUpgradeMaster(newmaster).transact(txmaster))
-assert functions.upgradeMaster().call() == newmaster
+assert upgrade_master() == newmaster
 succeeds("changeUpgradeMaster succeeds with correct master sender and setting old master", functions.changeUpgradeMaster(master).transact(txnewmaster))
-assert functions.upgradeMaster().call() == master
+assert upgrade_master() == master
 
-assert functions.canUpgrade().call()
+assert can_upgrade()
 succeeds("setCanUp to False succeeds", functions.setCanUp(False).transact(txmaster))
-assert not functions.canUpgrade().call()
-assert functions.getUpgradeState().call()
+assert not can_upgrade()
+assert get_upgrade_state()
 fails("setUpgradeAgent fails with wrong master", functions.setUpgradeAgent(upgrade_agent_contract.address).transact(txnewmaster))
-assert functions.upgradeAgent().call() == address_zero
+assert upgrade_agent() == address_zero
 fails("setUpgradeAgent fails setting address zero", functions.setUpgradeAgent(address_zero).transact(txmaster))
-assert functions.upgradeAgent().call() == address_zero
+assert upgrade_agent() == address_zero
 fails("setUpgradeAgent fails with canUpgrade False", functions.setUpgradeAgent(upgrade_agent_contract.address).transact(txmaster))
-assert functions.upgradeAgent().call() == address_zero
+assert upgrade_agent() == address_zero
 fails("upgrade fails with canUpgrade False (state NotAllowed)", functions.upgrade(10000000000).transact(txmaster))
-assert functions.totalUpgraded().call() == 0
+assert total_upgraded() == 0
 
 succeeds("setCanUp to True succeeds", functions.setCanUp(True).transact(txmaster))
-assert functions.canUpgrade().call()
-assert functions.getUpgradeState().call() == 2
+assert can_upgrade()
+assert get_upgrade_state() == 2
 fails("upgrade fails in state WaitingForAgent", functions.upgrade(10000000000).transact(txmaster))
-assert functions.totalUpgraded().call() == 0
+assert total_upgraded() == 0
 fails("setUpgradeAgent fails with wrong master", functions.setUpgradeAgent(upgrade_agent_contract.address).transact(txnewmaster))
-assert functions.upgradeAgent().call() == address_zero
+assert upgrade_agent() == address_zero
 fails("setUpgradeAgent fails setting address zero", functions.setUpgradeAgent(address_zero).transact(txmaster))
-assert functions.upgradeAgent().call() == address_zero
-assert functions.upgradeMaster().call() == master
-assert functions.canUpgrade().call()
-assert upgrade_agent_contract.address != address_zero
-assert functions.getUpgradeState().call() != 4
+assert upgrade_agent() == address_zero
 succeeds("setUpgradeAgent succeeds with canUpgrade True", functions.setUpgradeAgent(upgrade_agent_contract.address).transact(txmaster))
-assert functions.upgradeAgent().call() == upgrade_agent_contract.address
-assert functions.getUpgradeState().call() == 3
+assert upgrade_agent() == upgrade_agent_contract.address
+assert get_upgrade_state() == 3
 fails("upgrade fails sending value 0", functions.upgrade(0).transact(txmaster))
-assert functions.totalUpgraded().call() == 0
+assert total_upgraded() == 0
 succeeds("upgrade succeeds", functions.upgrade(10000000000).transact(txmaster))
-assert functions.totalUpgraded().call() == 10000000000
-assert functions.getUpgradeState().call() == 4
+assert total_upgraded() == 10000000000
+assert get_upgrade_state() == 4
 
 web3.miner.stop()
