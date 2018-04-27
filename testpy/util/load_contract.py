@@ -1,6 +1,6 @@
 import glob
 import os
-from web3_interface import Web3Interface
+from .web3_interface import Web3Interface
 import json
 
 class ContractLoader:
@@ -20,7 +20,7 @@ class ContractLoader:
     contract = self.web3.eth.contract(address=contract_address, abi=contract_abi, bytecode=contract_bytecode)
     return contract
 
-  def get_abi_and_bytecode(self, compiled_path, contract_name):
+  def get_abi_and_bytecode(compiled_path, contract_name):
     with open(compiled_path + contract_name + ".abi") as contract_abi_file:
       contract_abi = json.load(contract_abi_file)
     with open(compiled_path + contract_name + ".bin") as contract_bin_file:
