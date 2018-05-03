@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
-from util.deployer import Deployer
-from util.web3_interface import Web3Interface
-from util.tx_checker import fails, succeeds
-from util.test_config2 import config_f
+import sys
+sys.path.append("../deployment")
+from deployer import Deployer
+from web3_interface import Web3Interface
+from tx_checker import fails, succeeds
+from test_config2 import config_f
 
 web3 = Web3Interface().w3
 web3.miner.start(1)
@@ -15,7 +17,7 @@ tx = {"from": owner, "value": 0, "gas": gas, "gasPrice": gas_price}
 config = config_f()
 tokens_sold_example = 37287 * 10 ** 20
 
-(token_tranche_pricing_contract, tx_hash) = deployer.deploy("./build/", "TokenTranchePricingMock", owner, tx,)
+(token_tranche_pricing_contract, tx_hash) = deployer.deploy("./build/", "TokenTranchePricingMock", tx,)
 receipt = web3.eth.waitForTransactionReceipt(tx_hash)
 assert receipt.status == 1
 functions = token_tranche_pricing_contract.functions

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
-from util.deployer import Deployer
-from util.web3_interface import Web3Interface
-from util.tx_checker import fails, succeeds
+import sys
+sys.path.append("../deployment")
+from deployer import Deployer
+from web3_interface import Web3Interface
+from tx_checker import fails, succeeds
 
 web3 = Web3Interface().w3
 web3.miner.start(1)
@@ -13,7 +15,7 @@ gas = 50000000
 gas_price = 20000000000
 tx = {"from": sender, "value": 0, "gas": gas, "gasPrice": gas_price}
 
-(standard_token_contract, tx_hash) = deployer.deploy("./build/", "StandardTokenMock", tx['from'], tx,)
+(standard_token_contract, tx_hash) = deployer.deploy("./build/", "StandardTokenMock", tx,)
 receipt = web3.eth.waitForTransactionReceipt(tx_hash)
 assert receipt.status == 1
 functions = standard_token_contract.functions
@@ -44,21 +46,6 @@ def test_balances():
   for n in accounts:
     for m in accounts:
       assert allowed[n][m] == allowance(n, m)
-
-
-print("Test fails: - burn more tokens that the account has. Check.")
-print("            - approve when value and allowance != 0. Check.")
-print("            - transferFrom when value > from_address_balance. Check.")
-print("            - transferFrom when value > sender_allowance. Check.")
-print("            - transfer when value > from_address_balance. Check.")
-
-print("Test succeeds: - transfer. Check.")
-print("               - transferFrom. Check.")
-print("               - approve. Check.")
-print("               - addApproval. Check.")
-print("               - subApproval. Check.")
-print("               - burnTokensMock")
-print("               - mint. Check.")
 
 tx["from"] = accounts[3]
 fails("Transfer 10000 from account 1 to account 2 with account 3: Fails because account 1 has no tokens", functions.transferFrom(accounts[1], accounts[2], value_transfer).transact(tx))

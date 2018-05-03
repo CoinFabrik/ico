@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
-from util.deployer import Deployer
-from util.web3_interface import Web3Interface
-from util.tx_checker import fails, succeeds
+import sys
+sys.path.append("../deployment")
+from deployer import Deployer
+from web3_interface import Web3Interface
+from tx_checker import fails, succeeds
 
 web3 = Web3Interface().w3
 web3.miner.start(1)
@@ -18,11 +20,11 @@ txmasterwogas = {"from": master, "value": 0}
 txnewmaster = {"from": newmaster, "value": 0, "gas": gas, "gasPrice": gas_price}
 original_supply = 525 * (10 ** 3) * (10 ** 18)
 
-(upgrade_agent_contract, tx_hash_agent) = deployer.deploy("./build/", "UpgradeAgentMock", master, txmaster, original_supply)
+(upgrade_agent_contract, tx_hash_agent) = deployer.deploy("./build/", "UpgradeAgentMock", txmaster, original_supply)
 receipt_agent = web3.eth.waitForTransactionReceipt(tx_hash_agent)
 assert receipt_agent.status == 1
 print("Deployed UpgradeAgentMock")
-(upgradeable_token_contract, tx_hash) = deployer.deploy("./build/", "UpgradeableTokenMock", master, txmaster, original_supply)
+(upgradeable_token_contract, tx_hash) = deployer.deploy("./build/", "UpgradeableTokenMock", txmaster, original_supply)
 receipt = web3.eth.waitForTransactionReceipt(tx_hash)
 assert receipt.status == 1
 print("Deployed UpgradeableTokenMock")
