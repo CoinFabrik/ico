@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-
-class Investor:
-  
+class Investor:  
   address = None
   whitelisted = False
   customerId = None

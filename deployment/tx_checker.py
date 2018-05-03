@@ -1,7 +1,6 @@
 from web3_interface import Web3Interface
 
 web3 = Web3Interface().w3
-
 def fails(message, tx_hash):
   print(message, end='')
   try:
