@@ -20,7 +20,7 @@ def config_f():
   pre_ico_tranches_quantity = 1
   ico_tranches_quantity = tranches_quantity - pre_ico_tranches_quantity
   amounts = list(map(toWei, amounts))
-  config['multisig_address'] = to_checksum_address("0xF19258256B06324C7516B00bf5C76Af001ee1E95")
+  config['MW_address'] = to_checksum_address("0xF19258256B06324C7516B00bf5C76Af001ee1E95")
   config['start_time'] = int(round(time.time())) + 215
   pre_ico_tranches_start = config['start_time'] - 215
   pre_ico_tranches_end = config['start_time']
