@@ -83,7 +83,7 @@ class Crowdsale:
     return self.contract.functions.buyWithSignedAddress(customerId, v, r, s).transact(self.transaction_info(buyer, value))
   
   def configuration_crowdsale(self):
-    param_list = [self.params['multisig_address'], self.params['start_time'], self.params['end_time'], self.params['token_retriever_account'], self.params['tranches'], self.params['multisig_supply'], self.params['crowdsale_supply'], self.params['token_decimals'], self.params['max_tokens_to_sell']]
+    param_list = [self.params['MW_address'], self.params['start_time'], self.params['end_time'], self.params['token_retriever_account'], self.params['tranches'], self.params['multisig_supply'], self.params['crowdsale_supply'], self.params['token_decimals'], self.params['max_tokens_to_sell']]
     return self.contract.functions.configurationCrowdsale(*param_list).transact({"from": self.sender_account, "value": 0, "gas": self.gas, "gasPrice": self.gas_price})
 
   def configured(self):

@@ -32,7 +32,7 @@ class CrowdsaleChecker(Crowdsale):
     self.investors.append(Investor(self.accounts[3], False, 0))
     self.investors.append(Investor(self.accounts[4], False, 1))
     self.token_balances = {x : 0 for x in self.accounts}
-    self.multisig_wei = self.web3.eth.getBalance(self.params['multisig_address'])
+    self.multisig_wei = self.web3.eth.getBalance(self.params['MW_address'])
   
   def set_early_participant_whitelist(self):
     succeeds("Whitelist Account 1", super().set_early_participant_whitelist(self.accounts[1], True))
