@@ -16,8 +16,7 @@
   "testrpc": {
     "http": {
       "host": "localhost",
-      "port": 8545,
-      "network_id": "58342"
+      "port": 8545
     }
   },
   "poanet": {
@@ -32,9 +31,6 @@
       "network_id": "58342"
     },
     "ipc": {
-      "host": "localhost",
-      "port": 8545,
-      "network_id": "58342",
       "path": "/home/coinfabrik/Programming/blockchain/node/geth.ipc"
     }
   }
