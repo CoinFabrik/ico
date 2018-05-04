@@ -8,7 +8,7 @@ contract MintableTokenMock is MintableToken {
   uint private total_supply;
   mapping(address => uint) public balances;
 
-  function MintableTokenMock(uint initialSupply, address multisig, bool mintable) MintableToken(initialSupply, multisig, mintable) public {
+  constructor(uint initialSupply, address multisig, bool mintable) MintableToken(initialSupply, multisig, mintable) public {
 
   }
 

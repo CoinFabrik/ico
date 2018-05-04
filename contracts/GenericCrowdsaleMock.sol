@@ -7,7 +7,7 @@ contract GenericCrowdsaleMock is GenericCrowdsale {
   StandardTokenMock public token;
   uint public sellable_tokens;
 
-  function GenericCrowdsaleMock() public {
+  constructor() public {
     token = new StandardTokenMock();
   }
 

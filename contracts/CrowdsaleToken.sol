@@ -42,7 +42,7 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Los
    * @param team_multisig Address of the multisig that receives the initial supply and is set as the upgrade master.
    * @param token_retriever Address of the account that handles ERC20 tokens that were accidentally sent to this contract.
    */
-  function CrowdsaleToken(uint initial_supply, uint8 token_decimals, address team_multisig, address token_retriever) public
+  constructor(uint initial_supply, uint8 token_decimals, address team_multisig, address token_retriever) public
   UpgradeableToken(team_multisig) MintableToken(initial_supply, team_multisig, true) {
     require(token_retriever != address(0));
     decimals = token_decimals;

@@ -6,12 +6,12 @@ pragma solidity ^0.4.21;
  */
 
 import "./Ownable.sol";
-import "./helpers/NullStandardToken.sol";
+import "./NullStandardToken.sol";
 
 /**
  * Define interface for releasing the token transfer after a successful crowdsale.
  */
-contract ReleasableToken is NullStandardToken, Ownable {
+contract ReleasableTokenMock is NullStandardToken, Ownable {
 
   /* The finalizer contract that allows lifting the transfer limits on this token */
   address public releaseAgent;

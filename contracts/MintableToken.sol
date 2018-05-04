@@ -28,7 +28,7 @@ contract MintableToken is Mintable, Ownable {
   event MintingAgentChanged(address addr, bool state);
 
 
-  function MintableToken(uint initialSupply, address multisig, bool mintable) internal {
+  constructor(uint initialSupply, address multisig, bool mintable) internal {
     require(multisig != address(0));
     // Cannot create a token without supply and no minting
     require(mintable || initialSupply != 0);

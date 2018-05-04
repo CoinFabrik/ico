@@ -7,7 +7,7 @@ contract LostAndFoundTokenMock is LostAndFoundToken {
 
   address public master;
 
-  function LostAndFoundTokenMock() public {
+  constructor() public {
     master = msg.sender;
   }
 

@@ -4,7 +4,7 @@ pragma solidity ^0.4.21;
 contract DeploymentInfo {
   uint private deployed_on;
 
-  function DeploymentInfo() public {
+  constructor() public {
     deployed_on = block.number;
   }
 
