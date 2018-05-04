@@ -6,7 +6,7 @@
  * Heavily modified by https://www.coinfabrik.com/
  */
 
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.23;
 
 import "./SafeMath.sol";
 
