@@ -11,6 +11,10 @@ contract GenericCrowdsaleMock is GenericCrowdsale {
     token = new StandardTokenMock();
   }
 
+  function configuration(address team_multisig, uint start, uint end) public {
+    super.configurationGenericCrowdsale(team_multisig, start, end);
+  }
+
   function assignTokens(address receiver, uint tokenAmount) internal {
     token.transfer(receiver, tokenAmount);
   }
