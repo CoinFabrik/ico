@@ -22,10 +22,10 @@ class CrowdsaleChecker(Crowdsale):
   sold_tokens = 0
   tokens_to_preallocate = 10
   wei_price_of_preallocation = 350
+  token_contract_name = None
 
-
-  def __init__(self, params):
-    Crowdsale.__init__(self, params)
+  def __init__(self, params, contract_name, token_contract_name, addr_path=None, contract_addr=None):
+    Crowdsale.__init__(self, params, contract_name, addr_path=addr_path, contract_addr=contract_addr)
     self.state = self.states["PendingConfiguration"]
     self.investors.append(Investor(self.accounts[1], True, 0))
     self.investors.append(Investor(self.accounts[2], True, 1))
@@ -33,6 +33,7 @@ class CrowdsaleChecker(Crowdsale):
     self.investors.append(Investor(self.accounts[4], False, 1))
     self.token_balances = {x : 0 for x in self.accounts}
     self.multisig_wei = self.web3.eth.getBalance(self.params['MW_address'])
+    self.token_contract_name = token_contract_name
   
   def set_early_participant_whitelist(self):
     succeeds("Whitelist Account 1", super().set_early_participant_whitelist(self.accounts[1], True))
@@ -85,7 +86,7 @@ class CrowdsaleChecker(Crowdsale):
   
   def instantiate_token(self):
     loader = ContractLoader()
-    contract = loader.load("./build/", "CrowdsaleToken", contract_address=self.token())
+    contract = loader.load("./build/", self.token_contract_name, contract_address=self.token())
     return contract
 
   def check_all_end_balances(self):

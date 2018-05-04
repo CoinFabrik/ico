@@ -12,7 +12,7 @@ class Web3Interface:
     parser.add_argument("-p", "--provider", default="http")
     parser.add_argument("-t", "--test", action="store_true")
     args = parser.parse_args()
-    with open("util/networks.json") as networks_file:
+    with open("../deployment/networks.json") as networks_file:
       networks = json.load(networks_file)
     try:
       if args.provider == "ipc":
