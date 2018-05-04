@@ -7,8 +7,6 @@ from deployer import Deployer
 from web3_interface import Web3Interface
 from tx_checker import fails, succeeds
 
-print(deployer.__file__)
-
 web3 = Web3Interface().w3
 web3.miner.start(1)
 deployer = Deployer()
