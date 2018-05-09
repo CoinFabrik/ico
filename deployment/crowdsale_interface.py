@@ -28,11 +28,11 @@ class Crowdsale:
   contract = None
   states = {"Unknown": 0, "PendingConfiguration": 1, "PreFunding": 2, "Funding": 3, "Success": 4, "Finalized": 5}
   
-  def __init__(self, config_params=None, contract_name, addr_path=None, contract_addr=None):
+  def __init__(self, config_params=None, contract_name, log_path):
     self.params = config_params
     
     loader = ContractLoader()
-    self.contract = loader.load("./build/", contract_name, address_path=addr_path, contract_address=contract_addr)
+    self.contract = loader.load("./build/", contract_name, log_path)
 
   # Transaction parameter
   def transaction_info(self, sender, value=0):

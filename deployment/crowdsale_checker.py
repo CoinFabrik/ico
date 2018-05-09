@@ -24,8 +24,8 @@ class CrowdsaleChecker(Crowdsale):
   wei_price_of_preallocation = 350
   token_contract_name = None
 
-  def __init__(self, params, contract_name, token_contract_name, addr_path=None, contract_addr=None):
-    Crowdsale.__init__(self, params, contract_name, addr_path=addr_path, contract_addr=contract_addr)
+  def __init__(self, params, contract_name, token_contract_name, log_path):
+    Crowdsale.__init__(self, params, contract_name, log_path)
     self.state = self.states["PendingConfiguration"]
     self.investors.append(Investor(self.accounts[1], True, 0))
     self.investors.append(Investor(self.accounts[2], True, 1))
