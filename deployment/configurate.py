@@ -13,9 +13,11 @@ import sys
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-n", "--network", default="poanet")
-parser.add_argument("-p", "--provider", default="http")
-parser.add_argument("-t", "--test", action="store_true")
+parser.add_argument("-n", "--network", default="poanet", help="Enter network, defaults to poanet")
+parser.add_argument("-p", "--provider", default="http", help="Enter provider, defaults to http")
+parser.add_argument("-a", "--address", help="Enter address to look for log file")
+parser.add_argument("-d", "--deployment_name", help="Enter deployment name to look for log file")
+parser.add_argument("-t", "--test", action="store_true", help="Testing mode")
 args = parser.parse_args()
 
 if args.test:
@@ -24,7 +26,7 @@ else:
   from client_config import config_f
 
 config = config_f()
-c = [config['multisig_address'], config['start_time'], config['end_time'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals'], config['max_tokens_to_sell']]
+c = [config['MW_address'], config['start_time'], config['end_time'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals'], config['max_tokens_to_sell']]
 
 web3 = Web3Interface().w3
 miner = web3.miner
@@ -34,10 +36,10 @@ else:
   sender_account = web3.eth.accounts[0]
 gas = 5000000
 gas_price = None
-params_log_path = "./params_log/"
+log_path = "./log/"
 
 loader = ContractLoader()
-contract = loader.load("./build/", "Crowdsale", address_path="./address_log/")
+contract = loader.load("./build/", "Crowdsale", log_path=log_path)
 
 # Display configuration parameters, confirm them, write them to json file
 def dump():
@@ -45,7 +47,7 @@ def dump():
   print("\nWeb3 version:", web3.version.api)
   print("\nWeb3 network:", args.network)
   print(
-    "\n\nMultisig address:", config['multisig_owners'][0],
+    "\n\nMultisig address:", config['MW_address'][0],
     "\n\nStart time:", time.ctime(config['start_time']),
     "\n\nEnd time:", time.ctime(config['end_time']),
     "\n\nToken retriever: " + config['token_retriever_account']
@@ -73,25 +75,18 @@ def dump():
       sys.exit("Aborted")
     else:
       print("\nPlease enter 'yes' or 'no'\n")
-  deployment_name = input('\nEnter name of deployment: ')
-  local_time = datetime.now()
-  json_file_name = "Crowdsale" + '-' + local_time.strftime('%Y-%m-%d--%H-%M-%S') + '--' + deployment_name
   
-  try:
-    if not os.path.exists(params_log_path):
-      os.makedirs(params_log_path)
-  except OSError as e:
-    if e.errno != errno.EEXIST:
-      raise
+  ContractLoader.exists_folder(log_path)
   
   # Writing configuration parameters into json file for logging purposes
-  file_path_name_w_ext = params_log_path + json_file_name + '.json'
-  with open(file_path_name_w_ext, 'w') as fp:
-    json.dump(config, fp, sort_keys=True, indent=2)
+  (log_json, file_path) = ContractLoader.get_deployment_json_and_path(log_path, deployment_name=args.deployment_name, address=args.address)
+  log_json.update(config)
+  with open(file_path, 'w') as fp:
+    json.dump(log_json, fp, sort_keys=True, indent=2)
 
 def configurate():
   configuration_tx_hash = contract.functions.configurationCrowdsale(*c).transact({"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price})
-  print("Configuration transaction hash: ", configuration_tx_hash)
+  print("Configuration transaction hash: ", configuration_tx_hash.hex())
   return configuration_tx_hash
 
 if __name__ == '__main__':

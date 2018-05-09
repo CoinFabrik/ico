@@ -4,7 +4,7 @@ from crowdsale_deployment import deploy
 from configurate import config
 from crowdsale_checker import CrowdsaleChecker
 
-deploy()
+contract = deploy()
 
 def general_check():
   crowdsale_checker.check_state()
@@ -32,7 +32,7 @@ def all_checks_and_stages():
   #halt_stage()
   #require_customer_id_stage()
 
-crowdsale_checker = CrowdsaleChecker(config)
+crowdsale_checker = CrowdsaleChecker(config, "Crowdsale", "CrowdsaleToken", contract_addr=contract.address)
 
 print("Pre-ICO before configuration stage")
 

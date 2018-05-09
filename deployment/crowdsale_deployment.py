@@ -8,11 +8,12 @@ from datetime import datetime
 from deployer import Deployer
 import sys
 import argparse
+from load_contract import ContractLoader
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-n", "--network", default="poanet")
-parser.add_argument("-p", "--provider", default="http")
-parser.add_argument("-t", "--test", action="store_true")
+parser.add_argument("-n", "--network", default="poanet", help="Enter network, defaults to poanet")
+parser.add_argument("-p", "--provider", default="http", help="Enter provider, defaults to http")
+parser.add_argument("-t", "--test", action="store_true", help="Testing mode")
 parser.add_argument("-c", "--configurate", action="store_true")
 args = parser.parse_args()
 
@@ -24,7 +25,7 @@ if web3.net.chainId == "1":
 else:
   sender_account = web3.eth.accounts[0]
 gas = 5000000
-address_log_path = "./address_log/"
+log_path = "./log/"
 compiled_path = "./build/"
 crowdsale_contract = None
 tx_hash = None
@@ -45,6 +46,7 @@ def deploy():
   print("\nDeployment transaction hash: ", tx_hash.hex(),
         "\nCrowdsale address: ", crowdsale_contract.address)
   write_to_address_log(crowdsale_contract)
+  return crowdsale_contract
 
 def write_to_address_log(contract):
   # Write json file with contract's address into address_log folder
@@ -54,16 +56,11 @@ def write_to_address_log(contract):
     deployment_name = input("Enter a name for the deployment: ") 
  
   local_time = datetime.now()
-  json_file_name = "Contract-Address" + '--' + local_time.strftime('%Y-%m-%d--%H-%M-%S') + '--' + deployment_name
+  json_file_name = deployment_name + '--' + local_time.strftime('%Y-%m-%d--%H-%M-%S') + "--" + contract.address
   
-  try:
-    if not os.path.exists(address_log_path):
-      os.makedirs(address_log_path)
-  except OSError as e:
-    if e.errno != errno.EEXIST:
-      raise
+  ContractLoader.exists_folder(log_path)
   
-  file_path_name_w_ext = address_log_path + json_file_name + '.json'
+  file_path_name_w_ext = log_path + json_file_name + '.json'
   address_for_file = {'contract_address': contract.address}
   with open(file_path_name_w_ext, 'w') as fp:
     json.dump(address_for_file, fp, sort_keys=True, indent=2)
