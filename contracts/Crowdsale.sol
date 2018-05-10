@@ -33,7 +33,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
 
   function configurationCrowdsale(address team_multisig, uint start, uint end,
   address token_retriever, uint[] init_tranches, uint multisig_supply, uint crowdsale_supply,
-  uint8 token_decimals, uint max_tokens_to_sell) public onlyOwner {
+  uint8 token_decimals) public onlyOwner {
 
     initial_tokens = multisig_supply;
     minimum_buy_value = uint(100).mul(10 ** uint(token_decimals));
@@ -51,7 +51,7 @@ contract Crowdsale is GenericCrowdsale, LostAndFoundToken, DeploymentInfo, Token
     // Necessary if assignTokens mints
     token.setMintAgent(address(this), false);
 
-    sellable_tokens = max_tokens_to_sell;
+    sellable_tokens = crowdsale_supply;
 
     // Configuration functionality for GenericCrowdsale.
     configurationGenericCrowdsale(team_multisig, start, end);
