@@ -5,7 +5,7 @@ import json
 import unlocker
 import os, errno
 from datetime import datetime
-from deployer import Deployer
+from deployer2 import Deployer
 import sys
 import argparse
 from load_contract import ContractLoader
@@ -25,11 +25,10 @@ if web3.net.version == "1":
 else:
   sender_account = web3.eth.accounts[0]
 gas = 5000000
-gas_price = None
 log_path = "./log/"
 compiled_path = "./build/"
+crowdsale_contract = None
 tx_hash = None
-contract_name = None
 
 if args.test:
   unlocker.unlock()
