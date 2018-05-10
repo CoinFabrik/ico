@@ -20,19 +20,19 @@ parser.add_argument("-t", "--test", action="store_true", help="Testing mode")
 args = parser.parse_args()
 
 if args.test:
-  from test_config2 import config_f
+  from test_config import config_f
 else:
   from client_config import config_f
 config = config_f()
-c = [config['MW_address'], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals'], config['max_tokens_to_sell']]
+c = [config['MW_address'], config['startTime'], config['endTime'], config['token_retriever_account'], config['tranches'], config['multisig_supply'], config['crowdsale_supply'], config['token_decimals']]
 
 web3 = Web3Interface().w3
 miner = web3.miner
-if web3.net.chainId == "1":
+if web3.net.version == "1":
   sender_account = "0x54d9249C776C56520A62faeCB87A00E105E8c9Dc"
 else:
   sender_account = web3.eth.accounts[0]
-gas = 5000000
+gas = 2000000
 gas_price = None
 log_path = "./log/"
 
