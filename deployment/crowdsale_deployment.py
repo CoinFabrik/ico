@@ -5,7 +5,7 @@ import json
 import unlocker
 import os, errno
 from datetime import datetime
-from deployer2 import Deployer
+from deployer import Deployer
 import sys
 import argparse
 from load_contract import ContractLoader
