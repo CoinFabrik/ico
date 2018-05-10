@@ -1,0 +1,37 @@
+{
+  "mainnet": {
+    "ws": {
+      "host": "localhost",
+      "port": 8546,
+      "network_id": "1"
+    }
+  },
+  "ropsten": {
+    "http": {
+      "host": "localhost",
+      "port": 8544,
+      "network_id": "3"
+    }
+  },
+  "testrpc": {
+    "http": {
+      "host": "localhost",
+      "port": 8545
+    }
+  },
+  "poanet": {
+    "ws": {
+      "host": "localhost",
+      "port": 8547,
+      "network_id": "58342"
+    },
+    "http": {
+      "host": "localhost",
+      "port": 8545,
+      "network_id": "58342"
+    },
+    "ipc": {
+      "path": "/home/coinfabrik/Programming/blockchain/node/geth.ipc"
+    }
+  }
+}
