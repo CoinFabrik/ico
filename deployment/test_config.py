@@ -17,7 +17,7 @@ def config_f():
   amounts = list(map(toWei, amounts))
   assert len(amounts) == len(eur_per_fulltokens),  "Fails lengths"
   config['tranches'] = []
-  config['startTime'] = int(datetime(2018, 4, 16, 10, tzinfo = timezone.utc).timestamp())
+  config['startTime'] = int(datetime(2018, 4, 26, 10, tzinfo = timezone.utc).timestamp()) # int(datetime(2018, 4, 16, 10, tzinfo = timezone.utc).timestamp())
   config['endTime'] = int(datetime(2018, 7, 14, 10, tzinfo = timezone.utc).timestamp())
   config['MW_address'] = to_checksum_address("0x93C4a8ed12BAb494bc3045380EE1CfC07507D234")
   config['token_retriever_account'] = to_checksum_address('0x54d9249C776C56520A62faeCB87A00E105E8c9Dc')
@@ -25,15 +25,15 @@ def config_f():
   config['crowdsale_supply'] = 1008 * (10 ** 6) * ether
   config['token_decimals'] = 18
   config['max_tokens_to_sell'] = 1008 * (10 ** 6) * ether
-  tranches_start = [int(datetime.utcnow().timestamp()),
-                    int(datetime.utcnow().timestamp()),
-                    int(datetime.utcnow().timestamp()),
-                    int(datetime.utcnow().timestamp()),
-                    int(datetime.utcnow().timestamp())]
-  tranches_end = [int(datetime(2018, 5, 1, 10, tzinfo = timezone.utc).timestamp()),
-                  int(datetime(2018, 5, 16, 10, tzinfo = timezone.utc).timestamp()),
-                  int(datetime(2018, 5, 31, 10, tzinfo = timezone.utc).timestamp()),
-                  int(datetime(2018, 6, 15, 10, tzinfo = timezone.utc).timestamp()),
+  tranches_start = [int(round(time.time())),
+                    int(round(time.time())),
+                    int(round(time.time())),
+                    int(round(time.time())),
+                    int(round(time.time()))]
+  tranches_end = [int(round(time.time())) + 2000,
+                  int(round(time.time())) + 3000,
+                  int(round(time.time())) + 4000,
+                  int(round(time.time())) + 5000,
                   config['endTime']]
   for x in range(0, tranches_quantity):
     config['tranches'].append(amounts[x])
