@@ -24,7 +24,7 @@ class ContractLoader:
       if self.args.address:
         contract = self.web3.eth.contract(address=self.args.address, abi=contract_abi, bytecode=contract_bytecode)
       elif self.args.deployment_name:
-        log_json = self.get_deployment_json(log_path, self.args.deployment_name, self.args.address)
+        (log_json, latest_file) = self.get_deployment_json_and_path(log_path, self.args.deployment_name, self.args.address)
         loaded_address = log_json["contract_address"]
         contract = self.web3.eth.contract(address=loaded_address, abi=contract_abi, bytecode=contract_bytecode)
     except FileNotFoundError:
