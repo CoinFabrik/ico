@@ -1,4 +1,4 @@
-# CryptoSolarTech
+# Kryptobits
 
 ## Requirements
 
@@ -10,5 +10,5 @@
 
 - `cd deployment` Goes to deployment directory
 - `./recompile.sh` Compiles the contracts 
-- `python3 crowdsale_deployment.py` Deploys the contracts
-- `python3 configurate.py` Sets the configuration of the crowdsale
+- `./crowdsale_deployment.py -n mainnet` Deploys the contracts
+- `./configurate.py (-a <address> or -d <deployment_name>)` Sets the configuration of the crowdsale
