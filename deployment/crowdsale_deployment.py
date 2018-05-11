@@ -27,7 +27,6 @@ else:
 gas = 4600000
 log_path = "./log/"
 compiled_path = "./build/"
-crowdsale_contract = None
 tx_hash = None
 
 if args.test:
@@ -42,11 +41,11 @@ else:
 def deploy():
   deployer = Deployer()
   print("\nDeploying contract...")
-  (crowdsale_contract, tx_hash) = deployer.deploy(compiled_path, contract_name, {"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price},)
+  (contract, tx_hash) = deployer.deploy(compiled_path, contract_name, {"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price},)
   print("\nDeployment transaction hash: ", tx_hash.hex(),
-        "\nCrowdsale address: ", crowdsale_contract.address)
-  write_to_address_log(crowdsale_contract)
-  return crowdsale_contract
+        "\nCrowdsale address: ", contract.address)
+  write_to_address_log(contract)
+  return contract
 
 def write_to_address_log(contract):
   # Write json file with contract's address into address_log folder
@@ -66,7 +65,7 @@ def write_to_address_log(contract):
     json.dump(address_for_file, fp, sort_keys=True, indent=2)
 
 if __name__ == '__main__':
-  deploy()
+  crowdsale_contract = deploy()
   if args.configurate:
     import configurate
-    configurate.configurate()
+    configurate.configurate(address=crowdsale_contract.address, abi=crowdsale_contract.abi, bytecode=crowdsale_contract.bytecode)

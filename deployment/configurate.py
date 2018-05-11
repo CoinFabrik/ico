@@ -17,6 +17,7 @@ parser.add_argument("-p", "--provider", default="http", help="Enter provider, de
 parser.add_argument("-a", "--address", help="Enter address to look for log file")
 parser.add_argument("-d", "--deployment_name", help="Enter deployment name to look for log file")
 parser.add_argument("-t", "--test", action="store_true", help="Testing mode")
+parser.add_argument("-c", "--configurate", action="store_true")
 args = parser.parse_args()
 
 if args.test:
@@ -45,12 +46,12 @@ def dump():
   print("\nWeb3 version:", web3.version.api)
   print("\nWeb3 network:", args.network)
   print(
-    "\n\nMultisig address:", config['MW_address'][0], 
+    "\n\nMultisig address:", config['MW_address'], 
     "\n\nStart time:", time.ctime(config['startTime']),
     "\n\nEnd time:", time.ctime(config['endTime']),
     "\n\nToken retriever: " + config['token_retriever_account']
   );  
-  for x in range(0,int((len(config['tranches'])/4)-1)):
+  for x in range(int((len(config['tranches'])/4))):
     print("\nTranche #", x, " -----------------------------------------------------------------",
       "\nFullTokens cap:", int(config['tranches'][4*x]/(10**18)),
       "\nStart:         ", time.ctime(config['tranches'][4*x+1]),
@@ -82,7 +83,9 @@ def dump():
   with open(file_path, 'w') as fp:
     json.dump(log_json, fp, sort_keys=True, indent=2)
 
-def configurate():
+def configurate(address=None, abi=None, bytecode=None):
+  if address and abi and bytecode:
+    contract = web3.eth.contract(address=address, abi=abi, bytecode=bytecode)
   configuration_tx_hash = contract.functions.configurationCrowdsale(*c).transact({"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price})
   print("Configuration transaction hash: ", configuration_tx_hash.hex())
   return configuration_tx_hash
