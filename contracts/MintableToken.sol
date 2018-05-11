@@ -53,7 +53,7 @@ contract MintableToken is Mintable, Ownable {
    */
   function setMintAgent(address addr, bool state) onlyOwner canMint public {
     mintAgents[addr] = state;
-    MintingAgentChanged(addr, state);
+    emit MintingAgentChanged(addr, state);
   }
 
   modifier onlyMintAgent() {

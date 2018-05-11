@@ -31,12 +31,12 @@ contract Haltable is Ownable {
   // called by the owner on emergency, triggers stopped state
   function halt() external onlyOwner {
     halted = true;
-    Halted(true);
+    emit Halted(true);
   }
 
   // called by the owner on end of emergency, returns to normal state
   function unhalt() external onlyOwner onlyInEmergency {
     halted = false;
-    Halted(false);
+    emit Halted(false);
   }
 }
