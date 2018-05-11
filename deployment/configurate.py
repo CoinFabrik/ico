@@ -83,7 +83,7 @@ def dump():
   with open(file_path, 'w') as fp:
     json.dump(log_json, fp, sort_keys=True, indent=2)
 
-def configurate(address=None, abi=None, bytecode=None):
+def configurate(contract=None, address=None, abi=None, bytecode=None):
   if address and abi and bytecode:
     contract = web3.eth.contract(address=address, abi=abi, bytecode=bytecode)
   configuration_tx_hash = contract.functions.configurationCrowdsale(*c).transact({"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price})
@@ -98,4 +98,4 @@ if __name__ == '__main__':
   else:
     gas_price = input("Enter gas price: ")
     dump()
-  configurate()
+  configurate(contract=contract)
