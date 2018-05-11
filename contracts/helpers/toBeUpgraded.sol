@@ -9,7 +9,7 @@ contract toBeUpgraded is UpgradeableToken, StandardToken {
   bool public canUp;
 
   //constructor
-  function toBeUpgraded(uint value) public
+  constructor(uint value) public
   UpgradeableToken(msg.sender) {
     mintInternal(msg.sender, value);
     setCanUp(true);

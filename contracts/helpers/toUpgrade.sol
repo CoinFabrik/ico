@@ -5,7 +5,7 @@ import '../UpgradeAgent.sol';
 // Mock class for testing of UpgradeableToken
 contract toUpgrade is UpgradeAgent {
     
-  function toUpgrade(uint value) public {
+  constructor(uint value) public {
     originalSupply = value;
   }
 

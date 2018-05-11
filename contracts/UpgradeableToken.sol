@@ -51,7 +51,7 @@ contract UpgradeableToken is EIP20Token, Burnable {
   /**
    * Do not allow construction without upgrade master set.
    */
-  function UpgradeableToken(address master) internal {
+  constructor(address master) internal {
     setUpgradeMaster(master);
   }
 

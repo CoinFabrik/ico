@@ -99,7 +99,7 @@ contract MultiSigWallet {
     /// @dev Contract constructor sets initial owners and required number of confirmations.
     /// @param init_owners List of initial owners.
     /// @param signers_required Number of required confirmations.
-    function MultiSigWallet(address[] init_owners, uint signers_required)
+    constructor(address[] init_owners, uint signers_required)
         public
         validRequirement(init_owners.length, signers_required)
     {
