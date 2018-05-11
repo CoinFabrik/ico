@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.23;
 
 /**
  * Originally from https://github.com/ConsenSys/MultiSigWallet
