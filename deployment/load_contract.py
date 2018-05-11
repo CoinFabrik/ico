@@ -12,17 +12,18 @@ class ContractLoader:
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--network", default="poanet", help="Enter network, defaults to poanet")
     parser.add_argument("-p", "--provider", default="http", help="Enter provider, defaults to http")
-    parser.add_argument("-t", "--test", action="store_true", help="Testing mode")
     parser.add_argument("-a", "--address", help="Enter address to look for log file")
     parser.add_argument("-d", "--deployment_name", help="Enter deployment name to look for log file")
+    parser.add_argument("-t", "--test", action="store_true", help="Testing mode")
+    parser.add_argument("-c", "--configurate", action="store_true")
     self.args = parser.parse_args()
 
   def load(self, compiled_path, contract_name, log_path):
     (contract_abi, contract_bytecode) = self.get_abi_and_bytecode(compiled_path, contract_name)
-    if self.args.address:
-      contract = self.web3.eth.contract(address=self.args.address, abi=contract_abi, bytecode=contract_bytecode)
     try:
-      if self.args.deployment_name:
+      if self.args.address:
+        contract = self.web3.eth.contract(address=self.args.address, abi=contract_abi, bytecode=contract_bytecode)
+      elif self.args.deployment_name:
         log_json = self.get_deployment_json(log_path, self.args.deployment_name, self.args.address)
         loaded_address = log_json["contract_address"]
         contract = self.web3.eth.contract(address=loaded_address, abi=contract_abi, bytecode=contract_bytecode)

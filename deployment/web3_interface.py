@@ -13,6 +13,7 @@ class Web3Interface:
     parser.add_argument("-a", "--address", help="Enter address to look for log file")
     parser.add_argument("-d", "--deployment_name", help="Enter deployment name to look for log file")
     parser.add_argument("-t", "--test", action="store_true", help="Testing mode")
+    parser.add_argument("-c", "--configurate", action="store_true")
     args = parser.parse_args()
     with open("../deployment/networks.json") as networks_file:
       networks = json.load(networks_file)
