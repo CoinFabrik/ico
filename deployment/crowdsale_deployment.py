@@ -24,7 +24,7 @@ if web3.net.version == "1":
   sender_account = "0x54d9249C776C56520A62faeCB87A00E105E8c9Dc"
 else:
   sender_account = web3.eth.accounts[0]
-gas = 4800000
+gas = 4500000
 log_path = "./log/"
 compiled_path = "./build/"
 tx_hash = None
@@ -36,12 +36,12 @@ if args.test:
   gas_price = 5000000000
 else:
   contract_name = input("\nEnter contract's name: ")
-  gas_price = input("\nEnter gas price: ")
+  gas_price = 8600000000 #input("\nEnter gas price: ")
 
 def deploy():
   deployer = Deployer()
   print("\nDeploying contract...")
-  (contract, tx_hash) = deployer.deploy(compiled_path, contract_name, {"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price},)
+  (contract, tx_hash) = deployer.deploy(compiled_path, contract_name, {"from": sender_account, "value": 0, "nonce": 1642, "gas": gas, "gasPrice": gas_price},)
   print("\nDeployment transaction hash: ", tx_hash.hex(),
         "\nCrowdsale address: ", contract.address)
   write_to_address_log(contract)
