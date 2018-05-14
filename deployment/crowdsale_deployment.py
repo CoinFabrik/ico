@@ -24,7 +24,7 @@ if web3.net.version == "1":
   sender_account = "0x54d9249C776C56520A62faeCB87A00E105E8c9Dc"
 else:
   sender_account = web3.eth.accounts[0]
-gas = 4600000
+gas = 4800000
 log_path = "./log/"
 compiled_path = "./build/"
 tx_hash = None
