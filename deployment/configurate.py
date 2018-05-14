@@ -33,7 +33,7 @@ if web3.net.version == "1":
   sender_account = "0x54d9249C776C56520A62faeCB87A00E105E8c9Dc"
 else:
   sender_account = web3.eth.accounts[0]
-gas = 2500000
+gas = 2100000
 gas_price = None
 log_path = "./log/"
 
@@ -96,6 +96,6 @@ if __name__ == '__main__':
     miner.start(1)
     gas_price = 5000000000
   else:
-    gas_price = input("Enter gas price: ")
+    gas_price = 8600000000 #input("Enter gas price: ")
     dump()
   configurate(contract=contract)
