@@ -17,20 +17,20 @@ def config_f():
   amounts = list(map(toWei, amounts))
   assert len(amounts) == len(eur_per_fulltokens),  "Fails lengths"
   config['tranches'] = []
-  config['startTime'] = int(datetime(2018, 5, 15, 10, tzinfo = timezone.utc).timestamp())
-  config['endTime'] = int(datetime(2018, 7, 15, 10, tzinfo = timezone.utc).timestamp())
+  config['startTime'] = int(datetime(2018, 5, 17, 10, tzinfo = timezone.utc).timestamp())
+  config['endTime'] = int(datetime(2018, 8, 3, 10, tzinfo = timezone.utc).timestamp())
   config['MW_address'] = to_checksum_address("0x520F1214AebF4507A02cf5C5AC7E236E772db95f")
-  config['token_retriever_account'] = to_checksum_address('0x54d9249C776C56520A62faeCB87A00E105E8c9Dc')
+  config['token_retriever_account'] = to_checksum_address("0x54d9249C776C56520A62faeCB87A00E105E8c9Dc")
   config['multisig_supply'] = 36050 * (10 ** 3) * ether
   config['crowdsale_supply'] = 1442 * (10 ** 6) * ether
   config['token_decimals'] = 18
-  tranches_start = [int(datetime.utcnow().timestamp()),
-                    int(datetime.utcnow().timestamp()),
-                    int(datetime.utcnow().timestamp()),
-                    int(datetime.utcnow().timestamp())]
-  tranches_end = [int(datetime(2018, 5, 31, 10, tzinfo = timezone.utc).timestamp()),
-                  int(datetime(2018, 6, 15, 10, tzinfo = timezone.utc).timestamp()),
-                  int(datetime(2018, 6, 30, 10, tzinfo = timezone.utc).timestamp()),
+  tranches_start = [int(datetime.now().timestamp()),
+                    int(datetime.now().timestamp()),
+                    int(datetime.now().timestamp()),
+                    int(datetime.now().timestamp())]
+  tranches_end = [int(datetime(2018, 6, 3, 10, tzinfo = timezone.utc).timestamp()),
+                  int(datetime(2018, 6, 18, 10, tzinfo = timezone.utc).timestamp()),
+                  int(datetime(2018, 7, 3, 10, tzinfo = timezone.utc).timestamp()),
                   config['endTime']]
   for x in range(tranches_quantity):
     config['tranches'].append(amounts[x])
@@ -38,4 +38,3 @@ def config_f():
     config['tranches'].append(tranches_end[x])
     config['tranches'].append(tokens_per_eur[x])
   return config
-  #Falta cambiar todas las fechas
