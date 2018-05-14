@@ -33,7 +33,7 @@ if web3.net.version == "1":
   sender_account = "0x54d9249C776C56520A62faeCB87A00E105E8c9Dc"
 else:
   sender_account = web3.eth.accounts[0]
-gas = 2000000
+gas = 2500000
 gas_price = None
 log_path = "./log/"
 
@@ -94,7 +94,7 @@ if __name__ == '__main__':
   if args.test:
     unlocker.unlock()
     miner.start(1)
-    gas_price = 20000000000
+    gas_price = 5000000000
   else:
     gas_price = input("Enter gas price: ")
     dump()
