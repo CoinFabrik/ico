@@ -26,7 +26,7 @@ contract CrowdsaleToken is ReleasableToken, MintableToken, UpgradeableToken, Los
 
   string public name = "Kryptobits";
 
-  string public symbol = "KBT";
+  string public symbol = "KBE";
 
   uint8 public decimals;
 
