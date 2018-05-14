@@ -23,7 +23,7 @@
 ### Before deployment
 
 - Compile contract running `./recompile.sh`. It will make dir 'build' in the current directory 'deployment' and dump the output there.
-- In [networks](networks.py) change the networks' information accordingly (host and port).
+- In [networks](networks.json) change the networks' information accordingly (host and port).
 - Change configuration data if needed in [client_config](client_config.py)
 
 ### Deployment
