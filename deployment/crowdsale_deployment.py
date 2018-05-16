@@ -28,20 +28,20 @@ gas = 4500000
 log_path = "./log/"
 compiled_path = "./build/"
 tx_hash = None
+contract_name = "Crowdsale"
 
 if args.test:
   unlocker.unlock()
   miner.start(1)
-  contract_name = "Crowdsale"
   gas_price = 5000000000
 else:
-  contract_name = input("\nEnter contract's name: ")
-  gas_price = 8600000000 #input("\nEnter gas price: ")
+  #input("\nEnter contract's name: ")
+  gas_price = 9100000000 #input("\nEnter gas price: ")
 
 def deploy():
   deployer = Deployer()
   print("\nDeploying contract...")
-  (contract, tx_hash) = deployer.deploy(compiled_path, contract_name, {"from": sender_account, "value": 0, "nonce": 1642, "gas": gas, "gasPrice": gas_price},)
+  (contract, tx_hash) = deployer.deploy(compiled_path, contract_name, {"from": sender_account, "value": 0, "gas": gas, "gasPrice": gas_price},)
   print("\nDeployment transaction hash: ", tx_hash.hex(),
         "\nCrowdsale address: ", contract.address)
   write_to_address_log(contract)

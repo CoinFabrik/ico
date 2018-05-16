@@ -47,15 +47,15 @@ def dump():
   print("\nWeb3 network:", args.network)
   print(
     "\n\nMultisig address:", config['MW_address'], 
-    "\n\nStart time:", time.ctime(config['startTime']),
-    "\n\nEnd time:", time.ctime(config['endTime']),
+    "\n\nStart time:", time.asctime(time.gmtime(config['startTime'])) + " (GMT)",
+    "\n\nEnd time:", time.asctime(time.gmtime(config['endTime'])) + " (GMT)",
     "\n\nToken retriever: " + config['token_retriever_account']
   );  
   for x in range(int((len(config['tranches'])/4))):
     print("\nTranche #", x, " -----------------------------------------------------------------",
       "\nFullTokens cap:", int(config['tranches'][4*x]/(10**18)),
-      "\nStart:         ", time.ctime(config['tranches'][4*x+1]),
-      "\nEnd:           ", time.ctime(config['tranches'][4*x+2]),
+      "\nStart:         ", time.asctime(time.gmtime(config['tranches'][4*x+1])) + " (GMT)",
+      "\nEnd:           ", time.asctime(time.gmtime(config['tranches'][4*x+2])) + " (GMT)",
       "\nTokens per EUR:", config['tranches'][4*x+3]
     )  
   print("------------------------------------------------------------------------------");
@@ -96,6 +96,6 @@ if __name__ == '__main__':
     miner.start(1)
     gas_price = 5000000000
   else:
-    gas_price = 8600000000 #input("Enter gas price: ")
+    gas_price = 9100000000 #input("Enter gas price: ")
     dump()
   configurate(contract=contract)
