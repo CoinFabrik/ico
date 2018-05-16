@@ -7,7 +7,7 @@ def config_f():
   ether = 10 ** 18
   eur_per_fulltokens = [0.05, 0.06, 0.08, 0.10]
   def to_tokens(price):
-    return int(ether / price);
+    return int(ether / price)
   tokens_per_eur = list(map(to_tokens, eur_per_fulltokens))
   tranches_quantity = len(tokens_per_eur)
   amounts = [200000000, 867000000, 1242000000, 1442000000]
@@ -18,7 +18,7 @@ def config_f():
   assert len(amounts) == len(eur_per_fulltokens),  "Fails lengths"
   config['tranches'] = []
   config['startTime'] = int(datetime(2018, 5, 17, 10, tzinfo = timezone.utc).timestamp())
-  config['endTime'] = int(datetime(2018, 8, 3, 10, tzinfo = timezone.utc).timestamp())
+  config['endTime'] = int(datetime(2018, 8, 24, 10, tzinfo = timezone.utc).timestamp())
   config['MW_address'] = to_checksum_address("0x520F1214AebF4507A02cf5C5AC7E236E772db95f")
   config['token_retriever_account'] = to_checksum_address("0x54d9249C776C56520A62faeCB87A00E105E8c9Dc")
   config['multisig_supply'] = 36050 * (10 ** 3) * ether
@@ -28,9 +28,9 @@ def config_f():
                     int(datetime.now().timestamp()),
                     int(datetime.now().timestamp()),
                     int(datetime.now().timestamp())]
-  tranches_end = [int(datetime(2018, 6, 3, 10, tzinfo = timezone.utc).timestamp()),
-                  int(datetime(2018, 6, 18, 10, tzinfo = timezone.utc).timestamp()),
-                  int(datetime(2018, 7, 3, 10, tzinfo = timezone.utc).timestamp()),
+  tranches_end = [int(datetime(2018, 6, 5, 10, tzinfo = timezone.utc).timestamp()),
+                  int(datetime(2018, 6, 25, 10, tzinfo = timezone.utc).timestamp()),
+                  int(datetime(2018, 7, 25, 10, tzinfo = timezone.utc).timestamp()),
                   config['endTime']]
   for x in range(tranches_quantity):
     config['tranches'].append(amounts[x])
