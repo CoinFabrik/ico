@@ -29,8 +29,8 @@ def halt_stage():
 
 def all_checks_and_stages():
   general_check()
-  #halt_stage()
-  #require_customer_id_stage()
+  halt_stage()
+  require_customer_id_stage()
 
 crowdsale_checker = CrowdsaleChecker(config, "Crowdsale", "CrowdsaleToken", contract_addr=contract.address)
 
