@@ -1,19 +1,12 @@
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
-import argparse
+from cli_args import args
 import json
 
 class Web3Interface:
   w3 = None
   def __init__(self):
     provider_param = None
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-n", "--network", default="poanet", help="Enter network, defaults to poanet")
-    parser.add_argument("-p", "--provider", default="http", help="Enter provider, defaults to http")
-    parser.add_argument("-a", "--address", help="Enter address to look for log file")
-    parser.add_argument("-d", "--deployment_name", help="Enter deployment name to look for log file")
-    parser.add_argument("-t", "--test", action="store_true", help="Testing mode")
-    args = parser.parse_args()
     with open("../deployment/networks.json") as networks_file:
       networks = json.load(networks_file)
     try:
