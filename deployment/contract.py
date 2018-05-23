@@ -36,9 +36,9 @@ class Contract:
     contract = self.web3.eth.contract(address=contract_address, abi=contract_abi, bytecode=contract_bytecode)
     return contract
   
-  def deploy(self, path, contract_name, tx_args, *args):
+  def deploy(self, path, contract_name, tx_args, *constructor_args):
     contract = self.instantiate_contract(tx_args["from"], path, contract_name)
-    tx_hash = contract.constructor(*args).transact(transaction=tx_args)
+    tx_hash = contract.constructor(*constructor_args).transact(transaction=tx_args)
     return (contract, tx_hash)
 
   @staticmethod  
