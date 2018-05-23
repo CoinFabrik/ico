@@ -18,9 +18,8 @@ if web3.net.version == "1":
 else:
   sender_account = web3.eth.accounts[0]
 
-contract = Contract()
-contract = contract.load_contract("./build/", "Crowdsale")
+contract = Contract().load_contract("./build/", "Crowdsale")
 tx_args_dict = tx_args(sender_account, gas=2000000)
-dump(web3, sender_account, args, config, tx_args_dict["gas"], tx_args_dict["gasPrice"])
+dump(web3, args, config, tx_args_dict)
 configuration_tx_hash = contract.functions.configurationCrowdsale(*c).transact(tx_args_dict)
 print("Configuration transaction hash: ", configuration_tx_hash.hex())
