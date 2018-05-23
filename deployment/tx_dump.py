@@ -27,12 +27,10 @@ def dump(web3, sender_account, args, config, gas, gas_price):
   )  
   
   # Validating configuration parameters
-  pending_input = True
-  consent = None
-  while pending_input:
+  while True:
     consent = input('\nDo you agree with the information? [yes/no]: ')
     if consent == 'yes':
-      pending_input = False
+      break
     elif consent == 'no':
       sys.exit("Aborted")
     else:
