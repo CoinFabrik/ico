@@ -40,6 +40,6 @@ def dump(web3, args, config, tx_args_dict):
   # Writing configuration parameters into json file for logging purposes
   (log_json, file_path) = Contract.get_deployment_json_and_path(log_path, deployment_name=args.deployment_name, address=args.address)
   log_json.update(config)
-  log_json.update({"networkId": web3.bet.version})
+  log_json.update({"networkId": web3.net.version})
   with open(file_path, 'w') as fp:
     json.dump(log_json, fp, sort_keys=True, indent=2)
