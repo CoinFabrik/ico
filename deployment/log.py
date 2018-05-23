@@ -10,6 +10,6 @@ def log_address(contract):
   local_time = datetime.now()
   json_file_name = deployment_name + '--' + local_time.strftime('%Y-%m-%d--%H-%M-%S') + "--" + contract.address
   file_path_name_w_ext = log_path + json_file_name + '.json'
-  address_dict = {'contract_address': contract.address}
+  address_dict = {'contract_address': contract.address, 'deployment_name': deployment_name}
   with open(file_path_name_w_ext, 'w') as fp:
     json.dump(address_dict, fp, sort_keys=True, indent=2)
