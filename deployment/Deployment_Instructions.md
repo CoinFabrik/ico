@@ -12,8 +12,10 @@
 
 ### Deployment
 
-- For Deployment: You can run `./crowdsale_deployment.py -t` or `import crowdsale_deployment` from within a script of your own.
-- For Configuration: You can run `./configurate.py (-a <address> or -d <deployment_name>) -t`, or `import configurate` from within a script of your own or `from configurate import c` for getting only the parameters for the configuration.
+- For Deployment: You can run `./crowdsale_deployment.py [-n NETWORK] [-p PROVIDER] [-t]`.
+  - Options for NETWORK: {mainnet, ropsten, poanet}. Defaults to poanet.
+  - Options for PROVIDER: {http, ws, ipc}. Defaults to http.
+- For Configuration: You can run `./configurate.py [-n NETWORK] [-p PROVIDER] [-a ADDRESS] [-d DEPLOYMENT_NAME] [-t]`. Make sure you pass the ADDRESS or the DEPLOYMENT_NAME as parameter.
 
 
 ## **MainNet**:
@@ -22,11 +24,14 @@
 
 - Compile contract running `./recompile.sh`. It will make dir 'build' in the current directory 'deployment' and dump the output there.
 - In [networks](networks.json) change the networks' information accordingly.
-- Change configuration data in [client_config](client_config.py)
+- Change configuration data in [client_config](client_config.py).
+- If needed, set the gas in [deploy](deploy.py) and gasPrice in [tx_args](tx_args.py)
 
 ### Deployment
 
-- For Deployment: Run `./crowdsale_deployment.py -n mainnet`.
-  - You will be asked to enter the contract's name, the gas price and name of the deployment.
-- For Configuration: Run `./configurate.py -n mainnet (-a <address> or -d <deployment_name>)`
-  - You will be asked to enter the gas price and approve the configuration parameters.
+- For Deployment: Run `./crowdsale_deployment.py [-n NETWORK] [-p PROVIDER]`.
+  - Options for NETWORK: {mainnet, ropsten, poanet}. Defaults to poanet.
+  - Options for PROVIDER: {http, ws, ipc}. Defaults to http.
+  - You will be asked to enter the name of the deployment. The hash and the address will be printed.
+- For configuration: Run `./configurate.py [-n NETWORK] [-p PROVIDER] [-a ADDRESS] [-d DEPLOYMENT_NAME]`. Make sure you pass the ADDRESS or the DEPLOYMENT_NAME as parameter.
+  - You will be asked to approve the configuration parameters.
