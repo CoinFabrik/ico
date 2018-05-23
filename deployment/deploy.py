@@ -4,7 +4,7 @@ from web3_interface import Web3Interface, args
 import json
 from datetime import datetime
 from contract import Contract
-from log import write_address_to_log
+from log import log_address
 from tx_args import tx_args
 
 web3 = Web3Interface().w3
@@ -18,4 +18,4 @@ print("\nDeploying contract...")
 (crowdsale_contract, tx_hash) = contract.deploy(compiled_path, "Crowdsale", tx_args(sender_account, gas=4500000),)
 print("\nDeployment transaction hash: ", tx_hash.hex(),
       "\nCrowdsale address: ", crowdsale_contract.address)
-write_address_to_log(crowdsale_contract)
+log_address(crowdsale_contract)
