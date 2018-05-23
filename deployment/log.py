@@ -2,7 +2,7 @@ from contract import Contract
 from datetime import datetime
 import json
 
-def write_address_to_log(contract):
+def log_address(contract):
   """Write contract's address to json file in log directory."""
   log_path = "./log/"
   Contract.exists_folder(log_path)
