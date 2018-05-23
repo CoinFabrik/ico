@@ -3,7 +3,7 @@ import json
 import sys
 from contract import Contract
 
-def dump(web3, sender_account, args, config, gas, gas_price):
+def dump(web3, args, config, tx_args_dict):
   log_path = "./log/"
   # Displaying configuration parameters
   print("\nWeb3 version:", web3.version.api)
@@ -22,10 +22,9 @@ def dump(web3, sender_account, args, config, gas, gas_price):
       "\nTokens per EUR:", config['tranches'][4*x+3]
     )  
   print("------------------------------------------------------------------------------");
-  print("\nTransaction sender: ", sender_account,
-        "\nGas and Gas price: ", gas, " and ", gas_price, "\n"
+  print("\nTransaction sender: ", tx_args_dict["from"],
+        "\nGas and Gas price: ", tx_args_dict["gas"], " and ", tx_args_dict["gasPrice"], "\n"
   )  
-  
   # Validating configuration parameters
   while True:
     consent = input('\nDo you agree with the information? [yes/no]: ')
