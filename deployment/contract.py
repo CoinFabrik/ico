@@ -75,3 +75,10 @@ class Contract:
     with open(latest_file_path) as log_file:
       log_json = json.load(log_file)
     return (log_json, latest_file_path)
+
+  @staticmethod
+  def get_encoded_constructor_data(web3, compiled_path, contract_name, contract_address, *args):
+    (contract_abi, contract_bytecode) = Contract.get_abi_and_bytecode(compiled_path, contract_name)
+    contract = web3.eth.contract(address=contract_address, abi=contract_abi)
+    data = contract._encode_constructor_data(args=args)
+    return data
