@@ -18,7 +18,9 @@ if web3.net.version == "1":
 else:
   sender_account = web3.eth.accounts[0]
 
-contract = Contract().load_contract("./build/", "Crowdsale")
+compiled_path = "./build/"
+contract_name = "Crowdsale"
+contract = Contract().load_contract(compiled_path, contract_name)
 tx_args_dict = tx_args(sender_account, gas=2000000)
 dump(web3, args, config, tx_args_dict)
 configuration_tx_hash = contract.functions.configurationCrowdsale(*c).transact(tx_args_dict)
