@@ -1,16 +1,9 @@
 import argparse
 
-def get_args(args_list):
-  parser = argparse.ArgumentParser()
-  for arg in args_list:
-    parser.add_argument("-" + arg[0][0], "--" + arg[0], action=arg[1], default=arg[2], help=arg[3])
-  args = parser.parse_args()
-  return args
-
-args_list = [["network", None, "poanet", "Enter network, defaults to poanet"],
-            ["provider", None, "http", "Enter provider, defaults to http"],
-            ["address", None, None, "Enter address to look for log file"],
-            ["deployment_name", None, None, "Enter deployment name to look for log file"],
-            ["test", "store_true", False, "Testing mode"]]
-
-args = get_args(args_list)
+parser = argparse.ArgumentParser()
+parser.add_argument("-n", "--network", default="poanet", help="Enter network, defaults to poanet")
+parser.add_argument("-p", "--provider", default="http", help="Enter provider, defaults to http")
+parser.add_argument("-t", "--test", action="store_true", help="Testing mode")
+parser.add_argument("-a", "--address", help="Enter address to look for log file")
+parser.add_argument("-d", "--deployment_name", help="Enter deployment name to look for log file")
+args = parser.parse_args()
