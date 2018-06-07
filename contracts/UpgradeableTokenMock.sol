@@ -29,6 +29,10 @@ contract UpgradeableTokenMock is UpgradeableToken, StandardToken {
    * Overriden for testing different values
    */
   function canUpgrade() public view returns(bool) {
-     return canUp;
+    return canUp;
+  }
+
+  function burnTokens(address account, uint value) internal {
+    
   }
 }
