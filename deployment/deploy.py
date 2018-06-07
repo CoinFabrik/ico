@@ -13,9 +13,10 @@ if web3.net.version == "1":
 else:
   sender_account = web3.eth.accounts[0]
 compiled_path = "./build/"
+contract_name = "Crowdsale"
 contract = Contract()
 print("\nDeploying contract...")
-(crowdsale_contract, tx_hash) = contract.deploy(compiled_path, "Crowdsale", tx_args(sender_account, gas=4500000),)
+tx_hash = contract.deploy(compiled_path, contract_name, tx_args(sender_account, gas=4500000),)
 print("\nDeployment transaction hash: ", tx_hash.hex(),
-      "\nCrowdsale address: ", crowdsale_contract.address)
-log_address(crowdsale_contract)
+      "\nCrowdsale address: ", contract.contract.address)
+log_address(contract.contract)

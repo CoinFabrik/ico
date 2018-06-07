@@ -20,8 +20,9 @@ else:
 
 compiled_path = "./build/"
 contract_name = "Crowdsale"
-contract = Contract().load_contract(compiled_path, contract_name)
+contract = Contract()
+contract.load_contract(compiled_path, contract_name)
 tx_args_dict = tx_args(sender_account, gas=2000000)
 dump(web3, args, config, tx_args_dict)
-configuration_tx_hash = contract.functions.configurationCrowdsale(*c).transact(tx_args_dict)
+configuration_tx_hash = contract.contract.functions.configurationCrowdsale(*c).transact(tx_args_dict)
 print("Configuration transaction hash: ", configuration_tx_hash.hex())

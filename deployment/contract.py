@@ -8,9 +8,6 @@ from eth_utils import keccak, to_checksum_address
 
 class Contract:
 
-  web3 = None
-  args = None
-
   def __init__(self):
     self.web3 = Web3Interface().w3
     self.args = args
@@ -33,13 +30,12 @@ class Contract:
   def load_contract(self, compiled_path, contract_name, log_path="./log/"):
     (contract_abi, contract_bytecode) = self.get_abi_and_bytecode(compiled_path, contract_name)
     contract_address = self.load_address(log_path)
-    contract = self.web3.eth.contract(address=contract_address, abi=contract_abi, bytecode=contract_bytecode)
-    return contract
+    self.contract = self.web3.eth.contract(address=contract_address, abi=contract_abi, bytecode=contract_bytecode)
   
   def deploy(self, path, contract_name, tx_args, *constructor_args):
-    contract = self.instantiate_contract(tx_args["from"], path, contract_name)
-    tx_hash = contract.constructor(*constructor_args).transact(transaction=tx_args)
-    return (contract, tx_hash)
+    self.contract = self.instantiate_contract(tx_args["from"], path, contract_name)
+    tx_hash = self.contract.constructor(*constructor_args).transact(transaction=tx_args)
+    return tx_hash
 
   @staticmethod  
   def generate_contract_address(address, nonce):
