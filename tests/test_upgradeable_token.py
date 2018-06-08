@@ -15,7 +15,7 @@ def masters(web3):
   return [ADDRESS_ZERO, web3.eth.accounts[0], web3.eth.accounts[1], web3.eth.accounts[2]]
 
 @pytest.fixture(scope="module")
-def upgrade_agent_contract():
+def upgrade_agent():
   return Contract()
 
 @pytest.fixture(scope="module")
@@ -23,8 +23,8 @@ def upgradeable_token_contract():
   return Contract()
 
 @pytest.fixture(scope="module")
-def deploy_upgrade_agent_contract(upgrade_agent_contract, masters):
-  tx_hash = upgrade_agent_contract.deploy("./build/", "UpgradeAgentMock", tx_args(masters[1], gas=4000000), 1000000)
+def deploy_upgrade_agent_contract(upgrade_agent, masters):
+  tx_hash = upgrade_agent.deploy("./build/", "UpgradeAgentMock", tx_args(masters[1], gas=4000000), 1000000)
   return tx_hash
 
 @pytest.fixture(scope="module")
@@ -122,14 +122,14 @@ def test_canUp2(get_canUp):
 def test_get_upgrade_state1(get_upgrade_state):
   assert get_upgrade_state
 
-def test_set_upgrade_agent1(web3, set_upgrade_agent, masters, upgrade_agent_contract):
-  assert not web3.eth.waitForTransactionReceipt(set_upgrade_agent(upgrade_agent_contract.contract.address, masters[2])).status
+def test_set_upgrade_agent1(web3, set_upgrade_agent, masters, upgrade_agent):
+  assert not web3.eth.waitForTransactionReceipt(set_upgrade_agent(upgrade_agent.contract.address, masters[2])).status
 
-def test_set_upgrade_agent2(web3, set_upgrade_agent, masters, upgrade_agent_contract):
+def test_set_upgrade_agent2(web3, set_upgrade_agent, masters):
   assert not web3.eth.waitForTransactionReceipt(set_upgrade_agent(masters[0], masters[1])).status
 
-def test_set_upgrade_agent3(web3, set_upgrade_agent, masters, upgrade_agent_contract):
-  assert not web3.eth.waitForTransactionReceipt(set_upgrade_agent(upgrade_agent_contract.contract.address, masters[1])).status
+def test_set_upgrade_agent3(web3, set_upgrade_agent, masters, upgrade_agent):
+  assert not web3.eth.waitForTransactionReceipt(set_upgrade_agent(upgrade_agent.contract.address, masters[1])).status
 
 def test_get_upgrade_agent4(get_upgrade_agent, masters):
   assert get_upgrade_agent == masters[0]
@@ -155,11 +155,11 @@ def test_upgrade2(web3, upgrade, masters):
 def test_get_total_upgraded2(get_total_upgraded):
   assert not get_total_upgraded
 
-def test_set_upgrade_agent4(web3, set_upgrade_agent, masters, upgrade_agent_contract):
-  assert web3.eth.waitForTransactionReceipt(set_upgrade_agent(upgrade_agent_contract.contract.address, masters[1])).status
+def test_set_upgrade_agent4(web3, set_upgrade_agent, masters, upgrade_agent):
+  assert web3.eth.waitForTransactionReceipt(set_upgrade_agent(upgrade_agent.contract.address, masters[1])).status
 
-def test_get_upgrade_agent5(get_upgrade_agent, upgrade_agent_contract):
-  assert get_upgrade_agent == upgrade_agent_contract.contract.address
+def test_get_upgrade_agent5(get_upgrade_agent, upgrade_agent):
+  assert get_upgrade_agent == upgrade_agent.contract.address
 
 def test_get_upgrade_state3(get_upgrade_state):
   assert get_upgrade_state == 3

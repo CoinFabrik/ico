@@ -13,17 +13,17 @@ def owners(web3):
   return [web3.eth.accounts[0], web3.eth.accounts[1]]
 
 @pytest.fixture(scope="module")
-def contract():
+def ownable():
   return Contract()
 
 @pytest.fixture(scope="module")
-def deploy(contract, owners, web3):
-  tx_hash = contract.deploy("./build/", "Ownable", tx_args(owners[0], gas=4000000),)
+def deploy(ownable, owners, web3):
+  tx_hash = ownable.deploy("./build/", "Ownable", tx_args(owners[0], gas=4000000),)
   return tx_hash
 
 @pytest.fixture
-def get_owner(contract):
-  return contract.contract.functions.owner().call()
+def get_owner(ownable):
+  return ownable.contract.functions.owner().call()
 
 def test_deploy(deploy, web3):
   assert web3.eth.waitForTransactionReceipt(deploy).status
@@ -31,8 +31,8 @@ def test_deploy(deploy, web3):
 def test_first_owner(get_owner, owners):
   assert get_owner == owners[0]
 
-def test_ownership_transfer(web3, contract, owners):
-  tx_hash = contract.contract.functions.transferOwnership(owners[1]).transact(tx_args(owners[0], gas=4000000))
+def test_ownership_transfer(web3, ownable, owners):
+  tx_hash = ownable.contract.functions.transferOwnership(owners[1]).transact(tx_args(owners[0], gas=4000000))
   assert web3.eth.waitForTransactionReceipt(tx_hash).status
 
 def test_second_owner(get_owner, owners):

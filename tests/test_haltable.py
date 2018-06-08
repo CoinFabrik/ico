@@ -13,21 +13,21 @@ def owners(web3):
   return [web3.eth.accounts[0], web3.eth.accounts[1]]
 
 @pytest.fixture(scope="module")
-def contract():
+def haltable():
   return Contract()
 
 @pytest.fixture(scope="module")
-def deploy(contract, owners):
-  tx_hash = contract.deploy("./build/", "Haltable", tx_args(owners[0], gas=4000000),)
+def deploy(haltable, owners):
+  tx_hash = haltable.deploy("./build/", "Haltable", tx_args(owners[0], gas=4000000),)
   return tx_hash
 
 @pytest.fixture
-def get_owner(contract):
-  return contract.contract.functions.owner().call()
+def get_owner(haltable):
+  return haltable.contract.functions.owner().call()
 
 @pytest.fixture
-def halted(contract):
-  return contract.contract.functions.halted().call()
+def halted(haltable):
+  return haltable.contract.functions.halted().call()
 
 def test_deploy(deploy, web3):
   assert web3.eth.waitForTransactionReceipt(deploy).status
@@ -38,19 +38,19 @@ def test_first_owner(get_owner, owners):
 def test_init_halted(halted):
   assert not halted
 
-def test_halt(web3, contract, owners):
-  tx_hash = contract.contract.functions.halt().transact(tx_args(owners[0]))
+def test_halt(web3, haltable, owners):
+  tx_hash = haltable.contract.functions.halt().transact(tx_args(owners[0]))
   assert web3.eth.waitForTransactionReceipt(tx_hash).status
 
 def test_middle_halted(halted):
   assert halted
 
-def test_ownership_transfer_while_halted(web3, contract, owners):
-  tx_hash = contract.contract.functions.transferOwnership(owners[1]).transact(tx_args(owners[0], gas=4000000))
+def test_ownership_transfer_while_halted(web3, haltable, owners):
+  tx_hash = haltable.contract.functions.transferOwnership(owners[1]).transact(tx_args(owners[0], gas=4000000))
   assert web3.eth.waitForTransactionReceipt(tx_hash).status
 
-def test_unhalt(web3, contract, owners):
-  tx_hash = contract.contract.functions.unhalt().transact(tx_args(owners[1]))
+def test_unhalt(web3, haltable, owners):
+  tx_hash = haltable.contract.functions.unhalt().transact(tx_args(owners[1]))
   assert web3.eth.waitForTransactionReceipt(tx_hash).status
 
 def test_final_halted(halted):
