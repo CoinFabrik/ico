@@ -1,16 +1,17 @@
 import glob
 import os
-from web3_interface import Web3Interface, args
+from web3_interface import Web3Interface, parse_args
 import json
 import rlp
 from eth_utils import keccak, to_checksum_address
+import sys
 
 
 class Contract:
 
   def __init__(self):
     self.web3 = Web3Interface().w3
-    self.args = args
+    self.args, unknown = parse_args(sys.argv[1:])
 
   def instantiate_contract(self, sender_address, compiled_path, contract_name):
     (contract_abi, contract_bytecode) = self.get_abi_and_bytecode(compiled_path, contract_name)

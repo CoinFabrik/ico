@@ -1,12 +1,15 @@
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
-from cli_args import args
+from cli_args import parse_args
 import json
+import sys
+
 
 class Web3Interface:
   w3 = None
   def __init__(self):
     provider_param = None
+    args, unknown = parse_args(sys.argv[1:])
     with open("../deployment/networks.json") as networks_file:
       networks = json.load(networks_file)
     if args.provider == "ipc":
