@@ -175,12 +175,11 @@ contract GenericCrowdsale is Haltable {
    * @param weiPrice Price of a single indivisible token in wei.
    *
    */
-  function preallocate(address receiver, uint fullTokens, uint weiPrice) public onlyOwner notFinished {
-    require(receiver != address(0));
+  function preallocate(address receiver, uint fullTokens, uint weiPrice) external onlyOwner notFinished {
     uint tokenAmount = fullTokens.mul(10**uint(token.decimals()));
-    require(tokenAmount != 0);
-    uint weiAmount = weiPrice.mul(tokenAmount); // This can also be 0, in which case we give out tokens for free
-    updateInvestorFunds(tokenAmount, weiAmount, receiver , 0);
+    // weiAmount can also be 0, in which case weiRaised is not increased.
+    uint weiAmount = weiPrice.mul(tokenAmount);
+    granularPreallocate(receiver, tokenAmount, weiAmount);
   }
 
   /**
