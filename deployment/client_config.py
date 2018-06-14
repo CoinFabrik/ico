@@ -17,8 +17,8 @@ def config_f():
   amounts = list(map(toWei, amounts))
   assert len(amounts) == len(eur_per_fulltokens),  "Fails lengths"
   config['tranches'] = []
-  config['startTime'] = int(datetime(2018, 5, 17, 10, tzinfo = timezone.utc).timestamp())
-  config['endTime'] = int(datetime(2018, 8, 24, 10, tzinfo = timezone.utc).timestamp())
+  config['startTime'] = int(datetime(2018, 6, 14, 21, tzinfo = timezone.utc).timestamp())
+  config['endTime'] = int(datetime(2018, 11, 4, 23, tzinfo = timezone.utc).timestamp())
   config['MW_address'] = to_checksum_address("0x520F1214AebF4507A02cf5C5AC7E236E772db95f")
   config['token_retriever_account'] = to_checksum_address("0x54d9249C776C56520A62faeCB87A00E105E8c9Dc")
   config['multisig_supply'] = 36050 * (10 ** 3) * ether
@@ -28,9 +28,9 @@ def config_f():
                     int(datetime.now().timestamp()),
                     int(datetime.now().timestamp()),
                     int(datetime.now().timestamp())]
-  tranches_end = [int(datetime(2018, 6, 5, 10, tzinfo = timezone.utc).timestamp()),
-                  int(datetime(2018, 6, 25, 10, tzinfo = timezone.utc).timestamp()),
-                  int(datetime(2018, 7, 25, 10, tzinfo = timezone.utc).timestamp()),
+  tranches_end = [int(datetime(2018, 9, 3, 10, tzinfo = timezone.utc).timestamp()),
+                  int(datetime(2018, 9, 18, 22, tzinfo = timezone.utc).timestamp()),
+                  int(datetime(2018, 10, 3, 22, tzinfo = timezone.utc).timestamp()),
                   config['endTime']]
   for x in range(tranches_quantity):
     config['tranches'].append(amounts[x])
