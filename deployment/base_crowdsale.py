@@ -15,7 +15,7 @@ class BaseCrowdsale:
   accounts = None
   states = None
   
-  def __init__(self, config_params=None, log_path):
+  def __init__(self, log_path, config_params=None):
     self.web3 = Web3Interface().w3
     self.accounts = web3.eth.accounts
     if self.web3.version.network == "1":
