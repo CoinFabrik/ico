@@ -12,6 +12,7 @@ class Contract:
   def __init__(self):
     self.web3 = Web3Interface().w3
     self.args, unknown = parse_args(sys.argv[1:])
+    self.contract = None
 
   def instantiate_contract(self, sender_address, compiled_path, contract_name):
     (contract_abi, contract_bytecode) = self.get_abi_and_bytecode(compiled_path, contract_name)
@@ -48,7 +49,7 @@ class Contract:
       contract_abi = json.load(contract_abi_file)
     with open(compiled_path + contract_name + ".bin") as contract_bin_file:
       contract_bytecode = '0x' + contract_bin_file.read()
-    return (contract_abi, contract_bytecode)
+    return contract_abi, contract_bytecode
 
   @staticmethod
   def exists_folder(path):
@@ -71,7 +72,7 @@ class Contract:
     latest_file_path = max(filtered_file_list, key=os.path.getctime)
     with open(latest_file_path) as log_file:
       log_json = json.load(log_file)
-    return (log_json, latest_file_path)
+    return log_json, latest_file_path
 
   @staticmethod
   def get_encoded_constructor_data(web3, compiled_path, contract_name, contract_address, *args):
