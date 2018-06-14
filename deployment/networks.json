@@ -31,7 +31,7 @@
       "network_id": "58342"
     },
     "ipc": {
-      "path": "/home/coinfabrik/Programming/blockchain/node/geth.ipc"
+      "path": "/home/coinfabrik/dev/blockchain/node/geth.ipc"
     }
   }
 }
