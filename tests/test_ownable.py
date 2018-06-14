@@ -17,7 +17,7 @@ def ownable():
   return Contract()
 
 @pytest.fixture(scope="module")
-def deploy(ownable, owners, web3):
+def deploy(ownable, owners):
   tx_hash = ownable.deploy("./build/", "Ownable", tx_args(owners[0], gas=4000000),)
   return tx_hash
 
