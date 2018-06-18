@@ -36,7 +36,7 @@ if args.test:
   gas_price = 5000000000
 else:
   #input("\nEnter contract's name: ")
-  gas_price = 9100000000 #input("\nEnter gas price: ")
+  gas_price = 10100000000 #input("\nEnter gas price: ")
 
 def deploy():
   deployer = Deployer()

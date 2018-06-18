@@ -96,6 +96,6 @@ if __name__ == '__main__':
     miner.start(1)
     gas_price = 5000000000
   else:
-    gas_price = 9100000000 #input("Enter gas price: ")
+    gas_price = 10100000000 #input("Enter gas price: ")
     dump()
   configurate(contract=contract)
