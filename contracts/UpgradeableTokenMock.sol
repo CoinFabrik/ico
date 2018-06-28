@@ -6,7 +6,7 @@ import './StandardToken.sol';
 // Mock class for testing of UpgradeableToken
 contract UpgradeableTokenMock is UpgradeableToken, StandardToken {
     
-  bool public canUp;
+  bool public canUp = true;
 
   //constructor
   constructor(uint value) public
