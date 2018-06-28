@@ -10,168 +10,183 @@ from web3_interface import Web3Interface
 
 ADDRESS_ZERO = "0x0000000000000000000000000000000000000000"
 
-@pytest.fixture(scope="module")
-def masters(web3):
-  return [ADDRESS_ZERO, web3.eth.accounts[0], web3.eth.accounts[1], web3.eth.accounts[2]]
 
 @pytest.fixture(scope="module")
-def upgrade_agent():
+def address_zero():
+  return ADDRESS_ZERO
+
+@pytest.fixture(scope="module")
+def owner(web3):
+  return web3.eth.accounts[0]
+
+@pytest.fixture(scope="module")
+def upgradeMaster(web3):
+  return web3.eth.accounts[1]
+
+@pytest.fixture(scope="module")
+def not_upgradeMaster(web3):
+  return web3.eth.accounts[2]
+
+@pytest.fixture(scope="module")
+def total_supply():
+  return 100000
+
+@pytest.fixture(scope="module")
+def half_supply():
+  return 50000
+
+@pytest.fixture(scope="module")
+def value_zero():
+  return 0
+
+@pytest.fixture(scope="module")
+def upgradingState():
+  return 4
+
+@pytest.fixture(scope="module")
+def readyToUpgradeState():
+  return 3
+
+@pytest.fixture(scope="module")
+def waitingForUpgradeAgentState():
+  return 2
+
+@pytest.fixture(scope="module")
+def notAllowedState():
+  return 1
+
+@pytest.fixture(scope="module")
+def false():
+  return False
+
+@pytest.fixture(scope="module")
+def true():
+  return True
+
+@pytest.fixture(scope="module")
+def status(wait):
+  def inner_status(tx_hash):
+    return wait(tx_hash).status
+  return inner_status
+
+@pytest.fixture(scope="module")
+def wait(web3):
+  def inner_wait(tx_hash):
+    return web3.eth.waitForTransactionReceipt(tx_hash, timeout=10)
+  return inner_wait
+
+@pytest.fixture
+def upgradeable_token():
   return Contract()
 
-@pytest.fixture(scope="module")
-def upgradeable_token_contract():
-  return Contract()
-
-@pytest.fixture(scope="module")
-def deploy_upgrade_agent_contract(upgrade_agent, masters):
-  tx_hash = upgrade_agent.deploy("./build/", "UpgradeAgentMock", tx_args(masters[1], gas=4000000), 1000000)
-  return tx_hash
-
-@pytest.fixture(scope="module")
-def deploy_upgradeable_token_contract(upgradeable_token_contract, masters):
-  tx_hash = upgradeable_token_contract.deploy("./build/", "UpgradeableTokenMock", tx_args(masters[1], gas=4000000), 1000000)
-  return tx_hash
+@pytest.fixture
+def upgrade_agent(owner, total_supply, wait):
+  upgrade_agent = Contract()
+  tx_hash = upgrade_agent.deploy("./build/", "UpgradeAgentMock", tx_args(owner, gas=3000000), total_supply)
+  wait(tx_hash)
+  return upgrade_agent.contract.address
 
 @pytest.fixture
-def get_upgrade_master(upgradeable_token_contract):
-  return upgradeable_token_contract.contract.functions.upgradeMaster().call()
+def deploy(wait, upgradeMaster):
+  def inner_deploy(contract, contract_name, gas, supply):
+    tx_hash = contract.deploy("./build/", contract_name, tx_args(upgradeMaster, gas=gas), supply)
+    wait(tx_hash)
+    return tx_hash
+  return inner_deploy
 
 @pytest.fixture
-def change_upgrade_master(upgradeable_token_contract):
-  def inner_change_upgrade_master(sender, new_master):
-      return upgradeable_token_contract.contract.functions.changeUpgradeMaster(new_master).transact(tx_args(sender, gas=4000000))
-  return inner_change_upgrade_master
+def deployment_status(upgradeable_token, deploy, status):
+  def inner_deployment_status(gas):
+    return status(deploy(upgradeable_token, "UpgradeableTokenMock", gas))
+  return inner_deployment_status
+
 
 @pytest.fixture
-def get_canUp(upgradeable_token_contract):
-  return upgradeable_token_contract.contract.functions.canUpgrade().call()
+def changeUpgradeMaster(upgradeable_token, not_upgradeMaster, status, deploy, total_supply):
+  def inner_changeUpgradeMaster(current_master):
+    deploy(upgradeable_token, "UpgradeableTokenMock", 3000000, total_supply)
+    tx_hash = upgradeable_token.contract.functions.changeUpgradeMaster(not_upgradeMaster).transact(tx_args(current_master, gas=300000))
+    return status(tx_hash)
+  return inner_changeUpgradeMaster
 
 @pytest.fixture
-def set_canUp(upgradeable_token_contract):
-  def inner_set_canUp(value, sender):
-      return upgradeable_token_contract.contract.functions.setCanUp(value).transact(tx_args(sender, gas=4000000))
-  return inner_set_canUp
+def setUpgradeAgent(upgradeable_token, deploy, status, wait, address_zero, total_supply, upgradeMaster):
+  def inner_setUpgradeAgent(master, canUp, agent, state, supply):
+    deploy(upgradeable_token, "UpgradeableTokenMock", 3000000, supply)
+    if not canUp:
+      tx_hash = upgradeable_token.contract.functions.setCanUp(canUp).transact(tx_args(master, gas=300000))
+      wait(tx_hash)
+    if canUp and agent != address_zero and state == 4 and supply == total_supply and master == upgradeMaster:
+      tx_hash = upgradeable_token.contract.functions.setUpgradeAgent(agent).transact(tx_args(master, gas=300000))
+      wait(tx_hash)
+      tx_hash = upgradeable_token.contract.functions.upgrade(supply).transact(tx_args(master, gas=300000))
+      wait(tx_hash)
+    tx_hash = upgradeable_token.contract.functions.setUpgradeAgent(agent).transact(tx_args(master, gas=300000))
+    return status(tx_hash)
+  return inner_setUpgradeAgent
 
 @pytest.fixture
-def get_upgrade_state(upgradeable_token_contract):
-  return upgradeable_token_contract.contract.functions.getUpgradeState().call()
-
-@pytest.fixture
-def set_upgrade_agent(upgradeable_token_contract):
-  def inner_set_upgrade_agent(address, sender):
-      return upgradeable_token_contract.contract.functions.setUpgradeAgent(address).transact(tx_args(sender, gas=4000000))
-  return inner_set_upgrade_agent
-
-@pytest.fixture
-def get_upgrade_agent(upgradeable_token_contract):
-  return upgradeable_token_contract.contract.functions.upgradeAgent().call()
-
-@pytest.fixture
-def upgrade(upgradeable_token_contract):
-  def inner_upgrade(value, sender):
-      return upgradeable_token_contract.contract.functions.upgrade(value).transact(tx_args(sender, gas=4000000))
+def upgrade(upgradeable_token, upgrade_agent, upgradeMaster, status, wait, deploy, total_supply, half_supply, notAllowedState, readyToUpgradeState, upgradingState):
+  def inner_upgrade(state, value):
+    deploy(upgradeable_token, "UpgradeableTokenMock", 3000000, total_supply)
+    tx_hash = upgradeable_token.contract.functions.setUpgradeAgent(upgrade_agent).transact(tx_args(upgradeMaster, gas=300000))
+    wait(tx_hash)
+    if state == notAllowedState:
+      tx_hash = upgradeable_token.contract.functions.setCanUp(False).transact(tx_args(upgradeMaster, gas=300000))
+      wait(tx_hash)
+      tx_hash = upgradeable_token.contract.functions.upgrade(value).transact(tx_args(upgradeMaster, gas=300000))
+    if state == upgradingState:
+      tx_hash = upgradeable_token.contract.functions.upgrade(half_supply).transact(tx_args(upgradeMaster, gas=300000))
+      wait(tx_hash)
+      tx_hash = upgradeable_token.contract.functions.upgrade(value).transact(tx_args(upgradeMaster, gas=300000))
+    if state == readyToUpgradeState:
+      tx_hash = upgradeable_token.contract.functions.upgrade(value).transact(tx_args(upgradeMaster, gas=300000))
+    return status(tx_hash)
   return inner_upgrade
 
-@pytest.fixture
-def get_total_upgraded(upgradeable_token_contract):
-  return upgradeable_token_contract.contract.functions.totalUpgraded().call()
 
+def test_deployment_failed_with_low_gas(deployment_status):
+  with pytest.raises(ValueError):
+    deployment_status(200000)
 
-def test_deploy_upgrade_agent_contract(web3, deploy_upgrade_agent_contract):
-  assert web3.eth.waitForTransactionReceipt(deploy_upgrade_agent_contract).status
+def test_deployment_failed_with_intrinsic_gas_too_low(deployment_status):
+  assert deployment_status(300000) == 0
 
-def test_deploy_upgradeable_token_contract(web3, deploy_upgradeable_token_contract):
-  assert web3.eth.waitForTransactionReceipt(deploy_upgradeable_token_contract).status
+def test_deployment_successful_with_enough_gas(deployment_status):
+  assert deployment_status(3000000) == 1
+  
+def test_failed_changeUpgradeMaster_with_wrong_master(changeUpgradeMaster, not_upgradeMaster):
+  assert changeUpgradeMaster(not_upgradeMaster) == 0
 
-def test_master_1(get_upgrade_master, masters):
-  assert get_upgrade_master == masters[1]
+def test_failed_changeUpgradeMaster_with_master_zero(changeUpgradeMaster, address_zero):
+  with pytest.raises(ValueError):
+    changeUpgradeMaster(address_zero)
 
-def test_change_upgrade_master1(web3, change_upgrade_master, masters):
-  assert not web3.eth.waitForTransactionReceipt(change_upgrade_master(masters[2], masters[3])).status
+def test_successful_changeUpgradeMaster_with_right_master(changeUpgradeMaster, upgradeMaster):
+  assert changeUpgradeMaster(upgradeMaster) == 1
 
-def test_master_2(get_upgrade_master, masters):
-  assert get_upgrade_master == masters[1]
+@pytest.mark.parametrize("state", ["readyToUpgradeState", "upgradingState"])
+@pytest.mark.parametrize("canUp", ["false", "true"])
+@pytest.mark.parametrize("master", ["not_upgradeMaster", "upgradeMaster"])
+@pytest.mark.parametrize("agent", ["address_zero", "upgrade_agent"])
+@pytest.mark.parametrize("supply", ["total_supply", "half_supply"])
+def test_all_cases_of_setUpgradeAgent(setUpgradeAgent, master, canUp, agent, state, supply, upgradeMaster, address_zero, upgradingState, total_supply, request):
+  master = request.getfixturevalue(master)
+  canUp = request.getfixturevalue(canUp)
+  agent = request.getfixturevalue(agent)
+  state = request.getfixturevalue(state)
+  supply = request.getfixturevalue(supply)
+  if master == upgradeMaster and canUp and agent != address_zero and state != upgradingState and supply == total_supply:
+    assert setUpgradeAgent(master, canUp, agent, state, supply) == 1
+  else:
+    assert setUpgradeAgent(master, canUp, agent, state, supply) == 0
 
-def test_change_upgrade_master2(web3, change_upgrade_master, masters):
-  assert not web3.eth.waitForTransactionReceipt(change_upgrade_master(masters[1], masters[0])).status
-
-def test_master_3(get_upgrade_master, masters):
-  assert get_upgrade_master == masters[1]
-
-def test_change_upgrade_master3(web3, change_upgrade_master, masters):
-  assert web3.eth.waitForTransactionReceipt(change_upgrade_master(masters[1], masters[2])).status
-
-def test_master_4(get_upgrade_master, masters):
-  assert get_upgrade_master == masters[2]
-
-def test_change_upgrade_master4(web3, change_upgrade_master, masters):
-  assert web3.eth.waitForTransactionReceipt(change_upgrade_master(masters[2], masters[1])).status
-
-def test_master_5(get_upgrade_master, masters):
-  assert get_upgrade_master == masters[1]
-
-def test_canUp1(get_canUp):
-  assert get_canUp
-
-def test_set_canUp1(web3, set_canUp, masters):
-  assert web3.eth.waitForTransactionReceipt(set_canUp(False, masters[1])).status
-
-def test_canUp2(get_canUp):
-  assert not get_canUp
-
-def test_get_upgrade_state1(get_upgrade_state):
-  assert get_upgrade_state
-
-def test_set_upgrade_agent1(web3, set_upgrade_agent, masters, upgrade_agent):
-  assert not web3.eth.waitForTransactionReceipt(set_upgrade_agent(upgrade_agent.contract.address, masters[2])).status
-
-def test_set_upgrade_agent2(web3, set_upgrade_agent, masters):
-  assert not web3.eth.waitForTransactionReceipt(set_upgrade_agent(masters[0], masters[1])).status
-
-def test_set_upgrade_agent3(web3, set_upgrade_agent, masters, upgrade_agent):
-  assert not web3.eth.waitForTransactionReceipt(set_upgrade_agent(upgrade_agent.contract.address, masters[1])).status
-
-def test_get_upgrade_agent4(get_upgrade_agent, masters):
-  assert get_upgrade_agent == masters[0]
-
-def test_upgrade1(web3, upgrade, masters):
-  assert not web3.eth.waitForTransactionReceipt(upgrade(10000000000, masters[1])).status
-
-def test_get_total_upgraded1(get_total_upgraded):
-  assert not get_total_upgraded
-
-def test_set_canUp2(web3, set_canUp, masters):
-  assert web3.eth.waitForTransactionReceipt(set_canUp(True, masters[1])).status
-
-def test_canUp3(get_canUp):
-  assert get_canUp
-
-def test_get_upgrade_state2(get_upgrade_state):
-  assert get_upgrade_state == 2
-
-def test_upgrade2(web3, upgrade, masters):
-  assert not web3.eth.waitForTransactionReceipt(upgrade(10000000000, masters[1])).status
-
-def test_get_total_upgraded2(get_total_upgraded):
-  assert not get_total_upgraded
-
-def test_set_upgrade_agent4(web3, set_upgrade_agent, masters, upgrade_agent):
-  assert web3.eth.waitForTransactionReceipt(set_upgrade_agent(upgrade_agent.contract.address, masters[1])).status
-
-def test_get_upgrade_agent5(get_upgrade_agent, upgrade_agent):
-  assert get_upgrade_agent == upgrade_agent.contract.address
-
-def test_get_upgrade_state3(get_upgrade_state):
-  assert get_upgrade_state == 3
-
-def test_upgrade3(web3, upgrade, masters):
-  assert not web3.eth.waitForTransactionReceipt(upgrade(0, masters[1])).status
-
-def test_upgrade4(web3, upgrade, masters):
-  assert web3.eth.waitForTransactionReceipt(upgrade(10000000000, masters[1])).status
-
-def test_get_total_upgraded3(get_total_upgraded):
-  assert get_total_upgraded == 10000000000
-
-def test_get_upgrade_state4(get_upgrade_state):
-  assert get_upgrade_state == 4
+@pytest.mark.parametrize("state", ["notAllowedState", "readyToUpgradeState", "upgradingState"])
+@pytest.mark.parametrize("value", ["total_supply", "half_supply", "value_zero"])
+def test_all_cases_of_upgrade(request, upgrade, state, value, readyToUpgradeState, upgradingState):
+  state = request.getfixturevalue(state)
+  value = request.getfixturevalue(value)
+  if value != 0 and (state == readyToUpgradeState or state == upgradingState):
+    assert upgrade(state, value) == 1
+  else:
+    assert upgrade(state, value) == 0
