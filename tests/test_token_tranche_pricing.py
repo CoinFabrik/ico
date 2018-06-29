@@ -69,3 +69,15 @@ def deployment_status(token_tranche_pricing, deploy, status):
   def inner_deployment_status(gas):
     return status(deploy(token_tranche_pricing, "TokenTranchePricingMock", gas))
   return inner_deployment_status
+
+
+
+def test_deployment_failed_with_low_gas(deployment_status):
+  with pytest.raises(ValueError):
+    deployment_status(100000)
+
+def test_deployment_failed_with_intrinsic_gas_too_low(deployment_status):
+  assert deployment_status(300000) == 0
+
+def test_deployment_successful_with_enough_gas(deployment_status):
+  assert deployment_status(3000000) == 1
