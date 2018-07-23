@@ -45,9 +45,10 @@ class Contract:
   
   @staticmethod
   def get_abi_and_bytecode(compiled_path, contract_name):
-    with open(compiled_path + contract_name + ".abi") as contract_abi_file:
+    absolpath = os.path.join(compiled_path, contract_name)
+    with open(absolpath + ".abi") as contract_abi_file:
       contract_abi = json.load(contract_abi_file)
-    with open(compiled_path + contract_name + ".bin") as contract_bin_file:
+    with open(absolpath + ".bin") as contract_bin_file:
       contract_bytecode = '0x' + contract_bin_file.read()
     return contract_abi, contract_bytecode
 
