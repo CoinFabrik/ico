@@ -8,6 +8,13 @@ from tx_args import tx_args
 from web3_interface import Web3Interface
 
 
+ADDRESS_ZERO = "0x0000000000000000000000000000000000000000"
+
+
+@pytest.fixture(scope="module")
+def address_zero():
+  return ADDRESS_ZERO
+
 @pytest.fixture(scope="module")
 def owner(web3):
   return web3.eth.accounts[0]
@@ -144,6 +151,14 @@ def mint(standard_token, owner, from_address, status, deploy):
     return status(tx_hash)
   return inner_mint
 
+@pytest.fixture
+def balance(deploy, standard_token, address_zero, owner):
+  deploy(standard_token, "StandardTokenMock", 3000000)
+  abalance = standard_token.contract.functions.balanceOf(address_zero).call()
+  bbalance = standard_token.contract.functions.balanceOf(owner).call()
+  totalSupply = standard_token.contract.functions.totalSupply().call()
+  return abalance, bbalance, totalSupply
+
 
 def test_deployment_failed_with_low_gas(deployment_status):
   with pytest.raises(ValueError):
@@ -155,6 +170,8 @@ def test_deployment_failed_with_intrinsic_gas_too_low(deployment_status):
 def test_deployment_successful_with_enough_gas(deployment_status):
   assert deployment_status(3000000) == 1
 
+def test_balances(balance):
+  print(balance)
 
 @pytest.mark.parametrize("value", ["lessThan", "greaterThan"])
 def test_all_cases_of_transfer(transfer, request, value):

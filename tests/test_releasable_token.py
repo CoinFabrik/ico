@@ -148,6 +148,12 @@ def transferFrom(releasable_token, owner, recipient, wait, status, transferAgent
       return status(tx_hash)
   return inner_transferFrom
 
+@pytest.fixture
+def released(deploy, releasable_token):
+  deploy(releasable_token, "ReleasableTokenMock", 3000000)
+  released = releasable_token.contract.functions.released().call()
+  releaseAgent = releasable_token.contract.functions.releaseAgent().call()
+  return released, releaseAgent
 
 
 def test_deployment_failed_with_low_gas(deployment_status):
@@ -160,7 +166,9 @@ def test_deployment_failed_with_intrinsic_gas_too_low(deployment_status):
 def test_deployment_successful_with_enough_gas(deployment_status):
   assert deployment_status(3000000) == 1
 
-
+def test_released(released):
+  print(released)
+  
 
 @pytest.mark.parametrize("released", [False, True])
 @pytest.mark.parametrize("retrieved_owner", ["owner", "not_owner"])

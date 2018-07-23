@@ -95,9 +95,9 @@ def deploy(wait, upgradeMaster):
   return inner_deploy
 
 @pytest.fixture
-def deployment_status(upgradeable_token, deploy, status):
+def deployment_status(upgradeable_token, deploy, status, total_supply):
   def inner_deployment_status(gas):
-    return status(deploy(upgradeable_token, "UpgradeableTokenMock", gas))
+    return status(deploy(upgradeable_token, "UpgradeableTokenMock", gas, total_supply))
   return inner_deployment_status
 
 
@@ -144,6 +144,12 @@ def upgrade(upgradeable_token, upgrade_agent, upgradeMaster, status, wait, deplo
     return status(tx_hash)
   return inner_upgrade
 
+@pytest.fixture
+def varss(deploy, upgradeable_token, total_supply):
+  deploy(upgradeable_token, "UpgradeableTokenMock", 3000000, total_supply)
+  upgradeMaster = upgradeable_token.contract.functions.upgradeMaster().call()
+  totalUpgraded = upgradeable_token.contract.functions.totalUpgraded().call()
+  return upgradeMaster, totalUpgraded
 
 def test_deployment_failed_with_low_gas(deployment_status):
   with pytest.raises(ValueError):
@@ -154,6 +160,9 @@ def test_deployment_failed_with_intrinsic_gas_too_low(deployment_status):
 
 def test_deployment_successful_with_enough_gas(deployment_status):
   assert deployment_status(3000000) == 1
+  
+def test_getter(varss):
+  print(varss)
   
 def test_failed_changeUpgradeMaster_with_wrong_master(changeUpgradeMaster, not_upgradeMaster):
   assert changeUpgradeMaster(not_upgradeMaster) == 0
