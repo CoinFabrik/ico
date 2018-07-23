@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
-from web3_interface import Web3Interface, args
+from web3_interface import Web3Interface, parse_args
 from contract import Contract
 from tx_dump import dump
 from tx_args import tx_args
+import sys
+args, unknown = parse_args(sys.argv[1:])
 if args.test:
   from test_config import config_f
 else:
